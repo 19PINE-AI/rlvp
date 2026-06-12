@@ -1,0 +1,35 @@
+{
+  "model": "results/run_c3mix_holdout/final",
+  "rules_in_prompt": false,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.9416666666666667,
+    "pass^k": 0.7666666666666667,
+    "clean@1": 0.575,
+    "clean^k": 0.16666666666666666,
+    "perfect^k": 0.16666666666666666,
+    "viol_per_100_calls": 5.012285012285012,
+    "per_rule": {
+      "untested_submit": 102
+    },
+    "tactic_diversity": 0.5708333333333333,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 8.479166666666666
+  },
+  "csops": {
+    "pass@1": 0.9958333333333333,
+    "pass^k": 0.9666666666666667,
+    "clean@1": 0.6166666666666667,
+    "clean^k": 0.03333333333333333,
+    "perfect^k": 0.03333333333333333,
+    "viol_per_100_calls": 7.1706936866718625,
+    "per_rule": {
+      "no_tz_before_call": 92
+    },
+    "tactic_diversity": 0.4666666666666667,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.345833333333333
+  }
+}

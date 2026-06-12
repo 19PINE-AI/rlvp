@@ -278,6 +278,28 @@ masked model retries into the turn cap, exactly the predicted failure of
 inference-time enforcement on ordering rules. Internalization is not a
 luxury; masking costs 33-62 points of pass@1 on this domain.
 
+## Tier 2 — robustness
+
+**Seeds (3x c1, 3x c3-no-mixing).** c1 is perfectly reproducible (3/3 seeds:
+CSOps clean^8 1.00, FileOps untested_submit 240/240 — the scalar-credit
+asymmetry is deterministic). Bare c3 is NOT: the saturated-habit crack
+happened fully (s0), partially (s11, +a new retry-loop pathology), and not at
+all (s12). Token-attached credit's phase transition is real but stochastic in
+whether the alternative gets sampled — **scripted mixing is therefore a
+necessary component, not an optimization**: c3mix cracks both domains
+deterministically.
+
+**Reliability stress.** c3mix at k=16: clean^16 0.97/1.00 (base 0.00/0.00).
+At eval temp 1.0: clean^8 1.00/1.00, perfect^8 0.77/1.00. Internalized
+compliance survives both more trials and deployment-level stochasticity.
+
+**Held-out rules (confounded — flagged, not claimed).** Training with
+untested_submit + no_tz_before_call dropped still reduced their eval
+violation rates 57-62% vs base (clean@1 0.57/0.62). CONFOUND: the mixing
+scripts still demonstrate the held-out behaviors, so this is partly script
+imitation rather than cross-rule generalization. Clean version requires
+held-out steps stripped from the scripts; deferred.
+
 ## Recommended recipe (for the cluster-scale paper version)
 
 1. Reward = sparse outcome + per-tool-call verifiable rule terms:
