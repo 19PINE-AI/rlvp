@@ -23,8 +23,8 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from .envs import make_env
-from .rollout import episode_stats, run_episodes, start_episode
+from .envs import ENVS, make_env
+from .rollout import episode_stats, run_episodes, scripted_episode, start_episode
 
 
 @dataclass
@@ -55,6 +55,10 @@ class TrainConfig:
     domains: tuple = ("fileops", "csops")
     out_dir: str = "results/run"
     data_seed: int = 7
+    mix_scripted: bool = False    # Arm 1: 1 rule-engine-synthesized compliant ep per group
+    anneal_at: int = 0            # Arm 3: lam,beta -> 0 after this iteration (0 = never)
+    drop_rules: tuple = ()        # Arm 6: rules removed from TRAINING (eval keeps all)
+    lora_r: int = 0               # Arm 8: LoRA rank for large models (0 = full FT)
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -218,6 +222,12 @@ def train(cfg: TrainConfig):
 
     tok = AutoTokenizer.from_pretrained(cfg.model_name)
     model = AutoModelForCausalLM.from_pretrained(cfg.model_name, dtype=torch.bfloat16, device_map="cuda")
+    if cfg.lora_r:
+        from peft import LoraConfig, get_peft_model
+        model = get_peft_model(model, LoraConfig(
+            r=cfg.lora_r, lora_alpha=2 * cfg.lora_r, lora_dropout=0.0,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
+                            "gate_proj", "up_proj", "down_proj"]))
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     model.config.use_cache = True
     model.eval()
@@ -231,20 +241,31 @@ def train(cfg: TrainConfig):
         t0 = time.time()
         # ---- rollout ----
         groups, all_eps = [], []
+        n_live = cfg.group_size - (1 if cfg.mix_scripted else 0)
         per_dom = cfg.tasks_per_iter // len(cfg.domains)
         for domain in cfg.domains:
             for s in rng.sample(seeds, per_dom):
-                grp = [start_episode(tok, make_env(domain, s), cfg.include_rules_in_prompt)
-                       for _ in range(cfg.group_size)]
-                groups.append(grp)
+                grp = [start_episode(tok, make_env(domain, s, drop_rules=cfg.drop_rules),
+                                     cfg.include_rules_in_prompt)
+                       for _ in range(n_live)]
                 all_eps.extend(grp)
+                if cfg.mix_scripted:
+                    env_s = make_env(domain, s, drop_rules=cfg.drop_rules)
+                    grp = grp + [scripted_episode(tok, env_s,
+                                                  ENVS[domain].compliant_script(env_s.task),
+                                                  cfg.include_rules_in_prompt)]
+                groups.append(grp)
         model.config.use_cache = True
         run_episodes(model, tok, all_eps, temperature=cfg.temp, top_p=1.0, gen_batch=cfg.gen_batch)
         roll_s = time.time() - t0
-        st = episode_stats(all_eps)
+        st = episode_stats(all_eps)  # live episodes only
         # ---- update ----
         t1 = time.time()
-        adv_eps = build_advantages(groups, cfg)
+        cfg_eff = cfg
+        if cfg.anneal_at and it > cfg.anneal_at:
+            from dataclasses import replace as _replace
+            cfg_eff = _replace(cfg, lam=0.0, beta=0.0)
+        adv_eps = build_advantages(groups, cfg_eff)
         model.config.use_cache = False
         m = update_policy(model, tok, adv_eps, cfg, optimizer, scheduler)
         model.config.use_cache = True
@@ -259,6 +280,8 @@ def train(cfg: TrainConfig):
                          {"succ": st["success"], "viol100": st["viol_per_100_calls"],
                           "clean": st["clean"]}), flush=True)
 
+    if cfg.lora_r:
+        model = model.merge_and_unload()  # save a plain checkpoint for eval
     model.save_pretrained(out_dir / "final")
     tok.save_pretrained(out_dir / "final")
     log_f.close()

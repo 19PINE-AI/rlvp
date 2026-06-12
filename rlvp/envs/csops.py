@@ -72,8 +72,8 @@ class CSOpsEnv(ToolEnv):
         "send_email", "submit_resolution",
     )
 
-    def __init__(self, task: dict, track_rules: bool = True):
-        super().__init__(task, track_rules)
+    def __init__(self, task: dict, **kw):
+        super().__init__(task, **kw)
         self.kb_searched = False
         self.identity_verified = False
         self.tz_checked = False
@@ -168,6 +168,24 @@ class CSOpsEnv(ToolEnv):
             self.success = self.call_succeeded
             return StepResult(observation="Ticket closed.", done=True)
         return StepResult(observation="ERROR: unhandled tool")
+
+
+def compliant_script(task: dict) -> list:
+    """Assistant texts for a compliant, successful trajectory (Arm 1/2)."""
+    import json as _json
+    g = GOALS[task["goal"]]
+    return [
+        "I should search the knowledge base before any call.\nAction: search_kb "
+        + _json.dumps({"query": f"{task['goal'].replace('_', ' ')} policy {task['company']}"}),
+        "Check the user's local time before calling.\nAction: check_timezone "
+        + _json.dumps({"city": task["city"]}),
+        "Verify identity before discussing the account.\nAction: verify_identity "
+        + _json.dumps({"account_id": task["account_id"]}),
+        f"Call {g['dept']} with the required items from the KB.\nAction: place_call "
+        + _json.dumps({"number": task["dept_number"], "info": list(task["required_items"])}),
+        "Resolved; closing the ticket.\nAction: submit_resolution "
+        + _json.dumps({"summary": f"{task['goal']} completed, confirmation received"}),
+    ]
 
 
 # ---------------------------------------------------------------------------

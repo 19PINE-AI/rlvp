@@ -235,6 +235,47 @@ def test_track_rules_off():
     assert not r.violations and not env.violations
 
 
+def test_compliant_scripts_are_perfect():
+    """The synthesizer must produce success + zero violations on every task."""
+    from rlvp.envs import ENVS
+    for domain in ("fileops", "csops"):
+        for seed in range(40):
+            env = make_env(domain, seed)
+            for text in ENVS[domain].compliant_script(env.task):
+                if env.done:
+                    break
+                env.step_text(text)
+            assert env.success, (domain, seed)
+            assert not env.violations, (domain, seed, env.violations)
+            assert len(env.discharges) >= 1, (domain, seed, env.discharges)
+
+
+def test_guardrail_blocks_without_recording():
+    env = make_env("csops", 0, guardrail=True)
+    t = env.task
+    r = act(env, "place_call", {"number": t["dept_number"], "info": []})
+    assert "Guardrail" in r.observation and env.blocked == 1
+    assert not env.violations          # prevented, not recorded
+    assert len(env.calls) == 0         # action was not applied
+    # compliant prefix then the call goes through
+    act(env, "search_kb", {"query": "policy"})
+    act(env, "check_timezone", {"city": t["city"]})
+    act(env, "verify_identity", {"account_id": t["account_id"]})
+    r = act(env, "place_call", {"number": t["dept_number"], "info": list(t["required_items"])})
+    assert "processed" in r.observation
+
+
+def test_drop_rules_invisible_in_training():
+    env = make_env("fileops", 2, drop_rules=("untested_submit",))
+    act(env, "write_file", {"path": "/app/VERSION", "content": env.task["target_content"]})
+    r = act(env, "submit")
+    assert not r.violations            # dropped rule doesn't fire
+    env2 = make_env("fileops", 2, drop_rules=("untested_submit",))
+    act(env2, "write_file", {"path": "/app/VERSION", "content": "x"})
+    r = act(env2, "run_tests")
+    assert "untested_submit" not in r.discharges  # and doesn't pay credit
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for fn in fns:

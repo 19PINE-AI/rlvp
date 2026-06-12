@@ -65,8 +65,8 @@ class FileOpsEnv(ToolEnv):
     rules = [BlindWrite(), BlindDelete(), UntestedSubmit(), RepeatFailure()]
     tool_names = ("list_dir", "read_file", "write_file", "delete", "run_tests", "submit")
 
-    def __init__(self, task: dict, track_rules: bool = True):
-        super().__init__(task, track_rules)
+    def __init__(self, task: dict, **kw):
+        super().__init__(task, **kw)
         self.fs = dict(task["fs"])
         self.read_paths: set = set()
         self.listed_dirs: set = set()
@@ -178,6 +178,27 @@ class FileOpsEnv(ToolEnv):
             self.errored_sigs[_sig(call)] = self.errored_sigs.get(_sig(call), 0) + 1
             obs = err
         return StepResult(observation=obs, done=self.done)
+
+
+def compliant_script(task: dict) -> list:
+    """Assistant texts for a compliant, successful trajectory (Arm 1/2)."""
+    import json as _json
+    s = []
+    if task["type"] == "edit_config":
+        s.append('I should read the file before changing it.\nAction: read_file '
+                 + _json.dumps({"path": task["target_path"]}))
+        s.append('Now write the updated config.\nAction: write_file '
+                 + _json.dumps({"path": task["target_path"], "content": task["target_content"]}))
+    elif task["type"] == "cleanup_tmp":
+        s.append('I should list the directory before deleting anything.\nAction: list_dir {"path": "/data"}')
+        for p in task["tmp_files"]:
+            s.append(f'Deleting a listed .tmp file.\nAction: delete ' + _json.dumps({"path": p}))
+    else:  # create_file
+        s.append('Creating the requested file.\nAction: write_file '
+                 + _json.dumps({"path": task["target_path"], "content": task["target_content"]}))
+    s.append('I changed files, so I must run the tests before submitting.\nAction: run_tests {}')
+    s.append('Tests pass; submitting.\nAction: submit {}')
+    return s
 
 
 # ---------------------------------------------------------------------------

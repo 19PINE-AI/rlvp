@@ -114,6 +114,34 @@ def run_episodes(model, tok, episodes, temperature=1.0, top_p=1.0,
     return episodes
 
 
+def scripted_episode(tok, env, script_texts, include_rules=False) -> Episode:
+    """Build a complete Episode from pre-written assistant texts (off-policy
+    guidance, LUFFY-style). Token stream is identical in format to a live
+    rollout, so the trainer can't tell the difference."""
+    im_end = tok.convert_tokens_to_ids("<|im_end|>")
+    e = start_episode(tok, env, include_rules)
+    for text in script_texts:
+        if e.done:
+            break
+        g = _ids(tok, text) + [im_end]
+        start = len(e.ids)
+        e.ids.extend(g)
+        turn_idx = e.n_turns
+        e.action_spans.append((start, start + len(g), turn_idx))
+        res = env.step_text(text)
+        if res.violations:
+            e.turn_violations[turn_idx] = list(res.violations)
+        if res.discharges:
+            e.turn_discharges[turn_idx] = list(res.discharges)
+        if env.done:
+            e.done = True
+        else:
+            e.ids.extend(_ids(tok, "\n<|im_start|>user\n" + res.observation
+                              + "<|im_end|>\n" + ASSISTANT_PREFIX))
+    e.done = True
+    return e
+
+
 def episode_stats(episodes):
     """Aggregate metrics over a list of finished episodes."""
     n = len(episodes)

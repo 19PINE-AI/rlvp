@@ -96,9 +96,13 @@ class ToolEnv:
     rules: list = []
     tool_names: tuple = ()
 
-    def __init__(self, task: dict, track_rules: bool = True):
+    def __init__(self, task: dict, track_rules: bool = True, drop_rules: tuple = (),
+                 guardrail: bool = False):
         self.task = task
         self.track_rules = track_rules
+        self.drop_rules = set(drop_rules)   # rules invisible during training (Arm 6)
+        self.guardrail = guardrail          # runtime action masking (Arm 4)
+        self.blocked = 0
         self.turn = 0
         self.done = False
         self.success = False
@@ -148,15 +152,26 @@ class ToolEnv:
         fired, disch = [], []
         if self.track_rules:
             for rule in self.rules:
+                if rule.name in self.drop_rules:
+                    continue
                 try:
                     if rule.check(self, call):
                         fired.append(rule.name)
                 except Exception:
                     pass
             try:
-                disch = list(self.discharge_rules(call))
+                disch = [d for d in self.discharge_rules(call) if d not in self.drop_rules]
             except Exception:
                 disch = []
+        if self.guardrail and fired:
+            # runtime mask: reject the action, don't apply it, don't record a
+            # violation (it was prevented) — the agent pays in turns instead
+            self.blocked += 1
+            return StepResult(
+                observation="Guardrail: action blocked (violates: "
+                            + ", ".join(fired) + "). Choose a different action.",
+                done=self.done,
+            )
         res = self.apply(call)
         self.calls.append(call)
         for rname in fired:
