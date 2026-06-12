@@ -59,6 +59,7 @@ class TrainConfig:
     anneal_at: int = 0            # Arm 3: lam,beta -> 0 after this iteration (0 = never)
     drop_rules: tuple = ()        # Arm 6: rules removed from TRAINING (eval keeps all)
     lora_r: int = 0               # Arm 8: LoRA rank for large models (0 = full FT)
+    imperfect_scripts: bool = False  # mixing scripts are compliant but task-failing
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -251,9 +252,10 @@ def train(cfg: TrainConfig):
                 all_eps.extend(grp)
                 if cfg.mix_scripted:
                     env_s = make_env(domain, s, drop_rules=cfg.drop_rules)
-                    grp = grp + [scripted_episode(tok, env_s,
-                                                  ENVS[domain].compliant_script(env_s.task),
-                                                  cfg.include_rules_in_prompt)]
+                    grp = grp + [scripted_episode(
+                        tok, env_s,
+                        ENVS[domain].compliant_script(env_s.task, cfg.imperfect_scripts),
+                        cfg.include_rules_in_prompt)]
                 groups.append(grp)
         model.config.use_cache = True
         run_episodes(model, tok, all_eps, temperature=cfg.temp, top_p=1.0, gen_batch=cfg.gen_batch)

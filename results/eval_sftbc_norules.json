@@ -1,0 +1,33 @@
+{
+  "model": "results/run_sftbc/final",
+  "rules_in_prompt": false,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.9791666666666666,
+    "pass^k": 0.9333333333333333,
+    "clean@1": 0.9958333333333333,
+    "clean^k": 0.9666666666666667,
+    "perfect^k": 0.9333333333333333,
+    "viol_per_100_calls": 0.4995004995004995,
+    "per_rule": {
+      "repeat_failure": 5
+    },
+    "tactic_diversity": 0.1375,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.170833333333333
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "clean@1": 1.0,
+    "clean^k": 1.0,
+    "perfect^k": 1.0,
+    "viol_per_100_calls": 0.0,
+    "per_rule": {},
+    "tactic_diversity": 0.125,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.0
+  }
+}

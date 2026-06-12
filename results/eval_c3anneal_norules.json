@@ -1,0 +1,31 @@
+{
+  "model": "results/run_c3anneal/final",
+  "rules_in_prompt": false,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.975,
+    "pass^k": 0.8666666666666667,
+    "clean@1": 1.0,
+    "clean^k": 1.0,
+    "perfect^k": 0.8666666666666667,
+    "viol_per_100_calls": 0.0,
+    "per_rule": {},
+    "tactic_diversity": 0.32083333333333336,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.779166666666667
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "clean@1": 1.0,
+    "clean^k": 1.0,
+    "perfect^k": 1.0,
+    "viol_per_100_calls": 0.0,
+    "per_rule": {},
+    "tactic_diversity": 0.22916666666666666,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.608333333333333
+  }
+}

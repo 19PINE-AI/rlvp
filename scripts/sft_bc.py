@@ -17,12 +17,13 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, get_constant_sched
 from rlvp.envs import ENVS, make_env
 from rlvp.rollout import scripted_episode
 
+IMPERFECT = "--imperfect" in sys.argv
 MODEL = "Qwen/Qwen3-4B"
 N_SEEDS = 400          # tasks per domain
 EPOCHS = 2
 LR = 1e-5
 MICRO_TOKENS = 4096
-OUT = ROOT / "results/run_sftbc"
+OUT = ROOT / ("results/run_sftbc_imp" if IMPERFECT else "results/run_sftbc")
 
 tok = AutoTokenizer.from_pretrained(MODEL)
 model = AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16, device_map="cuda")
@@ -34,8 +35,9 @@ items = []
 for domain in ("fileops", "csops"):
     for s in range(N_SEEDS):
         env = make_env(domain, s)
-        e = scripted_episode(tok, env, ENVS[domain].compliant_script(env.task))
-        assert env.success and not env.violations
+        e = scripted_episode(tok, env, ENVS[domain].compliant_script(env.task, IMPERFECT))
+        assert not env.violations
+        assert env.success != IMPERFECT  # perfect scripts succeed, imperfect must fail
         mask = torch.zeros(len(e.ids))
         for (a, b, _t) in e.action_spans:
             mask[a:b] = 1.0

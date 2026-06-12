@@ -1,0 +1,26 @@
+{
+  "model": "Qwen/Qwen3-4B",
+  "guardrail": true,
+  "k": 8,
+  "temp": 0.7,
+  "fileops": {
+    "pass@1": 0.38333333333333336,
+    "pass^k": 0.16666666666666666,
+    "blocked_per_ep": 6.3,
+    "eps_with_blocks": 1.0,
+    "residual_viol": 0,
+    "turns_per_ep": 9.566666666666666,
+    "calls_per_ep": 3.2666666666666666,
+    "timeout_rate": 0.5916666666666667
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "blocked_per_ep": 1.0041666666666667,
+    "eps_with_blocks": 0.9708333333333333,
+    "residual_viol": 0,
+    "turns_per_ep": 6.004166666666666,
+    "calls_per_ep": 5.0,
+    "timeout_rate": 0.0
+  }
+}

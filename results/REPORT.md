@@ -224,6 +224,60 @@ c3 hybrid (1.00) > c2 (0.67, overcautious) > c4 (0.00, clean 0.33)
 The reproduce-first behavior was never rewarded directly — it emerged from
 the test-after-mutation discharge credit. SUCCESS, zero violations.
 
+## Tier 1 follow-up arms (same setup; eval k=8, no rules in prompt)
+
+### Arm 1 — scripted-compliant group mixing: the exploration wall falls
+
+c3 + 1 rule-engine-synthesized compliant episode per group (7 live + 1
+scripted), lam=beta=0.25:
+
+| Domain | pass@1 | pass^8 | clean^8 | perfect^8 | tactic div |
+|---|---|---|---|---|---|
+| FileOps | 0.86 | 0.43 | 1.00 | 0.43 | 0.57 |
+| CSOps   | 1.00 | 1.00 | **1.00** | **1.00** | 0.27 |
+
+The CSOps timezone rule — uncracked by c2, c2cal, c3, c4 and cracked only by
+luck in c1 — is now learned deterministically. Off-policy guidance through
+the group, not temperature, is what breaks the exploration wall. Side-effect:
+final entropy 0.43 (vs 0.01 elsewhere) — the off-policy tokens keep the
+policy hot, which costs FileOps reliability (pass^8 0.43).
+
+### Arm 3 — annealing (mix + anneal lam,beta->0 at it40): the recipe
+
+| Domain | pass@1 | pass^8 | clean^8 | perfect^8 | tactic div |
+|---|---|---|---|---|---|
+| FileOps | 0.97 | 0.87 | **1.00** | **0.87** | 0.32 |
+| CSOps   | 1.00 | 1.00 | **1.00** | **1.00** | 0.23 |
+
+Annealing the process channel after compliance saturates recovers the
+reliability the hot mixing phase costs (perfect^8 0.43 -> 0.87) while keeping
+clean^8 = 1.00 on BOTH domains and 2x the tactic diversity of every
+non-mixed variant. **mix + anneal is the final local recipe.**
+
+### Arm 2 — SFT-BC control: strong in toy envs, with a visible ceiling
+
+BC on 800 perfect scripted episodes: perfect^8 0.93 / 1.00 — statistically
+indistinguishable from the RL recipe here, BUT with tactic diversity
+collapsed to 0.14/0.12 (it IS the scripted path). Honest reading: in a
+deterministic toy env a perfect demonstration policy exists, so BC suffices;
+the discriminator is Tier 1.5 (imperfect scripts: compliant-but-failing
+demos — BC must clone the failure, RL group advantage filters it).
+
+### Arm 4 — runtime guardrail baseline: enforcement is not internalization
+
+Action masking (reject violating calls, agent retries) on FileOps:
+
+| Policy | pass@1 | timeout rate | blocked/ep | episodes hitting guardrail |
+|---|---|---|---|---|
+| base + guardrail    | 0.38 | 0.59 | 6.3 | 100% |
+| outcome + guardrail | 0.67 | 0.33 | 3.4 | 100% |
+| c3 internalized     | 1.00* | 0.00 | 0 | 0% |
+
+(*c3anneal pass@1.) Blocking `submit` does not produce `run_tests` — the
+masked model retries into the turn cap, exactly the predicted failure of
+inference-time enforcement on ordering rules. Internalization is not a
+luxury; masking costs 33-62 points of pass@1 on this domain.
+
 ## Recommended recipe (for the cluster-scale paper version)
 
 1. Reward = sparse outcome + per-tool-call verifiable rule terms:

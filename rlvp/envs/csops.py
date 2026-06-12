@@ -170,10 +170,12 @@ class CSOpsEnv(ToolEnv):
         return StepResult(observation="ERROR: unhandled tool")
 
 
-def compliant_script(task: dict) -> list:
-    """Assistant texts for a compliant, successful trajectory (Arm 1/2)."""
+def compliant_script(task: dict, imperfect: bool = False) -> list:
+    """Assistant texts for a compliant trajectory. With imperfect=True the
+    call omits the policy citation (compliant workflow, refused call)."""
     import json as _json
     g = GOALS[task["goal"]]
+    info = list(task["required_items"][:1]) if imperfect else list(task["required_items"])
     return [
         "I should search the knowledge base before any call.\nAction: search_kb "
         + _json.dumps({"query": f"{task['goal'].replace('_', ' ')} policy {task['company']}"}),
@@ -182,7 +184,7 @@ def compliant_script(task: dict) -> list:
         "Verify identity before discussing the account.\nAction: verify_identity "
         + _json.dumps({"account_id": task["account_id"]}),
         f"Call {g['dept']} with the required items from the KB.\nAction: place_call "
-        + _json.dumps({"number": task["dept_number"], "info": list(task["required_items"])}),
+        + _json.dumps({"number": task["dept_number"], "info": info}),
         "Resolved; closing the ticket.\nAction: submit_resolution "
         + _json.dumps({"summary": f"{task['goal']} completed, confirmation received"}),
     ]
