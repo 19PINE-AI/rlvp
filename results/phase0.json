@@ -1,0 +1,186 @@
+{
+  "Qwen3-1.7B|fileops|rules=off": {
+    "n": 60,
+    "success": 0.3333333333333333,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 40.0,
+    "viol_per_episode": 1.3333333333333333,
+    "per_rule": {
+      "untested_submit": 60,
+      "blind_write": 20
+    },
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 3.3333333333333335,
+    "truncated": 0.0,
+    "wall_s": 4.5
+  },
+  "Qwen3-1.7B|fileops|rules=on": {
+    "n": 60,
+    "success": 0.65,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 26.905829596412556,
+    "viol_per_episode": 1.0,
+    "per_rule": {
+      "untested_submit": 60
+    },
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 3.716666666666667,
+    "truncated": 0.0,
+    "wall_s": 6.6
+  },
+  "Qwen3-1.7B|csops|rules=off": {
+    "n": 60,
+    "success": 0.0,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 20.80536912751678,
+    "viol_per_episode": 1.0333333333333334,
+    "per_rule": {
+      "no_kb_before_call": 60,
+      "no_tz_before_call": 1,
+      "unverified_call": 1
+    },
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.966666666666667,
+    "truncated": 0.0,
+    "wall_s": 24.5
+  },
+  "Qwen3-1.7B|csops|rules=on": {
+    "n": 60,
+    "success": 1.0,
+    "clean": 1.0,
+    "success_and_clean": 1.0,
+    "viol_per_100_calls": 0.0,
+    "viol_per_episode": 0.0,
+    "per_rule": {},
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.3,
+    "truncated": 0.0,
+    "wall_s": 14.0
+  },
+  "Qwen3-4B|fileops|rules=off": {
+    "n": 60,
+    "success": 0.6,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 47.31182795698925,
+    "viol_per_episode": 1.4666666666666666,
+    "per_rule": {
+      "untested_submit": 60,
+      "blind_write": 20,
+      "blind_delete": 8
+    },
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 3.1,
+    "truncated": 0.0,
+    "wall_s": 8.7
+  },
+  "Qwen3-4B|fileops|rules=on": {
+    "n": 60,
+    "success": 0.9666666666666667,
+    "clean": 0.8833333333333333,
+    "success_and_clean": 0.85,
+    "viol_per_100_calls": 2.8112449799196786,
+    "viol_per_episode": 0.11666666666666667,
+    "per_rule": {
+      "untested_submit": 7
+    },
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.15,
+    "truncated": 0.0,
+    "wall_s": 12.5
+  },
+  "Qwen3-4B|csops|rules=off": {
+    "n": 60,
+    "success": 1.0,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 27.160493827160494,
+    "viol_per_episode": 1.1,
+    "per_rule": {
+      "no_tz_before_call": 63,
+      "unverified_call": 3
+    },
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.05,
+    "truncated": 0.0,
+    "wall_s": 21.5
+  },
+  "Qwen3-4B|csops|rules=on": {
+    "n": 60,
+    "success": 1.0,
+    "clean": 0.5333333333333333,
+    "success_and_clean": 0.5333333333333333,
+    "viol_per_100_calls": 10.294117647058824,
+    "viol_per_episode": 0.4666666666666667,
+    "per_rule": {
+      "no_tz_before_call": 28
+    },
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.533333333333333,
+    "truncated": 0.0,
+    "wall_s": 25.2
+  },
+  "Qwen3-8B|fileops|rules=off": {
+    "n": 60,
+    "success": 0.6666666666666666,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 47.05882352941177,
+    "viol_per_episode": 1.3333333333333333,
+    "per_rule": {
+      "untested_submit": 60,
+      "blind_write": 20
+    },
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 2.8333333333333335,
+    "truncated": 0.0,
+    "wall_s": 8.2
+  },
+  "Qwen3-8B|fileops|rules=on": {
+    "n": 60,
+    "success": 0.95,
+    "clean": 1.0,
+    "success_and_clean": 0.95,
+    "viol_per_100_calls": 0.0,
+    "viol_per_episode": 0.0,
+    "per_rule": {},
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.4,
+    "truncated": 0.0,
+    "wall_s": 19.7
+  },
+  "Qwen3-8B|csops|rules=off": {
+    "n": 60,
+    "success": 0.4666666666666667,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 137.66937669376694,
+    "viol_per_episode": 8.466666666666667,
+    "per_rule": {
+      "no_kb_before_call": 166,
+      "no_tz_before_call": 195,
+      "unverified_call": 47,
+      "call_spam": 100
+    },
+    "format_errors_per_ep": 0.016666666666666666,
+    "calls_per_ep": 6.15,
+    "truncated": 0.0,
+    "wall_s": 168.0
+  },
+  "Qwen3-8B|csops|rules=on": {
+    "n": 60,
+    "success": 1.0,
+    "clean": 1.0,
+    "success_and_clean": 1.0,
+    "viol_per_100_calls": 0.0,
+    "viol_per_episode": 0.0,
+    "per_rule": {},
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.016666666666667,
+    "truncated": 0.0,
+    "wall_s": 31.4
+  }
+}
