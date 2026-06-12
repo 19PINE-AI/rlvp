@@ -300,6 +300,27 @@ scripts still demonstrate the held-out behaviors, so this is partly script
 imitation rather than cross-rule generalization. Clean version requires
 held-out steps stripped from the scripts; deferred.
 
+## Tier 1.5 — imperfect demonstrations: the "why RL" verdict
+
+Demos made compliant-but-task-failing (wrong file content / missing policy
+citation; workflow scaffolding intact). This is the realistic regime: in real
+domains you can synthesize compliant scaffolding but not correct solutions.
+
+| Training on imperfect demos | pass@1 (fo/cs) | clean@1 (fo/cs) |
+|---|---|---|
+| SFT-BC  | **0.00 / 0.00** | 1.00 / 1.00 |
+| RL c3mix | **0.97 / 0.97** | 0.00 / 0.63 |
+
+BC clones the failure wholesale — perfect workflow, zero task success, no
+mechanism to filter demonstration quality. RL's group-relative advantage
+discards the failing demo's solution while training proceeds normally.
+So: perfect demos -> BC suffices (toy-env regime); imperfect demos -> BC is
+catastrophic and RL is required. Compliance absorption from failing demos
+was partial (cs 0.63 / fo 0.00) because the demo's negative scalar advantage
+suppresses its compliant scaffolding along with its mistake — cluster-scale
+fix: **scripted episodes should contribute through the process channel only**
+(zero their scalar advantage, keep their discharge attachments).
+
 ## Tier 3 — model scale (recipe = c3 + mixing, lam=beta=0.25)
 
 | Model | FileOps perfect^8 | CSOps perfect^8 | clean^8 (fo/cs) |
