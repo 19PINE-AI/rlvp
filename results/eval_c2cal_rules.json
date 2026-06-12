@@ -1,0 +1,31 @@
+{
+  "model": "results/run_c2cal/final",
+  "rules_in_prompt": true,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.5625,
+    "pass^k": 0.43333333333333335,
+    "clean@1": 1.0,
+    "clean^k": 1.0,
+    "perfect^k": 0.43333333333333335,
+    "viol_per_100_calls": 0.0,
+    "per_rule": {},
+    "tactic_diversity": 0.2125,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 8.766666666666667
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "clean@1": 1.0,
+    "clean^k": 1.0,
+    "perfect^k": 1.0,
+    "viol_per_100_calls": 0.0,
+    "per_rule": {},
+    "tactic_diversity": 0.12916666666666668,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.004166666666666
+  }
+}

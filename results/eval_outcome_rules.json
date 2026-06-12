@@ -1,0 +1,35 @@
+{
+  "model": "results/run_outcome/final",
+  "rules_in_prompt": true,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.9916666666666667,
+    "pass^k": 0.9333333333333333,
+    "clean@1": 0.8541666666666666,
+    "clean^k": 0.8333333333333334,
+    "perfect^k": 0.7666666666666667,
+    "viol_per_100_calls": 3.054101221640489,
+    "per_rule": {
+      "untested_submit": 35
+    },
+    "tactic_diversity": 0.19166666666666668,
+    "format_errors_per_ep": 0.20416666666666666,
+    "calls_per_ep": 4.775
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "clean@1": 0.9666666666666667,
+    "clean^k": 0.9,
+    "perfect^k": 0.9,
+    "viol_per_100_calls": 0.6711409395973155,
+    "per_rule": {
+      "no_tz_before_call": 8
+    },
+    "tactic_diversity": 0.15833333333333333,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.966666666666667
+  }
+}

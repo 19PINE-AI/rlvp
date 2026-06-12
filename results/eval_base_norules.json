@@ -1,0 +1,38 @@
+{
+  "model": "Qwen/Qwen3-4B",
+  "rules_in_prompt": false,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.6125,
+    "pass^k": 0.5666666666666667,
+    "clean@1": 0.0,
+    "clean^k": 0.0,
+    "perfect^k": 0.0,
+    "viol_per_100_calls": 46.43356643356643,
+    "per_rule": {
+      "untested_submit": 240,
+      "blind_write": 80,
+      "blind_delete": 12
+    },
+    "tactic_diversity": 0.15,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 2.9791666666666665
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "clean@1": 0.029166666666666667,
+    "clean^k": 0.0,
+    "perfect^k": 0.0,
+    "viol_per_100_calls": 25.7172131147541,
+    "per_rule": {
+      "no_tz_before_call": 242,
+      "unverified_call": 9
+    },
+    "tactic_diversity": 0.14583333333333334,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.066666666666666
+  }
+}
