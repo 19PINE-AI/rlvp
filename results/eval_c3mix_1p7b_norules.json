@@ -1,0 +1,33 @@
+{
+  "model": "results/run_c3mix_1p7b/final",
+  "rules_in_prompt": false,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.9625,
+    "pass^k": 0.9,
+    "clean@1": 0.9041666666666667,
+    "clean^k": 0.8,
+    "perfect^k": 0.8,
+    "viol_per_100_calls": 2.184235517568851,
+    "per_rule": {
+      "untested_submit": 23
+    },
+    "tactic_diversity": 0.18333333333333332,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 4.3875
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "clean@1": 1.0,
+    "clean^k": 1.0,
+    "perfect^k": 1.0,
+    "viol_per_100_calls": 0.0,
+    "per_rule": {},
+    "tactic_diversity": 0.16666666666666666,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.966666666666667
+  }
+}

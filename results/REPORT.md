@@ -300,6 +300,20 @@ scripts still demonstrate the held-out behaviors, so this is partly script
 imitation rather than cross-rule generalization. Clean version requires
 held-out steps stripped from the scripts; deferred.
 
+## Tier 3 — model scale (recipe = c3 + mixing, lam=beta=0.25)
+
+| Model | FileOps perfect^8 | CSOps perfect^8 | clean^8 (fo/cs) |
+|---|---|---|---|
+| Qwen3-1.7B (full FT) | 0.80 | 1.00 | 0.80 / 1.00 |
+| Qwen3-4B (full FT, +anneal) | 0.87 | 1.00 | 1.00 / 1.00 |
+| Qwen3-8B (LoRA r=32) | 0.77 | 0.97 | 1.00 / 0.97 |
+
+The recipe transfers down to 1.7B (full FT) and up to 8B through LoRA —
+notable because LoRA-RL is the cheap path for production-size models, and
+because the 8B base was the WORST offender in Phase 0 (137 violations/100
+calls, 100 redials). tau2-bench Phase-0 measurement pending (py3.12 venv
+built; run queued behind Tier 1.5).
+
 ## Recommended recipe (for the cluster-scale paper version)
 
 1. Reward = sparse outcome + per-tool-call verifiable rule terms:

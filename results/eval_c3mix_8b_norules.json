@@ -1,0 +1,33 @@
+{
+  "model": "results/run_c3mix_8b_lora/final",
+  "rules_in_prompt": false,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.9625,
+    "pass^k": 0.7666666666666667,
+    "clean@1": 1.0,
+    "clean^k": 1.0,
+    "perfect^k": 0.7666666666666667,
+    "viol_per_100_calls": 0.0,
+    "per_rule": {},
+    "tactic_diversity": 0.5333333333333333,
+    "format_errors_per_ep": 0.008333333333333333,
+    "calls_per_ep": 6.029166666666667
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "clean@1": 0.9958333333333333,
+    "clean^k": 0.9666666666666667,
+    "perfect^k": 0.9666666666666667,
+    "viol_per_100_calls": 0.07027406886858749,
+    "per_rule": {
+      "unverified_call": 1
+    },
+    "tactic_diversity": 0.45,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.929166666666666
+  }
+}
