@@ -24,7 +24,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from rlvp.envs import make_env
-from rlvp.rollout import run_episodes, start_episode
+from rlvp.rollout import run_episodes, set_template, start_episode
 
 ap = argparse.ArgumentParser()
 ap.add_argument("model")
@@ -37,7 +37,10 @@ ap.add_argument("--seed0", type=int, default=1000)
 ap.add_argument("--gen-batch", type=int, default=48)
 args = ap.parse_args()
 
+set_template(args.model)
 tok = AutoTokenizer.from_pretrained(args.model)
+if tok.pad_token_id is None:
+    tok.pad_token = tok.unk_token or tok.eos_token
 model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.bfloat16, device_map="cuda")
 model.eval()
 

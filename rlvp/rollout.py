@@ -21,6 +21,49 @@ ASSISTANT_PREFIX = "<|im_start|>assistant\n<think>\n\n</think>\n\n"
 MAX_EPISODE_TOKENS = 3000
 
 
+class _QwenTemplate:
+    name = "qwen3"
+    eot = "<|im_end|>"
+
+    @staticmethod
+    def initial(sys_p, usr):
+        return (f"<|im_start|>system\n{sys_p}<|im_end|>\n"
+                f"<|im_start|>user\n{usr}<|im_end|>\n" + ASSISTANT_PREFIX)
+
+    @staticmethod
+    def cont(obs):
+        return "\n<|im_start|>user\n" + obs + "<|im_end|>\n" + ASSISTANT_PREFIX
+
+
+class _MistralTemplate:
+    # Mistral-7B-Instruct-v0.3: <s>[INST] ... [/INST] resp</s>[INST] ... [/INST]
+    name = "mistral"
+    eot = "</s>"
+
+    @staticmethod
+    def initial(sys_p, usr):
+        return f"<s>[INST] {sys_p}\n\n{usr} [/INST] "
+
+    @staticmethod
+    def cont(obs):
+        return f"[INST] {obs} [/INST] "
+
+
+TEMPLATE = _QwenTemplate  # module default; switched via set_template()
+
+
+def set_template(model_name_or_path: str):
+    """Select the chat template from the model's config (qwen3 default)."""
+    global TEMPLATE
+    try:
+        from transformers import AutoConfig
+        mt = AutoConfig.from_pretrained(model_name_or_path).model_type.lower()
+    except Exception:
+        mt = model_name_or_path.lower()
+    TEMPLATE = _MistralTemplate if "mistral" in mt else _QwenTemplate
+    return TEMPLATE
+
+
 @dataclass
 class Episode:
     env: object
@@ -28,6 +71,7 @@ class Episode:
     action_spans: list = field(default_factory=list)  # (start, end, turn_idx) generated tokens
     turn_violations: dict = field(default_factory=dict)  # turn_idx -> [rule names]
     turn_discharges: dict = field(default_factory=dict)  # turn_idx -> [rule names]
+    turn_errors: set = field(default_factory=set)        # turn_idx with env ERROR obs
     done: bool = False
     truncated: bool = False
     scripted: bool = False  # off-policy rule-engine-synthesized episode
@@ -42,18 +86,16 @@ def _ids(tok, text):
 
 
 def start_episode(tok, env, include_rules=False) -> Episode:
-    text = (
-        f"<|im_start|>system\n{env.system_prompt(include_rules)}<|im_end|>\n"
-        f"<|im_start|>user\n{env.initial_user_msg()}<|im_end|>\n" + ASSISTANT_PREFIX
-    )
+    text = TEMPLATE.initial(env.system_prompt(include_rules), env.initial_user_msg())
     return Episode(env=env, ids=_ids(tok, text))
 
 
 @torch.no_grad()
 def run_episodes(model, tok, episodes, temperature=1.0, top_p=1.0,
-                 max_new_tokens=200, gen_batch=64, progress=None):
+                 max_new_tokens=200, gen_batch=64, progress=None,
+                 max_episode_tokens=MAX_EPISODE_TOKENS):
     """Drive all episodes to completion. Modifies episodes in place."""
-    im_end = tok.convert_tokens_to_ids("<|im_end|>")
+    im_end = tok.convert_tokens_to_ids(TEMPLATE.eot)
     pad = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
     device = next(model.parameters()).device
     rounds = 0
@@ -101,15 +143,16 @@ def run_episodes(model, tok, episodes, temperature=1.0, top_p=1.0,
                     e.turn_violations[turn_idx] = list(res.violations)
                 if res.discharges:
                     e.turn_discharges[turn_idx] = list(res.discharges)
+                if res.observation.startswith("ERROR"):
+                    e.turn_errors.add(turn_idx)
                 if e.env.done:
                     e.done = True
-                elif len(e.ids) > MAX_EPISODE_TOKENS:
+                elif len(e.ids) > max_episode_tokens:
                     e.done = True
                     e.truncated = True
                     e.env.done = True
                 else:
-                    e.ids.extend(_ids(tok, "\n<|im_start|>user\n" + res.observation
-                                      + "<|im_end|>\n" + ASSISTANT_PREFIX))
+                    e.ids.extend(_ids(tok, TEMPLATE.cont(res.observation)))
         if progress:
             progress(rounds, sum(1 for e in episodes if e.done), len(episodes))
     return episodes
@@ -119,7 +162,7 @@ def scripted_episode(tok, env, script_texts, include_rules=False) -> Episode:
     """Build a complete Episode from pre-written assistant texts (off-policy
     guidance, LUFFY-style). Token stream is identical in format to a live
     rollout, so the trainer can't tell the difference."""
-    im_end = tok.convert_tokens_to_ids("<|im_end|>")
+    im_end = tok.convert_tokens_to_ids(TEMPLATE.eot)
     e = start_episode(tok, env, include_rules)
     e.scripted = True
     for text in script_texts:
@@ -138,8 +181,7 @@ def scripted_episode(tok, env, script_texts, include_rules=False) -> Episode:
         if env.done:
             e.done = True
         else:
-            e.ids.extend(_ids(tok, "\n<|im_start|>user\n" + res.observation
-                              + "<|im_end|>\n" + ASSISTANT_PREFIX))
+            e.ids.extend(_ids(tok, TEMPLATE.cont(res.observation)))
     e.done = True
     return e
 

@@ -120,13 +120,9 @@ class FileOpsEnv(ToolEnv):
     # ------------------------------------------------------------------
     def _check_solution(self):
         t = self.task
-        if t["type"] in ("edit_config", "create_file"):
-            return self.fs.get(t["target_path"]) == t["target_content"]
-        if t["type"] == "cleanup_tmp":
-            tmp_gone = all(p not in self.fs for p in t["tmp_files"])
-            keep_ok = all(p in self.fs for p in t["keep_files"])
-            return tmp_gone and keep_ok
-        return False
+        if t["type"] == "chain":
+            return all(_check_one(sub, self.fs) for sub in t["stages"])
+        return _check_one(t, self.fs)
 
     def apply(self, call: ToolCall) -> StepResult:
         name, a = call.name, call.args
@@ -166,7 +162,14 @@ class FileOpsEnv(ToolEnv):
                 err = f"ERROR: no such file: {path}"
         elif name == "run_tests":
             self.last_tests_turn = self.turn
-            if self._check_solution():
+            if self.task["type"] == "chain":
+                fails = [i + 1 for i, sub in enumerate(self.task["stages"])
+                         if not _check_one(sub, self.fs)]
+                n = len(self.task["stages"])
+                obs = (f"Tests: PASS ({n}/{n})" if not fails else
+                       f"Tests: FAIL ({n - len(fails)}/{n}) - failing stages: "
+                       + ", ".join(str(i) for i in fails))
+            elif self._check_solution():
                 obs = "Tests: PASS (3/3)"
             else:
                 obs = "Tests: FAIL (1/3) - " + self.task["fail_hint"]
@@ -178,6 +181,49 @@ class FileOpsEnv(ToolEnv):
             self.errored_sigs[_sig(call)] = self.errored_sigs.get(_sig(call), 0) + 1
             obs = err
         return StepResult(observation=obs, done=self.done)
+
+
+def _check_one(t: dict, fs: dict) -> bool:
+    if t["type"] in ("edit_config", "create_file"):
+        return fs.get(t["target_path"]) == t["target_content"]
+    if t["type"] == "cleanup_tmp":
+        return (all(p not in fs for p in t["tmp_files"])
+                and all(p in fs for p in t["keep_files"]))
+    return False
+
+
+def _remap(task: dict, prefix: str) -> dict:
+    """Prefix every path in a task dict so chained stages don't collide."""
+    t = dict(task)
+    t["fs"] = {prefix + p: c for p, c in task["fs"].items()}
+    for key in ("target_path",):
+        if key in t:
+            t[key] = prefix + t[key]
+    for key in ("tmp_files", "keep_files"):
+        if key in t:
+            t[key] = [prefix + p for p in t[key]]
+    t["instruction"] = task["instruction"].replace("/app", prefix + "/app").replace("/data", prefix + "/data")
+    return t
+
+
+def make_chain_task(seed: int, n_stages: int) -> dict:
+    """Horizon-scaling task: n_stages independent sub-tasks in one episode.
+    Rule-relevant decision points grow ~3x per stage."""
+    stages = [_remap(make_task(1_000_000 + seed * 31 + i), f"/s{i + 1}") for i in range(n_stages)]
+    fs = {}
+    for s in stages:
+        fs.update(s["fs"])
+    instruction = (f"Complete ALL {n_stages} stages, then submit once:\n"
+                   + "\n".join(f"{i + 1}. {s['instruction']}" for i, s in enumerate(stages)))
+    return {"type": "chain", "seed": seed, "n_stages": n_stages,
+            "fs": fs, "stages": stages, "instruction": instruction,
+            "fail_hint": "one or more stages incomplete"}
+
+
+def make_chain_env(seed: int, n_stages: int, **kw) -> "FileOpsEnv":
+    env = FileOpsEnv(make_chain_task(seed, n_stages), **kw)
+    env.max_turns = 8 + 7 * n_stages
+    return env
 
 
 def compliant_script(task: dict, imperfect: bool = False, skip_rules: tuple = ()) -> list:
@@ -196,7 +242,9 @@ def compliant_script(task: dict, imperfect: bool = False, skip_rules: tuple = ()
                  + _json.dumps({"path": task["target_path"], "content": content}))
     elif task["type"] == "cleanup_tmp":
         if "blind_delete" not in skip_rules:
-            s.append('I should list the directory before deleting anything.\nAction: list_dir {"path": "/data"}')
+            ddir = os.path.dirname(task["tmp_files"][0])
+            s.append('I should list the directory before deleting anything.\nAction: list_dir '
+                     + _json.dumps({"path": ddir}))
         tmp = task["tmp_files"][:1] if imperfect else task["tmp_files"]
         for p in tmp:
             s.append(f'Deleting a listed .tmp file.\nAction: delete ' + _json.dumps({"path": p}))

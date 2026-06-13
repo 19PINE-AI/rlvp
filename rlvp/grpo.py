@@ -24,7 +24,8 @@ import torch
 import torch.nn.functional as F
 
 from .envs import ENVS, make_env
-from .rollout import episode_stats, run_episodes, scripted_episode, start_episode
+from .rollout import (episode_stats, run_episodes, scripted_episode,
+                      set_template, start_episode)
 
 
 @dataclass
@@ -72,6 +73,33 @@ def build_advantages(groups, cfg: TrainConfig):
     (A_seq scalar, per_turn_adj dict turn->extra advantage)."""
     out = []
     for grp in groups:
+        if cfg.credit == "gigpo":
+            # GiGPO-style adaptation: step-level advantage from per-turn-index
+            # groups of process-aware returns-to-go (sparse outcome + rule terms
+            # from turn t onward), no trajectory-level channel.
+            def rtg(e, t):
+                v = sum(len(r) for turn, r in e.turn_violations.items() if turn >= t)
+                d = sum(len(r) for turn, r in e.turn_discharges.items() if turn >= t)
+                return e.env.outcome_reward() - cfg.lam * v + cfg.beta * d
+            max_t = max(e.n_turns for e in grp)
+            for e in grp:
+                per_turn = {}
+                for t in range(e.n_turns):
+                    peers = [o for o in grp if o.n_turns > t]
+                    if len(peers) > 1:
+                        mu_t = sum(rtg(o, t) for o in peers) / len(peers)
+                        per_turn[t] = rtg(e, t) - mu_t
+                out.append((e, 0.0, per_turn))
+            continue
+        if cfg.credit == "steptool":
+            # StepTool-style adaptation: SuccCalling (+0.2 per non-error parsed
+            # call) per turn + IsSolved terminal outcome trajectory-wide.
+            rs0 = [e.env.outcome_reward() for e in grp]
+            mu0 = sum(rs0) / len(rs0)
+            for e, r in zip(grp, rs0):
+                per_turn = {t: 0.2 for t in range(e.n_turns) if t not in e.turn_errors}
+                out.append((e, r - mu0, per_turn))
+            continue
         # with script_scalar=False, scripted episodes are invisible to the
         # scalar channel: excluded from the baseline, zero scalar advantage
         scalar_grp = grp if cfg.script_scalar else [e for e in grp if not e.scripted]
@@ -229,7 +257,10 @@ def train(cfg: TrainConfig):
     (out_dir / "config.json").write_text(json.dumps(asdict(cfg), default=str, indent=2))
     log_f = open(out_dir / "train_log.jsonl", "a")
 
+    set_template(cfg.model_name)
     tok = AutoTokenizer.from_pretrained(cfg.model_name)
+    if tok.pad_token_id is None:
+        tok.pad_token = tok.unk_token or tok.eos_token
     model = AutoModelForCausalLM.from_pretrained(cfg.model_name, dtype=torch.bfloat16, device_map="cuda")
     if cfg.lora_r:
         from peft import LoraConfig, get_peft_model

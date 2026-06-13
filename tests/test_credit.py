@@ -101,6 +101,28 @@ def test_script_process_only():
     assert out_def[2][1] != 0.0
 
 
+def test_gigpo_step_groups():
+    cfg = TrainConfig(credit="gigpo", lam=0.5, beta=0.5)
+    e1, e2 = ep(True, []), ep(False, [1])
+    out = build_advantages([[e1, e2]], cfg)
+    assert out[0][1] == 0.0 and out[1][1] == 0.0  # no trajectory channel
+    # turn 0: rtg e1=1, e2=0-0.5=-0.5 (viol at turn1 counts for t<=1) -> mu=0.25
+    assert abs(out[0][2][0] - 0.75) < 1e-9
+    assert abs(out[1][2][0] + 0.75) < 1e-9
+    # turn 1: e1 rtg=1, e2 rtg=-0.5 -> same split
+    assert abs(out[0][2][1] - 0.75) < 1e-9
+
+
+def test_steptool_succ_calling():
+    cfg = TrainConfig(credit="steptool")
+    e1, e2 = ep(True, []), ep(False, [])
+    e2.turn_errors = {1}
+    out = build_advantages([[e1, e2]], cfg)
+    assert out[0][2] == {0: 0.2, 1: 0.2}
+    assert out[1][2] == {0: 0.2}  # errored turn gets no SuccCalling reward
+    assert abs(out[0][1] - 0.5) < 1e-9
+
+
 if __name__ == "__main__":
     for k, v in sorted(globals().items()):
         if k.startswith("test_"):
