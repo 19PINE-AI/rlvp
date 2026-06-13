@@ -1,0 +1,34 @@
+{
+  "model": "results/run_c3v2_imp/final",
+  "rules_in_prompt": false,
+  "k": 8,
+  "temp": 0.7,
+  "n_tasks": 30,
+  "fileops": {
+    "pass@1": 0.975,
+    "pass^k": 0.8666666666666667,
+    "clean@1": 0.9833333333333333,
+    "clean^k": 0.8666666666666667,
+    "perfect^k": 0.8,
+    "viol_per_100_calls": 0.37202380952380953,
+    "per_rule": {
+      "repeat_failure": 2,
+      "untested_submit": 3
+    },
+    "tactic_diversity": 0.3541666666666667,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.6
+  },
+  "csops": {
+    "pass@1": 1.0,
+    "pass^k": 1.0,
+    "clean@1": 1.0,
+    "clean^k": 1.0,
+    "perfect^k": 1.0,
+    "viol_per_100_calls": 0.0,
+    "per_rule": {},
+    "tactic_diversity": 0.125,
+    "format_errors_per_ep": 0.0,
+    "calls_per_ep": 5.0
+  }
+}

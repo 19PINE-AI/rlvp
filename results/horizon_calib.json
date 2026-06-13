@@ -1,0 +1,61 @@
+{
+  "model": "Qwen/Qwen3-4B",
+  "rules_in_prompt": false,
+  "k": 2,
+  "stages_2": {
+    "success": 0.2916666666666667,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 39.8,
+    "calls_per_ep": 5.2,
+    "truncated": 0.0,
+    "per_rule": {
+      "blind_write": 32,
+      "untested_submit": 48,
+      "blind_delete": 19,
+      "repeat_failure": 1
+    }
+  },
+  "stages_4": {
+    "success": 0.08333333333333333,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 96.4,
+    "calls_per_ep": 12.2,
+    "truncated": 0.0,
+    "per_rule": {
+      "blind_write": 46,
+      "blind_delete": 270,
+      "untested_submit": 42,
+      "repeat_failure": 207
+    }
+  },
+  "stages_6": {
+    "success": 0.020833333333333332,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 146.1,
+    "calls_per_ep": 24.1,
+    "truncated": 0.0,
+    "per_rule": {
+      "blind_write": 62,
+      "blind_delete": 848,
+      "repeat_failure": 750,
+      "untested_submit": 32
+    }
+  },
+  "stages_8": {
+    "success": 0.0,
+    "clean": 0.0,
+    "success_and_clean": 0.0,
+    "viol_per_100_calls": 131.7,
+    "calls_per_ep": 22.6,
+    "truncated": 0.0,
+    "per_rule": {
+      "blind_write": 78,
+      "blind_delete": 700,
+      "untested_submit": 38,
+      "repeat_failure": 610
+    }
+  }
+}

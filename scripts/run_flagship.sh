@@ -11,23 +11,27 @@ mark() { echo "$(date '+%m-%d %H:%M') $1" >> "$S"; }
 
 # wait until nothing else trains
 while pgrep -f "run_paper_abc|run_paper_def|scripts/train.py" >/dev/null; do sleep 60; done
-mark "=== FLAGSHIP: calibration ==="
-python3 scripts/eval_horizon.py Qwen/Qwen3-4B calib --stages 2,4,6,8 --k 2 --n-tasks 24 \
-  >> results/evals_paper.log 2>&1 && mark "CALIB OK" || mark "CALIB FAILED"
 
-# pick smallest N with base success <= 0.35 (fallback 6)
+# calibration already done (results/horizon_calib.json):
+#   chain2 succ .29 -> only ~6% all-fail groups (GRPO rarely blind: too easy)
+#   chain4 succ .083 -> ~50% all-fail groups (GRPO blind half the time: ideal)
+#   chain6 succ .021 -> ~85% all-fail (very hard, base barely solves any)
+# Pick the regime where the all-fail-group mechanism is strongest while live
+# rollouts still produce some success: smallest N with base success <= 0.15.
+if [ ! -f results/horizon_calib.json ]; then
+  mark "=== FLAGSHIP: calibration ==="
+  python3 scripts/eval_horizon.py Qwen/Qwen3-4B calib --stages 2,4,6,8 --k 2 --n-tasks 24 \
+    >> results/evals_paper.log 2>&1 && mark "CALIB OK" || mark "CALIB FAILED"
+fi
 N=$(python3 -c "
 import json
-try:
-    d = json.load(open('results/horizon_calib.json'))
-    for n in (2, 4, 6, 8):
-        if d[f'stages_{n}']['success'] <= 0.35:
-            print(n); break
-    else:
-        print(8)
-except Exception:
-    print(6)")
-mark "FLAGSHIP domain=chain${N}"
+d = json.load(open('results/horizon_calib.json'))
+for n in (2, 4, 6, 8):
+    if d[f'stages_{n}']['success'] <= 0.15:
+        print(n); break
+else:
+    print(4)")
+mark "FLAGSHIP domain=chain${N} (all-fail-rich regime)"
 
 FLAG="domains=('chain${N}',), tasks_per_iter=8, gen_batch=32, max_episode_tokens=9000, \
 eval_tasks=16, eval_k=2, iters=60, eval_every=6"
