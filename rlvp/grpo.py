@@ -67,6 +67,10 @@ class TrainConfig:
     strip_dropped_from_scripts: bool = False  # clean holdout: scripts must not
                                               # demonstrate dropped rules
     max_episode_tokens: int = 3000   # raise for chained long-horizon domains
+    dynamic_sampling: bool = False   # DAPO-style: discard all-fail/all-pass
+                                     # groups and resample (counts ALL generated
+                                     # episodes toward the budget)
+    dynamic_max_oversample: int = 6  # cap resampling rounds per iteration
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -282,36 +286,72 @@ def train(cfg: TrainConfig):
     for it in range(1, cfg.iters + 1):
         t0 = time.time()
         # ---- rollout ----
-        groups, all_eps = [], []
         n_live = cfg.group_size - (1 if cfg.mix_scripted else 0)
-        per_dom = cfg.tasks_per_iter // len(cfg.domains)
-        for domain in cfg.domains:
-            for s in rng.sample(seeds, per_dom):
-                grp = [start_episode(tok, make_env(domain, s, drop_rules=cfg.drop_rules),
-                                     cfg.include_rules_in_prompt)
-                       for _ in range(n_live)]
-                all_eps.extend(grp)
-                if cfg.mix_scripted:
-                    env_s = make_env(domain, s, drop_rules=cfg.drop_rules)
-                    skip = cfg.drop_rules if cfg.strip_dropped_from_scripts else ()
-                    grp = grp + [scripted_episode(
-                        tok, env_s,
-                        ENVS[domain].compliant_script(env_s.task, cfg.imperfect_scripts,
-                                                      skip_rules=skip),
-                        cfg.include_rules_in_prompt)]
-                groups.append(grp)
+        per_dom = max(cfg.tasks_per_iter // len(cfg.domains), 1)
+
+        def _make_group(domain, s):
+            grp = [start_episode(tok, make_env(domain, s, drop_rules=cfg.drop_rules),
+                                 cfg.include_rules_in_prompt)
+                   for _ in range(n_live)]
+            full = grp
+            if cfg.mix_scripted:
+                env_s = make_env(domain, s, drop_rules=cfg.drop_rules)
+                skip = cfg.drop_rules if cfg.strip_dropped_from_scripts else ()
+                full = grp + [scripted_episode(
+                    tok, env_s,
+                    ENVS[domain].compliant_script(env_s.task, cfg.imperfect_scripts,
+                                                  skip_rules=skip),
+                    cfg.include_rules_in_prompt)]
+            return grp, full  # (live-only, full group incl. scripted)
+
         model.config.use_cache = True
-        run_episodes(model, tok, all_eps, temperature=cfg.temp, top_p=1.0,
-                     gen_batch=cfg.gen_batch, max_episode_tokens=cfg.max_episode_tokens)
+        gen_groups = []   # (live, full) generated this iter, before any filtering
+        if not cfg.dynamic_sampling:
+            for domain in cfg.domains:
+                for s in rng.sample(seeds, per_dom):
+                    gen_groups.append(_make_group(domain, s))
+            run_episodes(model, tok, [e for live, _ in gen_groups for e in live],
+                         temperature=cfg.temp, top_p=1.0, gen_batch=cfg.gen_batch,
+                         max_episode_tokens=cfg.max_episode_tokens)
+            groups = [full for _, full in gen_groups]
+        else:
+            # DAPO dynamic sampling: keep only groups with 0<acc<1, resample the
+            # rest; ALL generated episodes count toward the sample budget.
+            kept, rounds = [], 0
+            while len(kept) < cfg.tasks_per_iter and rounds < cfg.dynamic_max_oversample:
+                rounds += 1
+                need = cfg.tasks_per_iter - len(kept)
+                fresh = [_make_group(cfg.domains[i % len(cfg.domains)], rng.choice(seeds))
+                         for i in range(need)]
+                run_episodes(model, tok, [e for live, _ in fresh for e in live],
+                             temperature=cfg.temp, top_p=1.0, gen_batch=cfg.gen_batch,
+                             max_episode_tokens=cfg.max_episode_tokens)
+                gen_groups.extend(fresh)
+                for live, full in fresh:
+                    n_succ = sum(e.env.success for e in live)
+                    if 0 < n_succ < len(live):   # informative (nonzero advantage)
+                        kept.append(full)
+            groups = kept
         roll_s = time.time() - t0
-        st = episode_stats(all_eps)  # live episodes only
-        # mechanism metric: fraction of groups where GRPO's outcome channel is
-        # blind (all live episodes fail, or all succeed)
-        live_groups = [[e for e in g if not e.scripted] for g in groups]
-        st["all_fail_groups"] = sum(all(not e.env.success for e in g)
-                                    for g in live_groups) / max(len(live_groups), 1)
-        st["all_pass_groups"] = sum(all(e.env.success for e in g)
-                                    for g in live_groups) / max(len(live_groups), 1)
+        episodes_generated = sum(len(live) for live, _ in gen_groups)
+        all_eps = [e for live, _ in gen_groups for e in live]  # unbiased: ALL generated
+        st = episode_stats(all_eps)
+        st["episodes_generated"] = episodes_generated
+        st["groups_kept"] = len(groups)
+        # mechanism metric: fraction of GENERATED groups where the outcome channel
+        # is blind (all live episodes fail, or all pass)
+        st["all_fail_groups"] = sum(all(not e.env.success for e in live)
+                                    for live, _ in gen_groups) / max(len(gen_groups), 1)
+        st["all_pass_groups"] = sum(all(e.env.success for e in live)
+                                    for live, _ in gen_groups) / max(len(gen_groups), 1)
+        if not groups:   # nothing informative found (DAPO stall) — skip update
+            rec = {"iter": it, "train": st, "loss": 0.0, "entropy": 0.0,
+                   "roll_s": round(roll_s, 1), "upd_s": 0.0}
+            log_f.write(json.dumps(rec) + "\n"); log_f.flush()
+            print(json.dumps({"iter": it, "succ": st["success"],
+                              "gen": episodes_generated, "kept": 0, "DAPO_STALL": True}),
+                  flush=True)
+            continue
         # ---- update ----
         t1 = time.time()
         cfg_eff = cfg

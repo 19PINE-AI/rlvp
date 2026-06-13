@@ -21,8 +21,9 @@ alone, with the process machinery as the *means*.
    hard tasks, early training is mostly all-fail groups → outcome-only GRPO
    has near-zero gradient exactly when learning matters most. The process
    channel (rule penalties + obligation-discharge credits) produces
-   verifiable gradient FROM FAILED EPISODES. Measured already: grad-norm
-   0.001 vs 0.6 (500x) depending on whether a non-outcome channel exists.
+   verifiable gradient FROM FAILED EPISODES. Measured already on chain4:
+   outcome-only logs DEAD iterations (upd_s=0, all-fail-group fraction 1.0);
+   RLVP logs zero dead iterations.
 2. **Unsampled good behavior cannot be reinforced** (gradient ∝ 1-p; 0/48
    base sampling of key actions). Process-channel-only demo mixing injects
    the behavior even from demos that FAIL the task — measured: BC on failing
@@ -30,6 +31,28 @@ alone, with the process machinery as the *means*.
 3. Together: RLVP converts "verifiable wrongness/obligation" signals — cheap
    to specify, available at every step — into outcome-relevant gradient that
    outcome-only GRPO simply does not have.
+
+## Positioning vs DAPO (the key baseline for the efficiency claim)
+
+DAPO's **dynamic sampling** confronts the SAME all-fail-group problem but with
+the opposite move: it DISCARDS groups with accuracy 0 or 1 and resamples until
+the batch is full of informative (0<acc<1) groups. This guarantees every
+gradient step is informative (no dead updates) — but it does NOT solve sampling
+efficiency: the rollouts spent on discarded all-fail groups are sunk cost, and
+on hard/low-success tasks the oversampling factor blows up (chain4 ~2x,
+chain6 ~6x; can stall entirely if no informative group is ever found).
+
+DAPO converts a zero-GRADIENT problem into a sampling-COST problem. RLVP instead
+makes the all-fail group itself informative: on a binary outcome all failures
+are identical (all reward 0, hence DAPO can only discard them), but verifiable
+process rewards distinguish them (one reproduced-then-timed-out, one never read
+the file) → gradient from the failures, no discard, no resample.
+
+THEREFORE every efficiency comparison is measured in **episodes GENERATED**
+(counting DAPO's discarded rollouts), not episodes used — else DAPO's resample
+cost is hidden. DAPO's orthogonal tricks (clip-higher, token-level loss,
+overlong shaping) are compatible with RLVP and noted as stackable, not
+competing.
 
 ## Experiments
 
@@ -39,21 +62,28 @@ chain-2/4/6/8; pick N* = smallest N with base success <= 0.3. This is the
 hard sparse-outcome testbed. (Risk check: also confirms outcome-only has a
 cold-start problem here: % all-fail groups at iteration 1.)
 
-### E2. FLAGSHIP — 4-way on chain-N*, same budget (~20h + ~10h seeds)
-Train: (a) outcome-only GRPO, (b) RLVP = hybrid credit + process-channel-only
-demo mixing + anneal@40, (c) GiGPO-style step advantages, (d) StepTool-style
-per-call rewards. 60 iters x 8 tasks x G=8; eval every 6 iters.
-Headline pair (a) vs (b) gets 3 seeds.
+### E2. FLAGSHIP — 5-way on chain-N*, same budget (~25h + seeds)
+Train: (a) outcome-only GRPO, (b) DAPO (outcome + dynamic sampling), (c) RLVP
+= hybrid credit + process-channel-only demo mixing + anneal@40, (d) GiGPO-style
+step advantages, (e) StepTool-style per-call rewards. 60 iters x 8 tasks x G=8;
+eval every 6 iters. Headline trio (a) GRPO vs (b) DAPO vs (c) RLVP gets 3 seeds.
 
-Metrics (all OUTCOME-side):
-- success-vs-episodes curve; episodes-to-reach 25%/50% success (T1)
+Metrics (all OUTCOME-side), X-AXIS = EPISODES GENERATED (counts DAPO resamples):
+- success-vs-episodes-generated curve; episodes-generated-to-25%/50% (T1)
 - final success + pass^8 at convergence; extend +40 iters if not plateaued (T2)
-- fraction of all-fail groups over time (the mechanism plot: outcome-only
-  should sit at ~1.0 early; RLVP should exit faster)
+- all-fail-group fraction + DEAD-iteration count over time (GRPO mechanism)
+- DAPO oversampling factor over time (episodes_generated / episodes_used) —
+  the cost dynamic sampling pays and RLVP does not
 - wall-clock per point of success (practical efficiency)
 
-Kill criterion: if (b) does not beat (a) on BOTH episodes-to-50% and final
-success at n=3 seeds, T1/T2 are refuted on this testbed and we say so.
+Kill criterion: if (c) RLVP does not beat BOTH (a) GRPO and (b) DAPO on
+episodes-generated-to-50% AND final success at n=3 seeds, T1/T2 are refuted
+on this testbed and we report it.
+
+### E2b. Paired dead-iteration micro-experiment (controlled, ~1h)
+Feed the IDENTICAL rollout batches to outcome-only vs RLVP credit and count
+dead (zero-gradient) updates per method — makes the dead-iteration claim paired
+rather than across-run. (Addresses the "different rollouts" caveat.)
 
 ### E3. tau2-bench head-to-head (~6-8h)
 Real benchmark, base reward 0.44 = real headroom. Train outcome-only vs RLVP
