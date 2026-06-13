@@ -386,3 +386,18 @@ landmines documented in scripts/tau2_phase0.sh.
    but-failing demos = 0.00 pass@1; RL with the same demos = 0.97.
 7. Report pass^k and perfect^k, not pass@1. Compliance held at clean^16
    0.97-1.00 and at eval temp 1.0.
+
+## v2 flagship (chain4, outcome thesis) — preliminary
+
+### E2b paired dead-iteration (controlled: identical batches, both credits)
+On 20 identical rollout batches (Qwen3-4B base, chain4):
+- outcome-only (GRPO) credit: 25% of batches yield a DEAD (zero-gradient) update
+- RLVP credit: 0% dead
+Same rollouts, different credit -> the dead-iteration gap is causal, not across-run.
+GRPO wastes 1 in 4 updates on all-fail batches; RLVP's process channel extracts
+gradient from those same failures.
+
+### E1 calibration (base Qwen3-4B, chain-N, k=2)
+chain2 succ .29 (~6% all-fail groups) | chain4 succ .083 (~50%) |
+chain6 succ .021 (~85%) | chain8 succ .0. Picked chain4: real outcome headroom
+AND a high all-fail-group fraction (the regime where GRPO is blind).

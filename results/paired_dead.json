@@ -1,0 +1,7 @@
+{
+  "model": "Qwen/Qwen3-4B",
+  "n_batches": 20,
+  "domain": "chain4",
+  "outcome_dead_frac": 0.25,
+  "rlvp_dead_frac": 0.0
+}
