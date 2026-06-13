@@ -401,3 +401,20 @@ gradient from those same failures.
 chain2 succ .29 (~6% all-fail groups) | chain4 succ .083 (~50%) |
 chain6 succ .021 (~85%) | chain8 succ .0. Picked chain4: real outcome headroom
 AND a high all-fail-group fraction (the regime where GRPO is blind).
+
+### E2 flagship 5-way (chain4, held-out eval) — HONEST
+Matched budget (episodes GENERATED), held-out success:
+  336 eps:  RLVP 0.78 | GRPO 0.25 | DAPO 0.59(@1720 gen!) | StepTool 0.62 | GiGPO 0.25
+  final:    RLVP 0.91 | GRPO 1.00 | DAPO 1.00 | StepTool 1.00 | GiGPO 0.69
+eps-to-50% (generated): RLVP 336 | StepTool 512 | GiGPO 832 | GRPO 2240 | DAPO 2312
+dead iters/60: GRPO 42 | DAPO 31(+5.59x oversample) | GiGPO 8 | RLVP 2 | StepTool 0
+
+T1 (efficiency): STRONG. At 336 eps RLVP 0.78 vs GRPO 0.25 (held-out). GRPO sits
+at base ~0.25 for ~50 iters (42/60 dead) then converges only at the very end.
+DAPO confirms the thesis: 5.59x oversampling AND 31 stalls -> no efficiency gain
+over vanilla GRPO; on episodes-generated it is the WORST.
+CAVEAT (real): RLVP final 0.91 < StepTool/GRPO 1.0, and RLVP calls/ep bloats
+11->26 by iter24 (BEFORE anneal). Cause: discharge credit farmed by reading
+unneeded files on multi-file chains (read-before-write pays per first read).
+Fix: per-step cost (length penalty). chain4 not hard enough for a CEILING gap
+(all reach ~1.0) -> chain6 T2 test pending.
