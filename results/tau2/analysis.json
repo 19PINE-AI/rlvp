@@ -1,0 +1,10 @@
+{
+  "n_sims_total": 20,
+  "n_sims_with_messages": 16,
+  "mean_reward": 0.4375,
+  "tool_calls": 36,
+  "violations": 0,
+  "viol_per_100_calls": 0.0,
+  "episodes_with_violation": "0/16",
+  "per_rule": {}
+}

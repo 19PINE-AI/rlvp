@@ -335,6 +335,31 @@ because the 8B base was the WORST offender in Phase 0 (137 violations/100
 calls, 100 redials). tau2-bench Phase-0 measurement pending (py3.12 venv
 built; run queued behind Tier 1.5).
 
+## Tier 3b — tau2-bench Phase-0 (fully local: vLLM Qwen3-8B agent + user sim)
+
+20 airline tasks, 16 completed simulations, 36 tool calls, mean reward 0.44.
+Structural rule analysis (lookup-before-write, call spam, unconfirmed write
+chains; tool-name prefixes verified against the actual airline API):
+**0 violations / 36 calls.**
+
+Reading this honestly: tau2's protocol always carries the FULL policy
+document in the system prompt — so this is Phase 0's rules-in-prompt
+condition, where Qwen3-8B was already perfectly compliant on our domains
+(clean 1.00/1.00). The result is consistent, not contradictory. The failure
+mass on tau2 (reward 0.44) is SEMANTIC policy compliance (fare rules,
+modification constraints), which requires compiling the policy doc into
+domain-semantic checkers — the cluster-scale Phase 0 task.
+
+The RLVP opportunity on tau2 is therefore the internalization condition:
+train with rule rewards and EVALUATE WITHOUT the ~10k-token policy document
+in the prompt. If compliance holds (as it did locally: trained-no-rules beat
+base-with-rules), the policy doc can be dropped from every production call —
+a direct latency/cost win on top of the reliability win.
+
+Infra note: the full local stack works end-to-end (py3.12 venv, vLLM with
+hermes tool-call parser + qwen3 reasoning parser, 32k context); five setup
+landmines documented in scripts/tau2_phase0.sh.
+
 ## Recommended recipe (final — every component now individually evidenced)
 
 1. Reward = sparse outcome + per-tool-call verifiable rule terms:
