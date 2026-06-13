@@ -71,6 +71,8 @@ class TrainConfig:
                                      # groups and resample (counts ALL generated
                                      # episodes toward the budget)
     dynamic_max_oversample: int = 6  # cap resampling rounds per iteration
+    step_cost: float = 0.0           # per-tool-call cost (length penalty) — offsets
+                                     # discharge-credit farming on long-horizon tasks
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -132,6 +134,12 @@ def build_advantages(groups, cfg: TrainConfig):
                 if cfg.credit != "c4" or e.env.success:
                     for turn, rules in e.turn_discharges.items():
                         per_turn[turn] = per_turn.get(turn, 0.0) + cfg.beta * len(rules)
+                # length penalty: small cost per action turn, applied only to
+                # scripted-eligible live episodes, to discourage farming
+                # discharge credit via unnecessary actions on long horizons
+                if cfg.step_cost and not e.scripted:
+                    for (s, t, turn) in e.action_spans:
+                        per_turn[turn] = per_turn.get(turn, 0.0) - cfg.step_cost
             elif cfg.credit == "c2pos":
                 viol_turns = set(e.turn_violations)
                 for (s, t, turn) in e.action_spans:
