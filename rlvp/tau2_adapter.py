@@ -194,20 +194,33 @@ def run_one_sim(task, gen, tok, include_policy, user_llm, max_steps=30):
     Agent = make_policy_agent_class()
     agent = Agent(tools=env.get_tools(), domain_policy=env.policy,
                   gen=gen, tok=tok, include_policy=include_policy)
+    # disable Qwen3 "thinking" on the user sim: thinking-only replies parse to
+    # empty content and crash tau2's orchestrator on UserMessage.validate()
     user = UserSimulator(llm=user_llm, instructions=str(task.user_scenario),
-                         llm_args={"temperature": 0.7, "max_tokens": 300})
+                         llm_args={"temperature": 0.7, "max_tokens": 400,
+                                   "extra_body": {"chat_template_kwargs":
+                                                  {"enable_thinking": False}}})
     orch = Orchestrator(domain="airline", agent=agent, user=user,
                         environment=env, task=task, max_steps=max_steps)
-    sim = orch.run()
+    try:
+        sim = orch.run()  # a single malformed user/agent turn must not kill the run
+    except Exception as exc:
+        print("orch error:", str(exc)[:120], flush=True)
+        ep = agent.episode
+        if ep is None or ep.n_turns == 0:
+            return None
+        ep.env = ShimEnv(0.0, agent.tracker)  # partial episode counts as a failure
+        ep.done = True
+        return ep
     try:
         ri = evaluate_simulation(sim, task, EvaluationType.ENV, solo_mode=False,
                                  domain="airline")
         reward = float(ri.reward)
     except Exception as exc:
-        print("eval error:", exc, flush=True)
+        print("eval error:", str(exc)[:120], flush=True)
         reward = 0.0
     ep = agent.episode
-    if ep is None:
+    if ep is None or ep.n_turns == 0:
         return None
     ep.env = ShimEnv(reward, agent.tracker)
     ep.done = True
