@@ -335,15 +335,29 @@ because the 8B base was the WORST offender in Phase 0 (137 violations/100
 calls, 100 redials). tau2-bench Phase-0 measurement pending (py3.12 venv
 built; run queued behind Tier 1.5).
 
-## Recommended recipe (for the cluster-scale paper version)
+## Recommended recipe (final — every component now individually evidenced)
 
 1. Reward = sparse outcome + per-tool-call verifiable rule terms:
    -lam per violation, +beta per pending-obligation discharge (idempotent).
-2. Credit = HYBRID: group-centered scalar (outcome + process terms folded)
-   on all tokens, PLUS token-attached process terms on the violating/
-   discharging turn, each channel normalized by its own token count.
-3. Anneal lam, beta -> 0 after compliance saturates (stability + the
-   internalization probe in one mechanism).
-4. Break the exploration wall with rule-engine-synthesized compliant episodes
-   mixed into GRPO groups (LUFFY-style), not with temperature.
-5. Report pass^k and perfect^k (= all k succeed AND comply), not pass@1.
+   [Pure penalties refuted by Finding B; c2pos refuted positive-only.]
+2. Credit = HYBRID: group-centered scalar on all tokens PLUS token-attached
+   process terms on the violating/discharging turn, each channel normalized
+   by its OWN token count. [c1/c2 complementary failures; c3 wins; global
+   normalizer refuted by Finding A.]
+3. Scripted-compliant episode mixed into each group — NECESSARY, not an
+   optimization: bare-c3's saturation crack is luck (3 seeds: full/partial/
+   none); with mixing it is deterministic (clean^8 = 1.00 both domains).
+   Scripted episodes should contribute via the PROCESS CHANNEL ONLY (zero
+   scalar advantage) so imperfect demos donate scaffolding without their
+   mistakes — Tier 1.5 showed the negative scalar otherwise suppresses both.
+4. Anneal lam, beta -> 0 after compliance saturates: recovers success
+   reliability the hot mixing phase costs (perfect^8 0.43 -> 0.87) and
+   doubles as the internalization probe. [Outcome-gating (c4) refuted as the
+   stability mechanism — it discards the practice episodes.]
+5. Train-time internalization, not inference-time masking: guardrails cost
+   33-62 pts pass@1 with 100% of episodes hitting blocks (ordering rules
+   cannot be masked into existence).
+6. RL, not BC, whenever demonstrations can be imperfect: BC on compliant-
+   but-failing demos = 0.00 pass@1; RL with the same demos = 0.97.
+7. Report pass^k and perfect^k, not pass@1. Compliance held at clean^16
+   0.97-1.00 and at eval temp 1.0.
