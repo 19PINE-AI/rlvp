@@ -232,6 +232,14 @@ def compliant_script(task: dict, imperfect: bool = False, skip_rules: tuple = ()
     cleanup) — compliant scaffolding around a failing solution. skip_rules
     removes the steps that demonstrate the named rules (clean holdout)."""
     import json as _json
+    if task["type"] == "chain":  # compose per-stage scripts, one test+submit
+        s = []
+        for sub in task["stages"]:
+            s.extend(compliant_script(sub, imperfect, skip_rules)[:-2])
+        if "untested_submit" not in skip_rules:
+            s.append("All stages changed files; run the tests before submitting.\nAction: run_tests {}")
+        s.append("Submitting.\nAction: submit {}")
+        return s
     s = []
     content = "TODO: fix" if imperfect else task.get("target_content")
     if task["type"] == "edit_config":

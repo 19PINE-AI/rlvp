@@ -35,17 +35,24 @@ from tau2.evaluator.evaluator import EvaluationType, evaluate_simulation
 from tau2.orchestrator.orchestrator import Orchestrator
 from tau2.user.user_simulator import UserSimulator
 
-ITERS = int(sys.argv[1]) if len(sys.argv) > 1 else 30
+ITERS = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 30
 WITH_POLICY = "--with-policy" in sys.argv
+CREDIT = "c3"
+OUT_NAME = "run_tau2"
+for _i, _a in enumerate(sys.argv):
+    if _a == "--credit":
+        CREDIT = sys.argv[_i + 1]
+    if _a == "--out":
+        OUT_NAME = sys.argv[_i + 1]
 POLICY_MODEL = "Qwen/Qwen3-4B"
 USER_LLM = "openai/Qwen/Qwen3-8B"
 G = 6
 TASKS_PER_ITER = 4
 MAX_STEPS = 30
-OUT = ROOT / "results/run_tau2"
+OUT = ROOT / "results" / OUT_NAME
 OUT.mkdir(parents=True, exist_ok=True)
 
-cfg = TrainConfig(credit="c3", lam=0.25, beta=0.25, inner_epochs=2,
+cfg = TrainConfig(credit=CREDIT, lam=0.25, beta=0.25, inner_epochs=2,
                   lr=2e-5, micro_token_budget=4096, clip_eps=0.2,
                   grad_clip=1.0, warmup=3)
 

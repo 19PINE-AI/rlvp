@@ -66,6 +66,7 @@ class TrainConfig:
                                   # only through the token-attached process channel
     strip_dropped_from_scripts: bool = False  # clean holdout: scripts must not
                                               # demonstrate dropped rules
+    max_episode_tokens: int = 3000   # raise for chained long-horizon domains
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -242,7 +243,8 @@ def evaluate(model, tok, cfg, k=None, temp=0.7, include_rules=None):
         for s in range(cfg.eval_tasks):
             for _ in range(k):
                 eps.append(start_episode(tok, make_env(domain, cfg.eval_seed0 + s), inc))
-        run_episodes(model, tok, eps, temperature=temp, top_p=0.95, gen_batch=cfg.gen_batch)
+        run_episodes(model, tok, eps, temperature=temp, top_p=0.95,
+                     gen_batch=cfg.gen_batch, max_episode_tokens=cfg.max_episode_tokens)
         out[domain] = episode_stats(eps)
     return out
 
@@ -299,9 +301,17 @@ def train(cfg: TrainConfig):
                         cfg.include_rules_in_prompt)]
                 groups.append(grp)
         model.config.use_cache = True
-        run_episodes(model, tok, all_eps, temperature=cfg.temp, top_p=1.0, gen_batch=cfg.gen_batch)
+        run_episodes(model, tok, all_eps, temperature=cfg.temp, top_p=1.0,
+                     gen_batch=cfg.gen_batch, max_episode_tokens=cfg.max_episode_tokens)
         roll_s = time.time() - t0
         st = episode_stats(all_eps)  # live episodes only
+        # mechanism metric: fraction of groups where GRPO's outcome channel is
+        # blind (all live episodes fail, or all succeed)
+        live_groups = [[e for e in g if not e.scripted] for g in groups]
+        st["all_fail_groups"] = sum(all(not e.env.success for e in g)
+                                    for g in live_groups) / max(len(live_groups), 1)
+        st["all_pass_groups"] = sum(all(e.env.success for e in g)
+                                    for g in live_groups) / max(len(live_groups), 1)
         # ---- update ----
         t1 = time.time()
         cfg_eff = cfg

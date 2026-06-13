@@ -26,6 +26,7 @@ ap.add_argument("--rules", action="store_true")
 ap.add_argument("--k", type=int, default=4)
 ap.add_argument("--n-tasks", type=int, default=30)
 ap.add_argument("--temp", type=float, default=0.7)
+ap.add_argument("--stages", default="1,2,4")
 args = ap.parse_args()
 
 tok = AutoTokenizer.from_pretrained("Qwen/Qwen3-4B")
@@ -33,7 +34,7 @@ model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.bfloat16, d
 model.eval()
 
 out = {"model": args.model, "rules_in_prompt": args.rules, "k": args.k}
-for n_stages in (1, 2, 4):
+for n_stages in tuple(int(x) for x in args.stages.split(",")):
     eps = []
     for s in range(args.n_tasks):
         for _ in range(args.k):
