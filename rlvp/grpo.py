@@ -60,6 +60,11 @@ class TrainConfig:
     drop_rules: tuple = ()        # Arm 6: rules removed from TRAINING (eval keeps all)
     lora_r: int = 0               # Arm 8: LoRA rank for large models (0 = full FT)
     imperfect_scripts: bool = False  # mixing scripts are compliant but task-failing
+    script_scalar: bool = True    # False: scripted eps get ZERO scalar advantage and
+                                  # are excluded from the group baseline — they teach
+                                  # only through the token-attached process channel
+    strip_dropped_from_scripts: bool = False  # clean holdout: scripts must not
+                                              # demonstrate dropped rules
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -67,19 +72,22 @@ def build_advantages(groups, cfg: TrainConfig):
     (A_seq scalar, per_turn_adj dict turn->extra advantage)."""
     out = []
     for grp in groups:
+        # with script_scalar=False, scripted episodes are invisible to the
+        # scalar channel: excluded from the baseline, zero scalar advantage
+        scalar_grp = grp if cfg.script_scalar else [e for e in grp if not e.scripted]
+        if not scalar_grp:
+            scalar_grp = grp
         if cfg.credit in ("outcome", "c2", "c2pos", "c4"):
-            rs = [e.env.outcome_reward() for e in grp]
-            mu = sum(rs) / len(rs)
-            base = [r - mu for r in rs]
+            rs = {id(e): e.env.outcome_reward() for e in scalar_grp}
         elif cfg.credit in ("c1", "c3"):
-            rs = [e.env.outcome_reward()
+            rs = {id(e): e.env.outcome_reward()
                   - cfg.lam * min(float(len(e.env.violations)), cfg.c1_clip)
                   + cfg.beta * min(float(len(e.env.discharges)), cfg.c1_clip)
-                  for e in grp]
-            mu = sum(rs) / len(rs)
-            base = [r - mu for r in rs]
+                  for e in scalar_grp}
         else:
             raise ValueError(cfg.credit)
+        mu = sum(rs.values()) / len(rs)
+        base = [(rs[id(e)] - mu) if id(e) in rs else 0.0 for e in grp]
         for e, a in zip(grp, base):
             per_turn = {}
             if cfg.credit in ("c2", "c3", "c4"):
@@ -252,9 +260,11 @@ def train(cfg: TrainConfig):
                 all_eps.extend(grp)
                 if cfg.mix_scripted:
                     env_s = make_env(domain, s, drop_rules=cfg.drop_rules)
+                    skip = cfg.drop_rules if cfg.strip_dropped_from_scripts else ()
                     grp = grp + [scripted_episode(
                         tok, env_s,
-                        ENVS[domain].compliant_script(env_s.task, cfg.imperfect_scripts),
+                        ENVS[domain].compliant_script(env_s.task, cfg.imperfect_scripts,
+                                                      skip_rules=skip),
                         cfg.include_rules_in_prompt)]
                 groups.append(grp)
         model.config.use_cache = True

@@ -18,12 +18,17 @@ from rlvp.envs import ENVS, make_env
 from rlvp.rollout import scripted_episode
 
 IMPERFECT = "--imperfect" in sys.argv
+OFFSET = 0
+for i, a in enumerate(sys.argv):
+    if a == "--seed-offset":
+        OFFSET = int(sys.argv[i + 1])
 MODEL = "Qwen/Qwen3-4B"
 N_SEEDS = 400          # tasks per domain
 EPOCHS = 2
 LR = 1e-5
 MICRO_TOKENS = 4096
-OUT = ROOT / ("results/run_sftbc_imp" if IMPERFECT else "results/run_sftbc")
+OUT = ROOT / (("results/run_sftbc_imp" if IMPERFECT else "results/run_sftbc")
+              + (f"_o{OFFSET}" if OFFSET else ""))
 
 tok = AutoTokenizer.from_pretrained(MODEL)
 model = AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16, device_map="cuda")
@@ -33,7 +38,7 @@ sched = get_constant_schedule_with_warmup(opt, num_warmup_steps=10)
 
 items = []
 for domain in ("fileops", "csops"):
-    for s in range(N_SEEDS):
+    for s in range(OFFSET, OFFSET + N_SEEDS):
         env = make_env(domain, s)
         e = scripted_episode(tok, env, ENVS[domain].compliant_script(env.task, IMPERFECT))
         assert not env.violations

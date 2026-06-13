@@ -30,6 +30,7 @@ class Episode:
     turn_discharges: dict = field(default_factory=dict)  # turn_idx -> [rule names]
     done: bool = False
     truncated: bool = False
+    scripted: bool = False  # off-policy rule-engine-synthesized episode
 
     @property
     def n_turns(self):
@@ -120,6 +121,7 @@ def scripted_episode(tok, env, script_texts, include_rules=False) -> Episode:
     rollout, so the trainer can't tell the difference."""
     im_end = tok.convert_tokens_to_ids("<|im_end|>")
     e = start_episode(tok, env, include_rules)
+    e.scripted = True
     for text in script_texts:
         if e.done:
             break

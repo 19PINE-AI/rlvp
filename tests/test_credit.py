@@ -82,6 +82,25 @@ def test_c2pos_rewards_clean_turns():
     assert out[1][2] == {0: 0.3, 1: 0.3}    # all clean turns paid
 
 
+def test_script_process_only():
+    cfg = TrainConfig(credit="c3", lam=0.25, beta=0.25, script_scalar=False)
+    live_win = ep(True, [])
+    live_lose = ep(False, [])
+    demo = ep(False, [])           # imperfect demo: fails the task
+    demo.scripted = True
+    demo.env.discharges = [(0, "r")]
+    demo.turn_discharges = {0: ["r"]}
+    out = build_advantages([[live_win, live_lose, demo]], cfg)
+    # baseline over live only: +0.5 / -0.5; demo scalar EXACTLY zero
+    assert abs(out[0][1] - 0.5) < 1e-9 and abs(out[1][1] + 0.5) < 1e-9
+    assert out[2][1] == 0.0
+    assert out[2][2] == {0: 0.25}  # but its discharge still teaches
+    # default behavior unchanged: demo participates in the baseline
+    cfg_def = TrainConfig(credit="c3", lam=0.25, beta=0.25)
+    out_def = build_advantages([[live_win, live_lose, demo]], cfg_def)
+    assert out_def[2][1] != 0.0
+
+
 if __name__ == "__main__":
     for k, v in sorted(globals().items()):
         if k.startswith("test_"):
