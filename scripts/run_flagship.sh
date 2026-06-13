@@ -6,6 +6,9 @@
 set -uo pipefail
 cd /home/ubuntu/rlvp
 export PYTORCH_ALLOC_CONF=expandable_segments:True
+# single-instance guard: refuse to run if another flagship holds the lock
+exec 9>/tmp/rlvp_flagship.lock
+if ! flock -n 9; then echo "another flagship driver is running; exiting"; exit 0; fi
 S=results/paper_status.log
 mark() { echo "$(date '+%m-%d %H:%M') $1" >> "$S"; }
 
@@ -43,8 +46,13 @@ from rlvp.grpo import TrainConfig, train
 train(TrainConfig(model_name='Qwen/Qwen3-4B', out_dir='results/run_${name}', ${kwargs}))
 " > "results/${name}.log" 2>&1 && mark "TRAIN ${name} OK" || mark "TRAIN ${name} FAILED"; }
 
-mark "=== FLAGSHIP: main 4-way (chain${N}) ==="
+# paired dead-iteration micro-experiment (E2b): identical batches, both credits
+python3 scripts/paired_dead.py Qwen/Qwen3-4B 20 > results/paired_dead.log 2>&1 \
+  && mark "PAIRED-DEAD OK" || mark "PAIRED-DEAD FAILED"
+
+mark "=== FLAGSHIP: main 5-way (chain${N}) ==="
 tr flag_outcome  "credit='outcome', ${FLAG}"
+tr flag_dapo     "credit='outcome', dynamic_sampling=True, ${FLAG}"
 tr flag_rlvp     "credit='c3', lam=0.25, beta=0.25, mix_scripted=True, script_scalar=False, anneal_at=40, ${FLAG}"
 tr flag_gigpo    "credit='gigpo', lam=0.25, beta=0.25, ${FLAG}"
 tr flag_steptool "credit='steptool', ${FLAG}"
@@ -75,9 +83,10 @@ for v in outcome rlvp; do
 done
 mark "=== FLAGSHIP DONE ==="
 
-mark "=== E2 seeds for headline pair ==="
+mark "=== E2 seeds for headline trio (GRPO/DAPO/RLVP) ==="
 for seed in 11 12; do
   tr "flag_outcome_s${seed}" "credit='outcome', data_seed=${seed}, ${FLAG}"
+  tr "flag_dapo_s${seed}"    "credit='outcome', dynamic_sampling=True, data_seed=${seed}, ${FLAG}"
   tr "flag_rlvp_s${seed}"    "credit='c3', lam=0.25, beta=0.25, mix_scripted=True, script_scalar=False, anneal_at=40, data_seed=${seed}, ${FLAG}"
 done
 
