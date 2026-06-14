@@ -1,5 +1,29 @@
 # RLVP v2 — Plan for review (2026-06-13)
 
+## Positioning: RLVP as R1-Zero extended to long-horizon agents
+
+R1-Zero self-evolves from a verifiable OUTCOME reward alone — elegant, but it
+assumes the base policy samples *some* successes (true on math/code). On
+long-horizon agents this breaks: ~85% all-fail groups at chain6, GRPO dead
+39/60 iters -> pure outcome reward stalls (measured). RLVP is the MINIMAL
+departure that restores self-evolution, and the departure is SPECIFICATION,
+not DEMONSTRATION:
+- rules (penalty/discharge) = a richer verifier (write-once, no solved examples,
+  no per-example labels) — the R1-Zero-analog input.
+- mixing (scripted demos) = a cold-start / SFT-analog (requires being able to
+  produce a correct solution) — the un-R1-Zero input.
+Headline method = CLEAN RLVP (rules only, NO mixing): demonstration-free,
+self-evolving. Mixing kept only as the characterized R1-style cold-start for
+the extreme-sparse regime; chain6/tau2 draw the boundary (R1-Zero vs R1 parallel).
+Supervision spectrum of the rules (frontier = push all to automatic):
+  automatic (repeat_failure <- env error signals) | general principle
+  (read-before-mutate, verify-before-submit <- tool types) | domain policy
+  (call-limits/auth <- provided policy doc, free with the benchmark).
+CAPSTONE (future/stretch): auto-derive the process signal from environment
+structure (tool pre/postconditions, error codes, state transitions) so even
+the rules aren't hand-written -> maximal R1-Zero purity, no demos AND no
+hand-written rules.
+
 ## Thesis (revised)
 
 **Verifiable process rewards are a better RL training method than outcome-only
