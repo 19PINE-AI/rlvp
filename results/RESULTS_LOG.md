@@ -451,3 +451,21 @@ discharge) still bloats (24.7 calls/ep), so the cause is PENALTY-AVOIDANCE (defe
 reads before writes to dodge blind_write penalty), present with or without discharge.
 step_cost still the right fix (per-action cost discourages defensive over-reading).
 OPEN: is mixing EVER needed? chain6 (~2% succ) + tau2 (compliance != success) decide.
+
+### E4 FULL ablation (chain4, final) — corrected attribution
+  clean (pen+disch+anneal, NO mix):  eps50=320 final=1.00  <- BEST = the recipe
+  full (+mixing):                    eps50=336 final=0.91  (mixing redundant/harmful)
+  mixing in scalar baseline:         eps50=392 final=1.00
+  NO discharge:                      eps50=336 final=0.94 dead=11  (discharge: fewer dead iters)
+  scalar-fold (NO token channel):    eps50=672 final=0.94  <- token channel = 2x SPEED
+  NO anneal:                         eps50=336 final=0.66 (31 calls/ep, 5-6x slower)
+  clean + step_cost=0.03:            eps50=336 final=0.84  <- step_cost HURTS
+CORRECTED ATTRIBUTION (supersedes earlier "discharge is the hero"):
+  - TOKEN-ATTACHED credit channel = the efficiency lever (336 vs 672 scalar-fold, 2x).
+  - ANNEALING = the ceiling lever (0.66 -> 1.0; also controls the episode bloat).
+  - DISCHARGE credit = secondary (reduces dead iters 11->5; chain4 reachable without it).
+  - MIXING = redundant/harmful here (clean is best).
+  - step_cost = HARMFUL (0.84<1.0); the calls/ep bloat does NOT block success (clean
+    reaches 1.0 with bloat) -> DROPPED from the recipe.
+RECIPE = penalty + discharge + token-attached credit + anneal, NO mixing, NO step_cost.
+chain6 arms corrected to this (step_cost=0 removed before they ran).
