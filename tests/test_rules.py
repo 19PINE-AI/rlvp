@@ -229,6 +229,39 @@ def test_csops_discharges():
     assert len(env.discharges) == 3
 
 
+def test_auto_rules_engine():
+    # auto rules fire from tags + errors, fileops
+    env = make_env("fileops", 0, auto_rules=True)  # edit_config
+    r = act(env, "write_file", {"path": env.task["target_path"], "content": "x"})
+    assert "auto_act_before_observe" in r.violations
+    r = act(env, "submit")
+    assert "auto_unverified_terminal" in r.violations
+    # discharges
+    env = make_env("fileops", 0, auto_rules=True)
+    r = act(env, "read_file", {"path": env.task["target_path"]})
+    assert "auto_act_before_observe" in r.discharges
+    r = act(env, "run_tests")  # no mutation yet -> not unverified
+    r = act(env, "write_file", {"path": env.task["target_path"], "content": "y"})
+    assert not r.violations  # observed first
+    r = act(env, "run_tests")
+    assert "auto_unverified_terminal" in r.discharges
+    # repeat-error (automatic from env error signal)
+    env = make_env("fileops", 0, auto_rules=True)
+    for _ in range(2):
+        act(env, "read_file", {"path": "/nope"})
+    r = act(env, "read_file", {"path": "/nope"})
+    assert "auto_repeat_error" in r.violations
+    # CSOps has no verify tool -> terminate-needs-verify must NOT fire
+    env = make_env("csops", 0, auto_rules=True)
+    t = env.task
+    act(env, "search_kb", {"query": "x"})
+    act(env, "verify_identity", {"account_id": t["account_id"]})
+    act(env, "place_call", {"number": t["dept_number"], "info": list(t["required_items"])})
+    r = act(env, "submit_resolution", {"summary": "done"})
+    assert "auto_unverified_terminal" not in r.violations
+    assert env.success
+
+
 def test_track_rules_off():
     env = make_env("csops", 0, track_rules=False)
     r = act(env, "place_call", {"number": "x", "info": []})

@@ -73,6 +73,8 @@ class TrainConfig:
     dynamic_max_oversample: int = 6  # cap resampling rounds per iteration
     step_cost: float = 0.0           # per-tool-call cost (length penalty) — offsets
                                      # discharge-credit farming on long-horizon tasks
+    auto_rules: bool = False         # capstone: derive the process signal from
+                                     # tool tags + env errors (no hand predicates)
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -298,12 +300,12 @@ def train(cfg: TrainConfig):
         per_dom = max(cfg.tasks_per_iter // len(cfg.domains), 1)
 
         def _make_group(domain, s):
-            grp = [start_episode(tok, make_env(domain, s, drop_rules=cfg.drop_rules),
+            grp = [start_episode(tok, make_env(domain, s, drop_rules=cfg.drop_rules, auto_rules=cfg.auto_rules),
                                  cfg.include_rules_in_prompt)
                    for _ in range(n_live)]
             full = grp
             if cfg.mix_scripted:
-                env_s = make_env(domain, s, drop_rules=cfg.drop_rules)
+                env_s = make_env(domain, s, drop_rules=cfg.drop_rules, auto_rules=cfg.auto_rules)
                 skip = cfg.drop_rules if cfg.strip_dropped_from_scripts else ()
                 full = grp + [scripted_episode(
                     tok, env_s,

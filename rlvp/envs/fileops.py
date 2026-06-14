@@ -64,6 +64,13 @@ class FileOpsEnv(ToolEnv):
     max_turns = 12
     rules = [BlindWrite(), BlindDelete(), UntestedSubmit(), RepeatFailure()]
     tool_names = ("list_dir", "read_file", "write_file", "delete", "run_tests", "submit")
+    # auto-rule tags (structural, task-agnostic): the auto engine reconstructs
+    # the same process signal from these alone
+    TOOL_CATEGORIES = {"list_dir": "observe", "read_file": "observe",
+                       "write_file": "mutate", "delete": "mutate",
+                       "run_tests": "verify", "submit": "terminal"}
+    TARGET_ARG = {"read_file": "path", "write_file": "path", "delete": "path",
+                  "list_dir": "path"}
 
     def __init__(self, task: dict, **kw):
         super().__init__(task, **kw)

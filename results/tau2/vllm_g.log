@@ -184,3 +184,5 @@
 (APIServer pid=3201016) INFO:     66.132.186.161:56448 - "POST / HTTP/1.1" 404 Not Found
 (APIServer pid=3201016) WARNING:  Invalid HTTP request received.
 (APIServer pid=3201016) INFO:     66.132.186.161:20378 - "GET /.well-known/security.txt HTTP/1.1" 404 Not Found
+(APIServer pid=3201016) INFO:     127.0.0.1:48660 - "GET /v1/models HTTP/1.1" 200 OK
+(APIServer pid=3201016) INFO:     127.0.0.1:56450 - "GET /v1/models HTTP/1.1" 200 OK

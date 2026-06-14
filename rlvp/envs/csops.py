@@ -71,6 +71,13 @@ class CSOpsEnv(ToolEnv):
         "search_kb", "verify_identity", "check_timezone", "place_call",
         "send_email", "submit_resolution",
     )
+    # auto-rule tags: info-gathering tools = observe, the call = mutate/action,
+    # resolution = terminal. "act before observe" generalizes the kb/tz/identity
+    # preconditions (coarser than the hand rules: requires SOME observe, not all)
+    TOOL_CATEGORIES = {"search_kb": "observe", "verify_identity": "observe",
+                       "check_timezone": "observe", "place_call": "mutate",
+                       "send_email": "neutral", "submit_resolution": "terminal"}
+    TARGET_ARG = {}  # no per-target arg; uses the coarse any-observe form
 
     def __init__(self, task: dict, **kw):
         super().__init__(task, **kw)

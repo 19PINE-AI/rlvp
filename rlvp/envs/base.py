@@ -95,13 +95,24 @@ class ToolEnv:
     max_turns: int = 12
     rules: list = []
     tool_names: tuple = ()
+    # Auto-rule metadata: per-tool category + (optional) the arg naming the
+    # tool's target object. The auto-rule engine derives the process signal
+    # from THESE TAGS + the env's own error signals — no hand-written
+    # predicates, no task knowledge (the R1-Zero-pure process reward).
+    TOOL_CATEGORIES: dict = {}   # tool -> observe | mutate | verify | terminal | neutral
+    TARGET_ARG: dict = {}        # tool -> arg name identifying its target object
 
     def __init__(self, task: dict, track_rules: bool = True, drop_rules: tuple = (),
-                 guardrail: bool = False):
+                 guardrail: bool = False, auto_rules: bool = False):
         self.task = task
         self.track_rules = track_rules
         self.drop_rules = set(drop_rules)   # rules invisible during training (Arm 6)
         self.guardrail = guardrail          # runtime action masking (Arm 4)
+        self.auto_rules = auto_rules        # capstone: derive rules from tool tags
+        self._auto_obs_targets: set = set()
+        self._auto_any_observe = False
+        self._auto_unverified = False       # a mutate happened since last verify
+        self._auto_err: dict = {}           # call signature -> error count
         self.blocked = 0
         self.turn = 0
         self.done = False
@@ -127,6 +138,59 @@ class ToolEnv:
         against pre-call state). Default: none."""
         return []
 
+    # -- auto-rule engine (R1-Zero-pure: tags + env errors, no predicates) ----
+    def _auto_target(self, call):
+        arg = self.TARGET_ARG.get(call.name)
+        return str(call.args.get(arg)) if arg else None
+
+    def _auto_observed(self, target):
+        if target in self._auto_obs_targets:
+            return True
+        import os
+        return os.path.dirname(target) in self._auto_obs_targets if target else False
+
+    def _auto_check(self, call):
+        """Universal meta-rules from (category, target_arg) + error signals."""
+        cat = self.TOOL_CATEGORIES.get(call.name, "neutral")
+        v, d = [], []
+        sig = call.name + "|" + json.dumps(call.args, sort_keys=True, default=str)
+        if self._auto_err.get(sig, 0) >= 2:        # repeat an env-errored call
+            v.append("auto_repeat_error")
+        # the "terminate-needs-verify" meta-rule only applies to a toolset that
+        # HAS a verify step (e.g. code: edit->test->submit). Domains with no
+        # verify tool (e.g. a phone call that is itself the goal) skip it.
+        has_verify = "verify" in self.TOOL_CATEGORIES.values()
+        tgt = self._auto_target(call)
+        if cat == "mutate":                        # act on an unobserved target
+            if tgt is not None and not self._auto_observed(tgt):
+                v.append("auto_act_before_observe")
+            elif tgt is None and not self._auto_any_observe:
+                v.append("auto_act_before_observe")
+        if has_verify and cat == "terminal" and self._auto_unverified:
+            v.append("auto_unverified_terminal")
+        if cat == "observe":                       # discharges
+            if (tgt is not None and not self._auto_observed(tgt)) or \
+               (tgt is None and not self._auto_any_observe):
+                d.append("auto_act_before_observe")
+        if has_verify and cat == "verify" and self._auto_unverified:
+            d.append("auto_unverified_terminal")
+        return v, d
+
+    def _auto_update(self, call, errored):
+        cat = self.TOOL_CATEGORIES.get(call.name, "neutral")
+        if errored:
+            sig = call.name + "|" + json.dumps(call.args, sort_keys=True, default=str)
+            self._auto_err[sig] = self._auto_err.get(sig, 0) + 1
+        if cat == "observe":
+            self._auto_any_observe = True
+            tgt = self._auto_target(call)
+            if tgt is not None:
+                self._auto_obs_targets.add(tgt)
+        elif cat == "mutate":
+            self._auto_unverified = True
+        elif cat == "verify":
+            self._auto_unverified = False
+
     # -- shared driver --------------------------------------------------------
     def step_text(self, model_text: str) -> StepResult:
         """Full step from raw model output: parse, check rules, apply."""
@@ -150,7 +214,12 @@ class ToolEnv:
                 done=self.done,
             )
         fired, disch = [], []
-        if self.track_rules:
+        if self.track_rules and self.auto_rules:
+            try:
+                fired, disch = self._auto_check(call)
+            except Exception:
+                fired, disch = [], []
+        elif self.track_rules:
             for rule in self.rules:
                 if rule.name in self.drop_rules:
                     continue
@@ -173,6 +242,8 @@ class ToolEnv:
                 done=self.done,
             )
         res = self.apply(call)
+        if self.auto_rules:
+            self._auto_update(call, errored=res.observation.startswith("ERROR"))
         self.calls.append(call)
         for rname in fired:
             self.violations.append((self.turn, rname))
