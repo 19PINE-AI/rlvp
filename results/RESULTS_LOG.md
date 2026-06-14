@@ -418,3 +418,14 @@ CAVEAT (real): RLVP final 0.91 < StepTool/GRPO 1.0, and RLVP calls/ep bloats
 unneeded files on multi-file chains (read-before-write pays per first read).
 Fix: per-step cost (length penalty). chain4 not hard enough for a CEILING gap
 (all reach ~1.0) -> chain6 T2 test pending.
+
+### E2 seeds (chain4, episodes-generated axis, mean±sd)
+                eps-to-50%     final-succ    dead  oversample
+  RLVP (n=2)    336 ± 0        0.92 ± 0.02   5.5   1.0x
+  GRPO (n=3)    1280 ± 837     0.88 ± 0.17   39    1.0x
+  DAPO (n=3)    2557 ± 743     1.00 ± 0.00   33    5.6x
+T1 efficiency CONFIRMED with error bars: RLVP 336 eps to 50% (zero variance) vs
+GRPO 3.8x / DAPO 7.6x more. GRPO is a lottery (final 0.69-1.0); RLVP/DAPO stable.
+DAPO always reaches 1.0 final but pays 5.6x oversampling -> slowest on the fair
+axis. chain4 too easy for a CEILING gap (DAPO/GRPO eventually reach 1.0) -> chain6.
+RLVP final 0.92 < DAPO 1.0: the calls/ep bloat caps the ceiling (step_cost fix pending).

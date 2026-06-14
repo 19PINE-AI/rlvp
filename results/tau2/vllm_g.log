@@ -174,3 +174,13 @@
 (APIServer pid=3201016) INFO:     127.0.0.1:44800 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 (APIServer pid=3201016) INFO 06-13 13:27:38 [loggers.py:259] Engine 000: Avg prompt throughput: 6.5 tokens/s, Avg generation throughput: 58.2 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 88.5%
 (APIServer pid=3201016) INFO 06-13 13:27:48 [loggers.py:259] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 0.0 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 88.5%
+(APIServer pid=3201016) WARNING:  Invalid HTTP request received.
+(APIServer pid=3201016) INFO:     66.132.186.161:47230 - "GET / HTTP/1.1" 404 Not Found
+(APIServer pid=3201016) WARNING:  Invalid HTTP request received.
+(APIServer pid=3201016) INFO:     66.132.186.161:35050 - "GET / HTTP/1.1" 404 Not Found
+(APIServer pid=3201016) WARNING:  Invalid HTTP request received.
+(APIServer pid=3201016) INFO:     66.132.186.161:62042 - "POST /mcp HTTP/1.1" 404 Not Found
+(APIServer pid=3201016) INFO:     66.132.186.161:62050 - "POST /jsonrpc HTTP/1.1" 404 Not Found
+(APIServer pid=3201016) INFO:     66.132.186.161:56448 - "POST / HTTP/1.1" 404 Not Found
+(APIServer pid=3201016) WARNING:  Invalid HTTP request received.
+(APIServer pid=3201016) INFO:     66.132.186.161:20378 - "GET /.well-known/security.txt HTTP/1.1" 404 Not Found
