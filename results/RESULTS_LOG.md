@@ -429,3 +429,12 @@ GRPO 3.8x / DAPO 7.6x more. GRPO is a lottery (final 0.69-1.0); RLVP/DAPO stable
 DAPO always reaches 1.0 final but pays 5.6x oversampling -> slowest on the fair
 axis. chain4 too easy for a CEILING gap (DAPO/GRPO eventually reach 1.0) -> chain6.
 RLVP final 0.92 < DAPO 1.0: the calls/ep bloat caps the ceiling (step_cost fix pending).
+
+### E4 ablation (chain4) — abl_nomix is the key surprise
+  full RLVP (c3+mix+anneal):  eps50=336 final=0.91 best=0.97  (oscillates after anneal)
+  RLVP - mixing (c3+anneal):  eps50=320 final=1.00 best=1.00  (clean monotone to 1.0)
+=> On chain4 the PROCESS CHANNEL (penalties+discharge) is the whole efficiency win;
+   demo-mixing is redundant here (8% base succ -> ~44% of groups already have a live
+   success) and slightly HURTS ceiling/stability + adds calls bloat. Reframe: process
+   channel = hero; mixing = regime-specific tool for near-zero-success tasks (-> chain6
+   prediction: mixing earns its keep only when live rollouts rarely contain a success).
