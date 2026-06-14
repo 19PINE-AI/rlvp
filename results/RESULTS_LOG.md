@@ -438,3 +438,16 @@ RLVP final 0.92 < DAPO 1.0: the calls/ep bloat caps the ceiling (step_cost fix p
    success) and slightly HURTS ceiling/stability + adds calls bloat. Reframe: process
    channel = hero; mixing = regime-specific tool for near-zero-success tasks (-> chain6
    prediction: mixing earns its keep only when live rollouts rarely contain a success).
+
+### E4 attribution (chain4) + CORRECTION
+  RLVP-mixing (penalty+discharge+anneal):  eps50=320 final=1.00  <- BEST, = "clean RLVP"
+  full RLVP (+mixing):                     eps50=336 final=0.91  (mixing redundant/harmful here)
+  RLVP-discharge (penalty+mixing):         eps50=336 final=0.66  all-fail stays 0.25-0.5 <- discharge ESSENTIAL
+CONCLUSION: discharge credit is the load-bearing component (positive process signal
+that escapes all-fail groups); penalties alone inert; mixing redundant on chain4.
+=> "clean RLVP" = penalties + discharge, NO mixing.
+CORRECTION to earlier note: calls/ep bloat is NOT discharge-farming. abl_nodisch (no
+discharge) still bloats (24.7 calls/ep), so the cause is PENALTY-AVOIDANCE (defensive
+reads before writes to dodge blind_write penalty), present with or without discharge.
+step_cost still the right fix (per-action cost discourages defensive over-reading).
+OPEN: is mixing EVER needed? chain6 (~2% succ) + tau2 (compliance != success) decide.
