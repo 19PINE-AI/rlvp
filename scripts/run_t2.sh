@@ -31,9 +31,16 @@ tr rlvp_b10  "credit='c3', lam=0.25, beta=0.10, mix_scripted=True, script_scalar
 tr ctrl_outmix "credit='outcome', mix_scripted=True, script_scalar=False, ${C4}"  # fairness: demos w/o process channel
 
 # --- Phase 2: ceiling test on the hard chain6 regime ---
-mark "=== T2-P2: ceiling trio (chain6) ==="
-tr t2_outcome "credit='outcome', ${C6}"
-tr t2_dapo    "credit='outcome', dynamic_sampling=True, ${C6}"
-tr t2_rlvp    "${RLVP}, step_cost=0.02, ${C6}"
-tr t2_outmix  "credit='outcome', mix_scripted=True, script_scalar=False, ${C6}"
+# E4 (chain4) showed mixing is redundant and the discharge credit is the driver.
+# chain6 is the decisive test of whether mixing is EVER needed: at ~2% base
+# success, live rollouts rarely contain a success, so if clean RLVP (no mixing)
+# still climbs, mixing can be dropped entirely. If it stalls and only the mixed
+# variant climbs, mixing earns its keep in the extreme-sparse regime.
+RLVP_CLEAN="credit='c3', lam=0.25, beta=0.25, anneal_at=40"  # penalty+discharge, NO mixing
+mark "=== T2-P2: ceiling test (chain6) ==="
+tr t2_outcome    "credit='outcome', ${C6}"
+tr t2_dapo       "credit='outcome', dynamic_sampling=True, ${C6}"
+tr t2_rlvp_clean "${RLVP_CLEAN}, step_cost=0.02, ${C6}"
+tr t2_rlvp_mix   "${RLVP}, step_cost=0.02, ${C6}"
+tr t2_outmix     "credit='outcome', mix_scripted=True, script_scalar=False, ${C6}"
 mark "=== T2 DONE ==="
