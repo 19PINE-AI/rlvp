@@ -500,3 +500,14 @@ long horizons. Recipe note: scale step_cost with horizon (~0/short, small/long).
 DECISION: dropped the slow confirmatory chain6 mix/outmix arms (saturating task,
 expensive) to prioritize the NON-SATURATING ceiling tests (gated, tau2) the user
 correctly flagged as what actually validates T2.
+
+### CAPSTONE: auto-derived process reward (chain4) — R1-Zero-pure WIN
+  AUTO rules (tool tags + env errors, NO hand predicates): eps50=320 final=1.0 dead=0
+  HAND rules (clean RLVP):                                  eps50=320 final=1.0 dead=5
+  outcome-only (no process):                                eps50=2240 final=1.0 dead=42
+=> Auto-derived process reward EXACTLY recovers hand-written-rule efficiency (320 vs
+   320, 7x faster than outcome-only). The maximal-R1-Zero RLVP: NO demonstrations
+   (mixing dropped) AND NO hand-written rules. Only human input = tagging tools by
+   category (observe/mutate/verify/terminal) — task-agnostic metadata real tool
+   schemas (OpenAPI/function-calling) often already expose. Plus the env's own error
+   signals (fully automatic). [n=1; auto seeds worth adding for the paper.]
