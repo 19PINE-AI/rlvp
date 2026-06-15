@@ -485,3 +485,18 @@ not ceiling. A true ceiling gap needs an irreducibly-hard subtask (best shot: ta
 where compliance != success). REFRAME: lead with T1 (efficiency/consistency); T2
 unsupported on chains, defer ceiling claim to tau2 or drop it.
 OPEN: chain6 clean-vs-mixed still informative — does mixing EVER help at ~2% base?
+
+### chain6 (partial, then deprioritized) + throughput finding
+  t2_outcome: final 1.0 (3,840 eps)  | t2_dapo: final 1.0 (20,696 eps, 5.4x oversample)
+  t2_rlvp_clean: eval 0.62->0.91 by iter30 (did NOT stall at 2% base success)
+=> chain6 SATURATES (outcome reaches 1.0) -> no ceiling gap (confirms reframe: chains
+   show efficiency, not ceiling). DAPO 5.4x compute for ZERO benefit (strongest
+   anti-DAPO point). Clean RLVP reaches 0.91 at 2% base -> does NOT stall in the
+   sparse regime -> mixing NOT needed even there (answers clean-vs-mixed).
+THROUGHPUT FINDING: on chain6 (50-turn cap) clean RLVP bloats to ~46 calls/ep
+WITHOUT step_cost, collapsing throughput to ~28 min/iter. => length control is
+HORIZON-DEPENDENT: harmful on short chain4 (step_cost 0.03 hurt) but NEEDED on very
+long horizons. Recipe note: scale step_cost with horizon (~0/short, small/long).
+DECISION: dropped the slow confirmatory chain6 mix/outmix arms (saturating task,
+expensive) to prioritize the NON-SATURATING ceiling tests (gated, tau2) the user
+correctly flagged as what actually validates T2.
