@@ -38,7 +38,7 @@ Efficiency measured in **episodes GENERATED** (counts DAPO's resampling cost).
 | Annealing = ceiling/stability lever | no-anneal final 0.66 vs 1.0; controls episode bloat |
 | Process channel > demonstrations alone | clean RLVP 320 vs outcome+demos 616 vs outcome 2240 |
 | Mixing (demos) is redundant | clean (no mixing) is the best variant (eps50 320, final 1.0) |
-| **Auto-derived rules = hand rules** (capstone) | tags+errors only: eps50 **320 = 320**, 7× vs outcome |
+| **Auto-derived rules = hand rules** (capstone) | tags+errors: eps50 **320** vs hand **256**, both ~7× vs outcome 2240 |
 
 ### REFUTED / SCOPED DOWN
 | claim | status |
