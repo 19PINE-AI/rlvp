@@ -30,9 +30,16 @@ hand-written rules.
 GRPO — measured by the outcome itself.** Two claims:
 
 - **T1 (efficiency):** with the same episode budget, RLVP reaches any given
-  outcome level in fewer samples / less wall-clock than outcome-only GRPO.
-- **T2 (ceiling):** at convergence, RLVP's final outcome score is higher —
-  outcome-only GRPO can permanently stall on hard tasks; RLVP does not.
+  outcome level in fewer samples than outcome-only GRPO/DAPO. [STRONGLY
+  SUPPORTED: chain4 eps-to-50% RLVP 336+-0 vs GRPO 1280+-837 vs DAPO 2557.]
+- **T1b (consistency):** RLVP has near-zero seed variance; outcome-only is a
+  high-variance lottery (the all-fail cold-start). [SUPPORTED, emerged from
+  seeds — promote to a headline claim alongside efficiency.]
+- **T2 (ceiling):** RLVP's converged score is higher. [NOT SUPPORTED on chain
+  tasks — they are compositionally easy, so outcome-only also reaches 1.0 given
+  budget. Ceiling gap needs an irreducibly-hard subtask; best shot = tau2
+  (compliance != success). Either demonstrate there or SCOPE THE CLAIM DOWN to
+  efficiency+consistency.]
 
 Compliance/internalization is demoted to a *secondary benefits* section
 (real, already proven, but distillable via prompts on easy behaviors — not
