@@ -7,6 +7,7 @@
 set -uo pipefail
 cd /home/ubuntu/rlvp
 export PYTORCH_ALLOC_CONF=expandable_segments:True
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 exec 5>/tmp/rlvp_gated.lock; flock -n 5 || { echo "gated already running"; exit 0; }
 S=results/paper_status.log
 mark() { echo "$(date '+%m-%d %H:%M') $1" >> "$S"; }

@@ -1,0 +1,13 @@
+{
+  "model": "Qwen/Qwen3-4B",
+  "with_policy": false,
+  "n_sims": 20,
+  "mean_reward": 0.55,
+  "success": 0.55,
+  "viol_per_ep": 0.65,
+  "clean_eps": 0.55,
+  "per_rule": {
+    "write_before_lookup": 12,
+    "unconfirmed_chain": 1
+  }
+}

@@ -45,7 +45,7 @@ for _i, _a in enumerate(sys.argv):
     if _a == "--out":
         OUT_NAME = sys.argv[_i + 1]
 POLICY_MODEL = "Qwen/Qwen3-4B"
-USER_LLM = "openai/Qwen/Qwen3-8B"
+USER_LLM = "openai/Qwen/Qwen3-4B"
 G = 6
 TASKS_PER_ITER = 4
 MAX_STEPS = 30
@@ -53,7 +53,7 @@ OUT = ROOT / "results" / OUT_NAME
 OUT.mkdir(parents=True, exist_ok=True)
 
 cfg = TrainConfig(credit=CREDIT, lam=0.25, beta=0.25, inner_epochs=2,
-                  lr=2e-5, micro_token_budget=4096, clip_eps=0.2,
+                  lr=2e-5, micro_token_budget=1536, clip_eps=0.2,
                   grad_clip=1.0, warmup=3)
 
 
@@ -64,7 +64,7 @@ def main():
                                                  device_map="cuda")
     from peft import LoraConfig, get_peft_model
     model = get_peft_model(model, LoraConfig(
-        r=64, lora_alpha=128, lora_dropout=0.0,
+        r=32, lora_alpha=64, lora_dropout=0.0,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                         "gate_proj", "up_proj", "down_proj"]))
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})

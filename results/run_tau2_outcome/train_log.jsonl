@@ -1,0 +1,3 @@
+{"iter": 1, "succ": 0.25, "reward": 0.25, "viol_per_ep": 1.2916666666666667, "n_eps": 24, "loss": 0.0, "entropy": 0.0, "wall_s": 284.3}
+{"iter": 2, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.5, "n_eps": 24, "loss": 0.0, "entropy": 0.0, "wall_s": 177.8}
+{"iter": 3, "succ": 0.25, "reward": 0.25, "viol_per_ep": 0.625, "n_eps": 24, "loss": 0.0, "entropy": 0.0, "wall_s": 192.3}

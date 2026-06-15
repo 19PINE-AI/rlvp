@@ -22,7 +22,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from rlvp.rollout import set_template
 from rlvp.tau2_adapter import GenServer, run_one_sim
 
-USER_LLM = 'openai/Qwen/Qwen3-8B'
+USER_LLM = 'openai/Qwen/Qwen3-4B'
 
 MODEL = sys.argv[1]
 TAG = sys.argv[2]

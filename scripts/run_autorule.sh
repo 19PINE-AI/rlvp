@@ -6,6 +6,7 @@
 set -uo pipefail
 cd /home/ubuntu/rlvp
 export PYTORCH_ALLOC_CONF=expandable_segments:True
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 exec 6>/tmp/rlvp_auto.lock; flock -n 6 || { echo "autorule already running"; exit 0; }
 S=results/paper_status.log
 mark() { echo "$(date '+%m-%d %H:%M') $1" >> "$S"; }

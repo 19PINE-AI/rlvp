@@ -6,15 +6,16 @@
 set -uo pipefail
 cd /home/ubuntu/rlvp
 export PYTORCH_ALLOC_CONF=expandable_segments:True
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 exec 7>/tmp/rlvp_tau2.lock; flock -n 7 || { echo "tau2 h2h already running"; exit 0; }
 S=results/paper_status.log
 mark() { echo "$(date '+%m-%d %H:%M') $1" >> "$S"; }
 
-while pgrep -f "run_flagship.sh|run_t2.sh" >/dev/null; do sleep 180; done
-mark "=== E3: tau2 head-to-head (fixed adapter) ==="
+while pgrep -f "run_flagship.sh|run_t2.sh|run_autorule.sh|run_gated.sh" >/dev/null; do sleep 180; done
+mark "=== E3: tau2 head-to-head (fixed adapter, 4B user-sim, reduced footprint) ==="
 
 python3 -m vllm.entrypoints.openai.api_server \
-  --model Qwen/Qwen3-8B --port 8011 --gpu-memory-utilization 0.30 \
+  --model Qwen/Qwen3-4B --port 8011 --gpu-memory-utilization 0.18 \
   --max-model-len 16384 --enable-auto-tool-choice --tool-call-parser hermes \
   --reasoning-parser qwen3 > results/tau2/vllm_h2h.log 2>&1 &
 VLLM_PID=$!
