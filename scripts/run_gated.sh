@@ -19,7 +19,7 @@ from rlvp.grpo import TrainConfig, train
 train(TrainConfig(model_name='Qwen/Qwen3-4B', out_dir='results/run_${name}', ${kwargs}))
 " > "results/${name}.log" 2>&1 && mark "TRAIN ${name} OK" || mark "TRAIN ${name} FAILED"; }
 
-while pgrep -f "run_flagship.sh|run_t2.sh|run_tau2_h2h.sh|run_autorule.sh" >/dev/null; do sleep 180; done
+while pgrep -f "run_flagship.sh|run_t2.sh|run_autorule.sh" >/dev/null; do sleep 180; done
 mark "=== GATED ceiling test ==="
 
 # calibration: confirm the task is non-saturating (base success low, gate rarely found)
