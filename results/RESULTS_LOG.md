@@ -469,3 +469,19 @@ CORRECTED ATTRIBUTION (supersedes earlier "discharge is the hero"):
     reaches 1.0 with bloat) -> DROPPED from the recipe.
 RECIPE = penalty + discharge + token-attached credit + anneal, NO mixing, NO step_cost.
 chain6 arms corrected to this (step_cost=0 removed before they ran).
+
+### chain4 fairness control + chain6 ceiling (honest)
+chain4 eps-to-50% (what speeds up outcome learning):
+  pure outcome (GRPO):              2240
+  outcome + demos (no proc chan):    616   <- demos help
+  process channel, no demos (clean): 320   <- process channel helps MORE
+  => process channel ALONE beats demonstrations alone, and needs no demo synthesis.
+     Adding demos to the process channel does not help (full RLVP 336 >= clean 320).
+chain6 ceiling: outcome-only ALSO reaches final 1.0 (eps50 448, single seed). Chain
+tasks are COMPOSITIONALLY EASY (master per-stage pattern -> all-stages success
+multiplicatively), so any method that gets a few successes converges. => T2 (higher
+CEILING) is NOT demonstrated on chains; the benefit is EFFICIENCY + CONSISTENCY (T1),
+not ceiling. A true ceiling gap needs an irreducibly-hard subtask (best shot: tau2,
+where compliance != success). REFRAME: lead with T1 (efficiency/consistency); T2
+unsupported on chains, defer ceiling claim to tau2 or drop it.
+OPEN: chain6 clean-vs-mixed still informative — does mixing EVER help at ~2% base?
