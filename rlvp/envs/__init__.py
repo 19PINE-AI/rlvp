@@ -1,4 +1,4 @@
-from . import csops, fileops
+from . import csops, fileops, gated
 from .base import ToolEnv, parse_action
 
 class _Envs(dict):
@@ -6,7 +6,7 @@ class _Envs(dict):
         return super().__getitem__("fileops" if k.startswith("chain") else k)
 
 
-ENVS = _Envs({"fileops": fileops, "csops": csops})
+ENVS = _Envs({"fileops": fileops, "csops": csops, "gated": gated})
 
 
 def make_env(domain: str, seed: int, track_rules: bool = True,
@@ -21,5 +21,6 @@ def make_env(domain: str, seed: int, track_rules: bool = True,
         return env
     mod = ENVS[domain]
     task = mod.make_task(seed)
-    cls = fileops.FileOpsEnv if domain == "fileops" else csops.CSOpsEnv
+    cls = {"fileops": fileops.FileOpsEnv, "csops": csops.CSOpsEnv,
+           "gated": gated.GatedEnv}[domain]
     return cls(task, **kw)

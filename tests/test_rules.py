@@ -262,6 +262,29 @@ def test_auto_rules_engine():
     assert env.success
 
 
+def test_gated_silent_failure_and_gate():
+    # compliant gate -> success, clean
+    env = make_env("gated", 0)
+    for t in __import__("rlvp.envs", fromlist=["ENVS"]).ENVS["gated"].compliant_script(env.task):
+        if env.done:
+            break
+        env.step_text(t)
+    assert env.success and not env.violations
+    # silent no-op: write without access looks ok but task fails
+    env = make_env("gated", 0)
+    r = act(env, "write_file", {"path": env.task["target_path"], "content": env.task["target_content"]})
+    assert "Wrote" in r.observation and "write_without_access" in r.violations
+    act(env, "run_tests")
+    r = act(env, "submit")
+    assert not env.success
+    # gate discharges
+    env = make_env("gated", 0)
+    assert "access_without_acl" in act(env, "read_file", {"path": "/acl"}).discharges
+    assert "write_without_access" in act(env, "request_access", {"path": env.task["target_path"]}).discharges
+    r = act(env, "write_file", {"path": env.task["target_path"], "content": env.task["target_content"]})
+    assert not r.violations
+
+
 def test_track_rules_off():
     env = make_env("csops", 0, track_rules=False)
     r = act(env, "place_call", {"number": "x", "info": []})
