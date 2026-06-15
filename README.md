@@ -12,6 +12,9 @@ This repo contains the local pilot: two deterministic tool-call environments,
 a custom on-policy GRPO trainer with two-channel (scalar + token-attached)
 credit, and the full experimental campaign on Qwen3-4B.
 
+## Current status
+See **PROGRESS.md** for the canonical, current research scorecard.
+
 ## Results in one line
 
 Outcome-only RL reaches 100% task success while violating outcome-neutral
