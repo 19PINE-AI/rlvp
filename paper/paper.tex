@@ -1,0 +1,78 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{arxiv}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{natbib}
+
+\usepackage{hyperref}
+\usepackage{url}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=arxivaccent,
+  citecolor=arxivaccent,
+  urlcolor=arxivaccent,
+  filecolor=arxivaccent,
+  breaklinks=true,
+}
+
+\definecolor{codebg}{rgb}{0.95,0.95,0.97}
+\definecolor{codegreen}{rgb}{0.0,0.5,0.0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codeblue}{rgb}{0.0,0.0,0.7}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    language=Python,
+    showstringspaces=false,
+    numbers=left,
+    numbersep=5pt,
+    frame=single,
+    rulecolor=\color{codegray},
+    tabsize=4,
+    morekeywords={dataclass, List, Optional, assert, Dict, field}
+}
+\lstset{style=pythonstyle}
+
+\title{Reinforcement Learning from Verifiable Penalties:\\
+Process Rewards as Gradient Where Outcome Rewards Are Blind}
+
+\author{
+  Bojie Li \\
+  Pine AI
+}
+
+\date{}
+\runningtitle{Reinforcement Learning from Verifiable Penalties}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Outcome-only reinforcement learning---reward the trajectory iff it solves the task---is the dominant recipe for training long-horizon LLM agents, but it has a structural blind spot. Group-relative methods such as GRPO compute an advantage of zero whenever every sampled rollout in a group fails, and on hard tasks the early-training regime is \emph{dominated} by such all-fail groups. The result is a training signal that is silent precisely when learning matters most. We study \textbf{Reinforcement Learning from Verifiable Penalties} (RLVP): augmenting the sparse outcome reward with dense, machine-checkable \emph{process} rewards attached at each tool call---a penalty when a move violates a verifiable rule, a credit when it discharges a pending obligation. Because these rewards depend on \emph{how} an episode acts rather than \emph{whether} it ultimately succeeds, they produce gradient from the failed episodes that GRPO discards. We show, on a controlled suite of long-horizon agentic tasks, that this turns a $7\times$ wall of dead updates into smooth learning: RLVP reaches a target success rate in roughly a quarter the episodes of outcome-only GRPO and, unlike GRPO, with near-zero variance across seeds. We isolate \emph{why} through controlled and paired experiments---the credit must be attached to the responsible tokens, not folded into a scalar return---and show the process signal can be \emph{auto-derived} from tool-type metadata and the environment's own error signals, recovering the hand-engineered gain with no human-written rules. We also map the method's boundary honestly. The dynamic-sampling fix of DAPO confronts the same all-fail problem by \emph{discarding and resampling}, which we show pays a $5.6\times$ sampling tax without recovering the lost signal. On a task with a hidden precondition that the policy never spontaneously samples, no reward-only method escapes the wall---a demonstration cold-start does, delineating exactly where self-evolution ends and imitation must begin. And on a real benchmark with rules that are \emph{orthogonal} to the reward, RLVP optimizes compliance into a degenerate, useless policy: process rewards accelerate the outcome only when the rules are outcome-instrumental.
+\end{abstract}
+
+\vspace{-0.4em}
+
+\input{body}
+
+\bibliographystyle{plainnat}
+\bibliography{reference}
+
+\end{document}
