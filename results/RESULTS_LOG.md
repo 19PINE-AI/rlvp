@@ -587,3 +587,19 @@ This is the BOUNDARY of the thesis, demonstrated on a real benchmark: RLVP's out
 gains (chains, gated) REQUIRE outcome-instrumental rules; misaligned rules -> no gain.
 Fixes for a real tau2 win (future work): (1) compile OUTCOME-INSTRUMENTAL rules from the
 policy doc, (2) much earlier anneal or outcome-gating (c4) to prevent the early collapse.
+
+### E3b tau2 POLICY-DERIVED (outcome-instrumental) rules — three-tier boundary
+tau2 airline, no policy in prompt:
+  outcome-only:           eval 0.60  viol 0.9   train ~0.50
+  RLVP generic rules:     eval 0.45* viol 0.55  train 0.00 (COLLAPSED; *eval=variance over dead policy)
+  RLVP aligned + anneal8: eval 0.35  viol 0.00  train 0.37 (HELD, no collapse)
+Aligned rules compiled from policy.md (modify_without_user/reservation, write_without_confirm,
+discharges for the prerequisite lookups) + early anneal:
+=> TIER 1 generic/orthogonal rules -> HARM (compliance-only collapse, train->0).
+   TIER 2 aligned procedural rules -> NO HARM (collapse FIXED: train 0.37, viol 0; alignment +
+          early anneal closes the attractor).
+   TIER 3 still NO GAIN over outcome (0.37<0.50): procedural rules fix the WORKFLOW but not the
+          CONTENT; tau2's reward needs SEMANTIC correctness (refund amount, flight, cabin) that
+          procedural rules don't capture.
+BOUNDARY is a COVERAGE GRADIENT, not a line: misaligned->harm, aligned-procedural->neutral,
+semantic-coverage->(predicted) gain. The remaining gap names the next rule set, not a failure.
