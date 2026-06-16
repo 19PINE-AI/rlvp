@@ -48,12 +48,12 @@ POLICY_MODEL = "Qwen/Qwen3-4B"
 USER_LLM = "openai/Qwen/Qwen3-4B"
 G = 6
 TASKS_PER_ITER = 4
-MAX_STEPS = 30
+MAX_STEPS = 10
 OUT = ROOT / "results" / OUT_NAME
 OUT.mkdir(parents=True, exist_ok=True)
 
 cfg = TrainConfig(credit=CREDIT, lam=0.25, beta=0.25, inner_epochs=2,
-                  lr=2e-5, micro_token_budget=1536, clip_eps=0.2,
+                  lr=2e-5, micro_token_budget=768, clip_eps=0.2,
                   grad_clip=1.0, warmup=3)
 
 

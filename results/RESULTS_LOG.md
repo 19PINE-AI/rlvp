@@ -547,3 +547,19 @@ gated success (non-saturating, base 0.00):
    Maps to R1-Zero<->R1: reward-only self-evolution works on discoverable workflows but
    needs a demonstration cold-start for un-discoverable preconditions. Demo injection
    succeeds where PROMPTING failed (changes weights, not just the ask).
+
+### E3 tau2 head-to-head (real benchmark) — HONEST NEGATIVE / scoping result
+tau2 airline, no policy doc in prompt, k=2 eval (~20 sims, HIGH variance):
+  base:          reward 0.20  viol/ep 0.55
+  outcome-only:  reward 0.60  viol/ep 0.90
+  RLVP:          reward 0.45  viol/ep 0.55
+=> On tau2, outcome-only GRPO BEAT RLVP on reward (0.60 vs 0.45); RLVP lowered
+   violations (0.55 vs 0.90) -> traded outcome for compliance. The process channel
+   worked but optimized HYGIENE that is ORTHOGONAL to the tau2 ENV reward.
+KEY SCOPING (refines, not breaks, the thesis): RLVP improves the OUTCOME only when the
+process rules are OUTCOME-INSTRUMENTAL (aligned with what success needs). chains/gated:
+rules ARE the bottleneck (read-before-write, the /acl gate) -> outcome lifted. tau2: I
+used GENERIC structural rules (write-before-lookup, call-spam) orthogonal to the airline
+reward (semantic policy: auth/refund eligibility) -> compliance up, reward not (slightly
+down). CAVEATS: (1) small n, high variance; (2) tau2-SPECIFIC policy-derived rules NOT
+tested -> a fair "aligned-RLVP on tau2" test = compile rules from the policy doc (future).

@@ -15,8 +15,8 @@ while pgrep -f "run_flagship.sh|run_t2.sh|run_autorule.sh|run_gated.sh" >/dev/nu
 mark "=== E3: tau2 head-to-head (fixed adapter, 4B user-sim, reduced footprint) ==="
 
 python3 -m vllm.entrypoints.openai.api_server \
-  --model Qwen/Qwen3-4B --port 8011 --gpu-memory-utilization 0.18 \
-  --max-model-len 16384 --enable-auto-tool-choice --tool-call-parser hermes \
+  --model Qwen/Qwen3-4B --port 8011 --gpu-memory-utilization 0.14 \
+  --max-model-len 8192 --enable-auto-tool-choice --tool-call-parser hermes \
   --reasoning-parser qwen3 > results/tau2/vllm_h2h.log 2>&1 &
 VLLM_PID=$!
 trap 'kill $VLLM_PID 2>/dev/null' EXIT

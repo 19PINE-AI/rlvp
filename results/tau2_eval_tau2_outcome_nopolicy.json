@@ -1,0 +1,12 @@
+{
+  "model": "results/run_tau2_outcome/final",
+  "with_policy": false,
+  "n_sims": 20,
+  "mean_reward": 0.6,
+  "success": 0.6,
+  "viol_per_ep": 0.9,
+  "clean_eps": 0.15,
+  "per_rule": {
+    "write_before_lookup": 18
+  }
+}

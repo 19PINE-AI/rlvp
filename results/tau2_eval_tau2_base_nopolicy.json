@@ -2,13 +2,12 @@
   "model": "Qwen/Qwen3-4B",
   "with_policy": false,
   "n_sims": 20,
-  "mean_reward": 0.35,
-  "success": 0.35,
-  "viol_per_ep": 0.75,
-  "clean_eps": 0.5,
+  "mean_reward": 0.2,
+  "success": 0.2,
+  "viol_per_ep": 0.55,
+  "clean_eps": 0.55,
   "per_rule": {
-    "write_before_lookup": 11,
-    "call_spam": 1,
-    "unconfirmed_chain": 3
+    "write_before_lookup": 10,
+    "call_spam": 1
   }
 }

@@ -1,0 +1,13 @@
+{
+  "model": "results/run_tau2_rlvp/final",
+  "with_policy": false,
+  "n_sims": 20,
+  "mean_reward": 0.45,
+  "success": 0.45,
+  "viol_per_ep": 0.55,
+  "clean_eps": 0.7,
+  "per_rule": {
+    "call_spam": 3,
+    "unconfirmed_chain": 8
+  }
+}
