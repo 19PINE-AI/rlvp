@@ -518,3 +518,19 @@ base Qwen3-4B on gated: success 0.00 | read_acl 0.00 | tried_request_access 1.00
    else request_access silently no-ops). base success 0.00 -> fully non-saturating,
    unlike chains. Valid T2 ceiling testbed: outcome-only must discover read-/acl from a
    0/1 signal (no hint); RLVP's rule rewards reading /acl. Ceiling comparison running.
+
+### GATED ceiling test — results: EXPLORATION WALL (all clean methods fail)
+  gated_outcome:        final 0.00, dead 80/80 (every iter all-fail)
+  gated_dapo:           final 0.00, stalled, 6x oversample
+  gated_rlvp (clean):   final 0.00, dead 61/80
+  gated_outcome_prompt: final 0.00 (PROMPTED still never reads /acl!)
+ROOT CAUSE: base model NEVER samples reading /acl (read_acl 0.00), even when PROMPTED.
+So clean RLVP's discharge credit for reading /acl CAN'T FIRE (can't reward an unsampled
+behavior); its penalty only suppresses request_access-without-acl, doesn't INDUCE
+reading /acl. => clean RLVP (process channel alone) has a DISCOVERY CEILING: it cannot
+induce a never-sampled precondition. This is the R1-Zero vs R1 boundary: self-evolution
+from reward stalls on un-discoverable preconditions; DEMONSTRATIONS (mixing) are the fix.
+DECISIVE TEST RUNNING: gated_rlvp_mix (clean RLVP + scripted demo that reads /acl). If it
+lifts success >0 while all others stay 0 -> (a) T2 ceiling gap demonstrated, (b) mixing
+proven NECESSARY in the hidden-precondition regime (vs redundant on discoverable chains).
+If mixing also fails -> task mis-calibrated (too hard); add a discoverable-hint variant.

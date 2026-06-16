@@ -1,0 +1,9 @@
+{
+  "model": "Qwen/Qwen3-4B",
+  "rules_in_prompt": true,
+  "n": 80,
+  "success": 0.0,
+  "read_acl_rate": 0.0,
+  "tried_request_access_rate": 1.0,
+  "viol_per_ep": 2.0
+}

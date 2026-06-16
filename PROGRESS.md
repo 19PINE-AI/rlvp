@@ -49,9 +49,11 @@ Efficiency measured in **episodes GENERATED** (counts DAPO's resampling cost).
 | pure penalties / positive-only rewards | inert / useless (earlier toy-env results, still hold) |
 
 ### OPEN / RUNNING
-- **Gated ceiling test** — calibration DONE: base success 0.00 (valid
-  non-saturating testbed; model misses the hidden read-/acl precondition).
-  Outcome-vs-RLVP ceiling comparison RUNNING — the decisive T2 test.
+- **Gated ceiling test** — ALL clean methods fail (outcome/DAPO/clean-RLVP/
+  prompted = 0.00): the hidden precondition (read /acl) is never sampled, so even
+  RLVP's discharge credit can't fire (DISCOVERY CEILING of self-evolution). Decisive
+  test RUNNING: does MIXING (demo injection) break it? -> if yes: T2 ceiling gap +
+  mixing proven NECESSARY here (vs redundant on chains). The R1-Zero vs R1 boundary.
 - **tau2 head-to-head** — real benchmark (base ~0.5), trained without the policy
   doc in prompt; reduced footprint for the shared GPU; runs last.
 - auto_rlvp seeds (capstone is n=1 so far).
