@@ -49,8 +49,9 @@ Efficiency measured in **episodes GENERATED** (counts DAPO's resampling cost).
 | pure penalties / positive-only rewards | inert / useless (earlier toy-env results, still hold) |
 
 ### OPEN / RUNNING
-- **Gated ceiling test** — non-saturating task (silent precondition gate);
-  calibration pending, then outcome-vs-RLVP ceiling comparison.
+- **Gated ceiling test** — calibration DONE: base success 0.00 (valid
+  non-saturating testbed; model misses the hidden read-/acl precondition).
+  Outcome-vs-RLVP ceiling comparison RUNNING — the decisive T2 test.
 - **tau2 head-to-head** — real benchmark (base ~0.5), trained without the policy
   doc in prompt; reduced footprint for the shared GPU; runs last.
 - auto_rlvp seeds (capstone is n=1 so far).

@@ -511,3 +511,10 @@ correctly flagged as what actually validates T2.
    category (observe/mutate/verify/terminal) — task-agnostic metadata real tool
    schemas (OpenAPI/function-calling) often already expose. Plus the env's own error
    signals (fully automatic). [n=1; auto seeds worth adding for the paper.]
+
+### GATED ceiling test — calibration (VALID non-saturating testbed)
+base Qwen3-4B on gated: success 0.00 | read_acl 0.00 | tried_request_access 1.00 | viol/ep 2.0
+=> Model discovers request_access but NEVER the hidden precondition (read /acl first,
+   else request_access silently no-ops). base success 0.00 -> fully non-saturating,
+   unlike chains. Valid T2 ceiling testbed: outcome-only must discover read-/acl from a
+   0/1 signal (no hint); RLVP's rule rewards reading /acl. Ceiling comparison running.
