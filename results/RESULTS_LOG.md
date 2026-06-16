@@ -574,3 +574,16 @@ unset) — the KNOWN mechanism to escape this attractor. So this is NOT a fair R
 Re-running tau2 RLVP WITH anneal for a fair comparison. Expected: anneal prevents the
 collapse; with ORTHOGONAL generic rules RLVP should land ~= outcome (no benefit, no harm).
 Real benefit on tau2 needs OUTCOME-INSTRUMENTAL rules from the policy doc (future work).
+
+### E3 tau2 — FINAL (fair re-run with anneal)
+  outcome-only:      reward 0.60  viol 0.90  (learns the task)
+  RLVP (no anneal):  reward ~0.45 viol 0.55  (train reward collapsed to 0)
+  RLVP (anneal@12):  reward 0.375 viol 0.28  (collapsed by iter 5-7, BEFORE anneal)
+Anneal@12 did NOT rescue it: the compliance-only collapse happens in the first ~7 iters;
+post-anneal pure-outcome can't recover from reward-0 (no success -> no gradient).
+FINAL CONCLUSION (real benchmark): with GENERIC structural rules orthogonal to the tau2
+reward, RLVP does NOT help outcome and modestly hurts it (drives compliance-collapse).
+This is the BOUNDARY of the thesis, demonstrated on a real benchmark: RLVP's outcome
+gains (chains, gated) REQUIRE outcome-instrumental rules; misaligned rules -> no gain.
+Fixes for a real tau2 win (future work): (1) compile OUTCOME-INSTRUMENTAL rules from the
+policy doc, (2) much earlier anneal or outcome-gating (c4) to prevent the early collapse.

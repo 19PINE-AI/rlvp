@@ -50,12 +50,13 @@ Efficiency measured in **episodes GENERATED** (counts DAPO's resampling cost).
 | "discharge credit is the hero" (earlier) | corrected — token-channel is the efficiency lever; discharge is secondary (dead-iter reduction) |
 | step_cost as a universal bloat fix | harmful on short horizons (final 0.84<1.0); length control is HORIZON-DEPENDENT |
 | pure penalties / positive-only rewards | inert / useless (earlier toy-env results, still hold) |
+| **RLVP helps outcome UNIVERSALLY** | **REFUTED on real benchmark** — tau2 with GENERIC (orthogonal) rules: RLVP 0.375-0.45 < outcome 0.60; compliance-only collapse. Gains REQUIRE outcome-instrumental rules (true on chains/gated, not on tau2 generic rules). |
 
 ### OPEN / RUNNING
 - **Gated ceiling test** — DONE. T2 ceiling gap shown; mixing necessary here (see Validated).
-- **tau2 head-to-head** — real benchmark (base ~0.5), trained without the policy
-  doc in prompt; reduced footprint for the shared GPU; runs last.
-- auto_rlvp seeds (capstone is n=1 so far).
+- **tau2 head-to-head** — DONE (honest negative): outcome 0.60 > RLVP 0.375-0.45 with
+  generic rules. Scopes the thesis: outcome gains need outcome-instrumental rules.
+- auto_rlvp seeds (capstone n=1). tau2 with policy-derived (instrumental) rules = future work.
 
 ---
 
