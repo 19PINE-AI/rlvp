@@ -39,12 +39,15 @@ ITERS = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 30
 WITH_POLICY = "--with-policy" in sys.argv
 CREDIT = "c3"
 ANNEAL = 0
+RULE_MODE = "structural"
 OUT_NAME = "run_tau2"
 for _i, _a in enumerate(sys.argv):
     if _a == "--credit":
         CREDIT = sys.argv[_i + 1]
     if _a == "--anneal":
         ANNEAL = int(sys.argv[_i + 1])
+    if _a == "--rule-mode":
+        RULE_MODE = sys.argv[_i + 1]
     if _a == "--out":
         OUT_NAME = sys.argv[_i + 1]
 POLICY_MODEL = "Qwen/Qwen3-4B"
@@ -91,7 +94,7 @@ def main():
         groups = []
         with ThreadPoolExecutor(max_workers=G * 2) as ex:
             futs = {t.id: [ex.submit(run_one_sim, t, gen_srv.generate, tok,
-                                     WITH_POLICY, USER_LLM, MAX_STEPS) for _ in range(G)]
+                                     WITH_POLICY, USER_LLM, MAX_STEPS, RULE_MODE) for _ in range(G)]
                     for t in batch_tasks}
             for tid, fs in futs.items():
                 grp = [f.result() for f in fs]

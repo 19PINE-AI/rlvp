@@ -111,22 +111,42 @@ WRITE_PREFIXES = ("update_", "cancel_", "book_", "modify_", "send_", "transfer_"
 READ_PREFIXES = ("get_", "search_", "list_", "calculate_")
 
 
-class RuleTracker:
-    """violations/discharges per assistant turn, tau2 structural rules:
-    R1 write_before_lookup (+discharge: first read call)
-    R2 call_spam: identical (name,args) 3+ times
-    R3 unconfirmed_chain (+discharge: user contact between writes)
-    """
+# OUTCOME-INSTRUMENTAL rules compiled from the airline policy.md. The policy
+# repeatedly states "the API does not check these, so the agent must make sure":
+# obtain the user id (get_user_details) and the reservation (get_reservation_details)
+# BEFORE any booking-DB modification, and confirm before writing. These are
+# instrumental to the reward, not generic hygiene: a correct modification REQUIRES
+# the looked-up reservation state, so the discharge credit pulls toward the
+# productive workflow rather than penalizing action (closing off the
+# compliance-only attractor that generic structural rules fell into).
+ALIGN_WRITE = ("update_reservation_", "cancel_reservation", "book_reservation",
+               "send_certificate")
 
-    def __init__(self):
+
+class RuleTracker:
+    """Per-turn violations/discharges. mode='structural' (generic hygiene) or
+    'aligned' (outcome-instrumental, compiled from the airline policy)."""
+
+    def __init__(self, mode="structural"):
+        self.mode = mode
         self.seen_read = False
         self.first_read_paid = False
+        self.got_user = False        # get_user_details called (aligned)
+        self.got_resv = False        # get_reservation_details called (aligned)
+        self.user_paid = False
+        self.resv_paid = False
+        self.confirmed_since_write = False   # require explicit confirm before each write
         self.sig = {}
         self.last_was_write = False
         self.turn_violations = {}
         self.turn_discharges = {}
 
     def observe_turn(self, turn_idx: int, tool_calls: list, is_respond: bool):
+        return (self._aligned(turn_idx, tool_calls, is_respond)
+                if self.mode == "aligned"
+                else self._structural(turn_idx, tool_calls, is_respond))
+
+    def _structural(self, turn_idx, tool_calls, is_respond):
         v, d = [], []
         if is_respond and self.last_was_write:
             self.last_was_write = False
@@ -149,6 +169,44 @@ class RuleTracker:
                 v.append("unconfirmed_chain")
             if is_write:
                 self.last_was_write = True
+        if v:
+            self.turn_violations[turn_idx] = v
+        if d:
+            self.turn_discharges[turn_idx] = d
+        return v, d
+
+    def _aligned(self, turn_idx, tool_calls, is_respond):
+        v, d = [], []
+        if is_respond:
+            self.confirmed_since_write = True     # a respond turn IS the confirmation
+            if self.last_was_write:               # contacted user after a write
+                self.last_was_write = False
+        for tc in tool_calls:
+            name = tc["name"]
+            sig = name + "|" + json.dumps(tc["arguments"], sort_keys=True, default=str)
+            # discharge the prerequisite lookups (the productive precursors)
+            if name == "get_user_details" and not self.user_paid:
+                self.user_paid = True; self.got_user = True; d.append("need_user")
+            elif name == "get_user_details":
+                self.got_user = True
+            if name == "get_reservation_details" and not self.resv_paid:
+                self.resv_paid = True; self.got_resv = True; d.append("need_reservation")
+            elif name == "get_reservation_details":
+                self.got_resv = True
+            is_write = name.startswith(ALIGN_WRITE)
+            if is_write:
+                # modify the DB without the looked-up state the change depends on
+                if not self.got_user:
+                    v.append("modify_without_user")
+                if not self.got_resv and name != "book_reservation":
+                    v.append("modify_without_reservation")
+                if not self.confirmed_since_write:
+                    v.append("write_without_confirm")
+                self.confirmed_since_write = False
+                self.last_was_write = True
+            self.sig[sig] = self.sig.get(sig, 0) + 1
+            if self.sig[sig] == 3:
+                v.append("repeat_error")
         if v:
             self.turn_violations[turn_idx] = v
         if d:
@@ -183,7 +241,7 @@ class ShimEnv:
         return self._r
 
 
-def run_one_sim(task, gen, tok, include_policy, user_llm, max_steps=30):
+def run_one_sim(task, gen, tok, include_policy, user_llm, max_steps=30, rule_mode='structural'):
     """One tau2 simulation with our HF policy; returns a trainer-ready Episode."""
     from tau2.domains.airline.environment import get_environment
     from tau2.evaluator.evaluator import EvaluationType, evaluate_simulation
@@ -193,7 +251,7 @@ def run_one_sim(task, gen, tok, include_policy, user_llm, max_steps=30):
     env = get_environment()
     Agent = make_policy_agent_class()
     agent = Agent(tools=env.get_tools(), domain_policy=env.policy,
-                  gen=gen, tok=tok, include_policy=include_policy)
+                  gen=gen, tok=tok, include_policy=include_policy, rule_mode=rule_mode)
     # disable Qwen3 "thinking" on the user sim: thinking-only replies parse to
     # empty content and crash tau2's orchestrator on UserMessage.validate()
     user = UserSimulator(llm=user_llm, instructions=str(task.user_scenario),
@@ -235,11 +293,11 @@ def make_policy_agent_class():
                                          UserMessage)
 
     class HFPolicyAgent(LLMAgent):
-        def __init__(self, tools, domain_policy, gen, tok, include_policy=True):
+        def __init__(self, tools, domain_policy, gen, tok, include_policy=True, rule_mode='structural'):
             self._gen, self._tok = gen, tok
             self.include_policy = include_policy
             self.episode = None
-            self.tracker = RuleTracker()
+            self.tracker = RuleTracker(mode=rule_mode)
             super().__init__(tools=tools, domain_policy=domain_policy,
                              llm="local/hf-policy", llm_args={})
 

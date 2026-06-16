@@ -23,6 +23,9 @@ from rlvp.rollout import set_template
 from rlvp.tau2_adapter import GenServer, run_one_sim
 
 USER_LLM = 'openai/Qwen/Qwen3-4B'
+RULE_MODE = 'structural'
+for _i,_a in enumerate(sys.argv):
+    if _a=='--rule-mode': RULE_MODE=sys.argv[_i+1]
 
 MODEL = sys.argv[1]
 TAG = sys.argv[2]
@@ -43,7 +46,7 @@ gen_srv = GenServer(model, tok, temperature=0.7, max_batch=12)
 eval_tasks = get_tasks()[:10]
 eps = []
 with ThreadPoolExecutor(max_workers=10) as ex:
-    futs = [ex.submit(run_one_sim, t, gen_srv.generate, tok, WITH_POLICY, USER_LLM)
+    futs = [ex.submit(run_one_sim, t, gen_srv.generate, tok, WITH_POLICY, USER_LLM, 10, RULE_MODE)
             for t in eval_tasks for _ in range(K)]
     for f in futs:
         e = f.result()
