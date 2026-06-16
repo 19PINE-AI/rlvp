@@ -38,10 +38,13 @@ from tau2.user.user_simulator import UserSimulator
 ITERS = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 30
 WITH_POLICY = "--with-policy" in sys.argv
 CREDIT = "c3"
+ANNEAL = 0
 OUT_NAME = "run_tau2"
 for _i, _a in enumerate(sys.argv):
     if _a == "--credit":
         CREDIT = sys.argv[_i + 1]
+    if _a == "--anneal":
+        ANNEAL = int(sys.argv[_i + 1])
     if _a == "--out":
         OUT_NAME = sys.argv[_i + 1]
 POLICY_MODEL = "Qwen/Qwen3-4B"
@@ -52,7 +55,7 @@ MAX_STEPS = 10
 OUT = ROOT / "results" / OUT_NAME
 OUT.mkdir(parents=True, exist_ok=True)
 
-cfg = TrainConfig(credit=CREDIT, lam=0.25, beta=0.25, inner_epochs=2,
+cfg = TrainConfig(credit=CREDIT, lam=0.25, beta=0.25, anneal_at=ANNEAL, inner_epochs=2,
                   lr=2e-5, micro_token_budget=768, clip_eps=0.2,
                   grad_clip=1.0, warmup=3)
 
