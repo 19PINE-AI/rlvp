@@ -563,3 +563,14 @@ used GENERIC structural rules (write-before-lookup, call-spam) orthogonal to the
 reward (semantic policy: auth/refund eligibility) -> compliance up, reward not (slightly
 down). CAVEATS: (1) small n, high variance; (2) tau2-SPECIFIC policy-derived rules NOT
 tested -> a fair "aligned-RLVP on tau2" test = compile rules from the policy doc (future).
+
+### E3 tau2 — CORRECTION (full train trajectory)
+tau2_rlvp reward FLAT at 0.0 (whole run); viol/ep 0.4 -> 0.0 (sustained). This is the
+COMPLIANCE-ONLY ATTRACTOR (drive violations to 0 by not attempting risky task actions ->
+reward collapses), the failure mode found early in the toy envs. The eval 0.45 was k=2
+variance over a collapsed policy (true reward ~0). outcome-only climbed reward 0.1->0.5
+(viol ~1.3, ignores compliance). CRUCIAL: the tau2 RLVP arm OMITTED annealing (anneal_at
+unset) — the KNOWN mechanism to escape this attractor. So this is NOT a fair RLVP test.
+Re-running tau2 RLVP WITH anneal for a fair comparison. Expected: anneal prevents the
+collapse; with ORTHOGONAL generic rules RLVP should land ~= outcome (no benefit, no harm).
+Real benefit on tau2 needs OUTCOME-INSTRUMENTAL rules from the policy doc (future work).
