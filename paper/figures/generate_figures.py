@@ -347,36 +347,43 @@ def fig_boundary():
 # ----------------------------------------------------------------------------
 def fig_tau2_collapse():
     t2 = D['tau2']
-    fig, ax = plt.subplots(figsize=(6.5, 4))
-    ot = t2['outcome_train']; rt = t2['rlvp_train']; rv = t2['rlvp_viol']
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4),
+                                   gridspec_kw={'width_ratios': [1.55, 1]})
+
+    # --- Left: three training trajectories ---
+    ot = t2['outcome_train']; rt = t2['rlvp_train']; at = t2.get('aligned_train', [])
     it = np.arange(1, len(ot) + 1)
+    axL.plot(it, ot, color=BLUE, linewidth=2.2, marker='o', markersize=3,
+             label='outcome-only GRPO')
+    axL.plot(it[:len(rt)], rt, color=RED, linewidth=2.2, marker='s', markersize=3,
+             label='RLVP, generic rules')
+    if at:
+        axL.plot(np.arange(1, len(at) + 1), at, color=GREEN, linewidth=2.2,
+                 marker='D', markersize=3, label='RLVP, policy-derived rules')
+    axL.set_xlabel('iteration'); axL.set_ylabel('training task reward')
+    axL.set_ylim(-0.03, 0.7); axL.grid(True, alpha=0.25, linewidth=0.6)
+    axL.annotate('compliance-only attractor\n(generic rules: reward $\\rightarrow$ 0)',
+                 xy=(len(rt), rt[-1]), xytext=(13, 0.47), fontsize=8.5, color=RED, ha='center',
+                 arrowprops=dict(arrowstyle='->', color=RED, linewidth=1.0))
+    axL.annotate('aligned rules + early anneal:\nno collapse',
+                 xy=(len(at), at[-1]) if at else (20, 0.37), xytext=(15, 0.09),
+                 fontsize=8.5, color='#15803D', ha='center',
+                 arrowprops=dict(arrowstyle='->', color=GREEN, linewidth=1.0))
+    axL.legend(loc='upper left', frameon=True, framealpha=0.9, fontsize=8.5)
 
-    ax.plot(it, ot, color=BLUE, linewidth=2.2, marker='o', markersize=3,
-            label='outcome-only: task reward')
-    ax.plot(it[:len(rt)], rt, color=RED, linewidth=2.2, marker='s', markersize=3,
-            label='RLVP: task reward')
-    ax.set_xlabel('iteration')
-    ax.set_ylabel('training task reward')
-    ax.set_ylim(-0.03, 0.8)
-    ax.grid(True, alpha=0.25, linewidth=0.6)
-
-    # twin axis: RLVP violations dropping to ~0
-    ax2 = ax.twinx()
-    ax2.plot(it[:len(rv)], rv, color=PURPLE, linewidth=1.5, linestyle=':', marker='^',
-             markersize=3, alpha=0.85, label='RLVP: rule violations / ep')
-    ax2.set_ylabel('rule violations per episode', color=PURPLE)
-    ax2.tick_params(axis='y', labelcolor=PURPLE)
-    ax2.set_ylim(0, 2.2)
-
-    # annotation
-    ax.annotate('compliance-only attractor:\nviolations $\\rightarrow$ 0  but  reward $\\rightarrow$ 0',
-                xy=(len(rt), rt[-1]), xytext=(11, 0.30),
-                fontsize=9, color=RED, ha='center',
-                arrowprops=dict(arrowstyle='->', color=RED, linewidth=1.1))
-
-    l1, lab1 = ax.get_legend_handles_labels()
-    l2, lab2 = ax2.get_legend_handles_labels()
-    ax.legend(l1 + l2, lab1 + lab2, loc='upper left', frameon=True, framealpha=0.9, fontsize=8.5)
+    # --- Right: the three-tier outcome (final held-out reward) ---
+    tiers = t2['tiers']
+    labels = list(tiers.keys()); vals = [tiers[k] for k in labels]
+    cols = [BLUE, RED, GREEN]
+    y = np.arange(len(labels))[::-1]
+    axR.barh(y, vals, color=cols, alpha=0.9, height=0.6, edgecolor=DARKGRAY)
+    for yi, v in zip(y, vals):
+        axR.text(v + 0.015, yi, f'{v:.2f}', va='center', fontsize=10, fontweight='bold')
+    axR.set_yticks(y); axR.set_yticklabels(labels, fontsize=8.5)
+    axR.set_xlim(0, 0.74); axR.set_xlabel('final held-out reward')
+    axR.grid(True, axis='x', alpha=0.25, linewidth=0.6)
+    axR.text(0.71, y[1], 'HARM', va='center', ha='right', fontsize=8, color=RED, fontweight='bold')
+    axR.text(0.71, y[2], 'no harm,\nno gain', va='center', ha='right', fontsize=7.5, color='#15803D')
     fig.tight_layout()
     save(fig, 'fig_tau2_collapse')
 

@@ -159,10 +159,20 @@ def tev(tag):
 D["tau2"] = {
     "base": tev("base"), "outcome": tev("outcome"),
     "rlvp": tev("rlvp"), "rlvp_anneal": tev("rlvp_anneal"),
+    "aligned": tev("aligned"),
     "outcome_train": [r["reward"] for r in rows("tau2_outcome")],
     "outcome_viol": [r.get("viol_per_ep", 0) for r in rows("tau2_outcome")],
     "rlvp_train": [r["reward"] for r in rows("tau2_rlvp")],
     "rlvp_viol": [r.get("viol_per_ep", 0) for r in rows("tau2_rlvp")],
+    "aligned_train": [r["reward"] for r in rows("tau2_aligned")],
+    "aligned_viol": [r.get("viol_per_ep", 0) for r in rows("tau2_aligned")],
+    # three-tier final eval rewards (generic eval is variance over a collapsed policy)
+    "tiers": {"outcome-only": tev("outcome")["reward"] if tev("outcome") else None,
+              "RLVP\n(generic rules)": tev("rlvp")["reward"] if tev("rlvp") else None,
+              "RLVP\n(aligned rules)": tev("aligned")["reward"] if tev("aligned") else None},
+    "tiers_train": {"outcome-only": st.mean([r["reward"] for r in rows("tau2_outcome")][-5:]),
+                    "RLVP\n(generic rules)": st.mean([r["reward"] for r in rows("tau2_rlvp")][-5:]),
+                    "RLVP\n(aligned rules)": st.mean([r["reward"] for r in rows("tau2_aligned")][-5:])},
 }
 
 # --- phase0 all-fail mechanism (chain difficulty calibration) ---
