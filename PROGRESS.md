@@ -17,8 +17,9 @@ produces gradient *from failed episodes*, exactly where GRPO is blind.
 Three sub-claims:
 - **T1 (efficiency):** fewer episodes to a given outcome level. **VALIDATED.**
 - **T1b (consistency):** near-zero seed variance vs GRPO's lottery. **VALIDATED.**
-- **T2 (ceiling):** higher converged score. **OPEN** — chains saturate, so the
-  ceiling tests run on non-saturating tasks (gated, tau2), in progress.
+- **T2 (ceiling):** higher converged score. **VALIDATED (gated)** — on the
+  non-saturating gated task, outcome/DAPO/clean-RLVP/prompted all 0.0 vs
+  RLVP+mixing 1.0 (reachable vs unreachable). tau2 is the real-benchmark check.
 
 Setup: Qwen3-4B, custom GRPO, chain-N (N-stage tool tasks), tau2-bench airline.
 Efficiency measured in **episodes GENERATED** (counts DAPO's resampling cost).
@@ -39,6 +40,8 @@ Efficiency measured in **episodes GENERATED** (counts DAPO's resampling cost).
 | Process channel > demonstrations alone | clean RLVP 320 vs outcome+demos 616 vs outcome 2240 |
 | Mixing (demos) is redundant | clean (no mixing) is the best variant (eps50 320, final 1.0) |
 | **Auto-derived rules = hand rules** (capstone) | tags+errors: eps50 **320** vs hand **256**, both ~7× vs outcome 2240 |
+| **T2 ceiling gap** (gated, non-saturating) | outcome/DAPO/clean-RLVP/prompted **0.0** vs RLVP+mixing **1.0** |
+| **Mixing boundary** (when demos are needed) | REDUNDANT on discoverable chains; NECESSARY on hidden-precondition gated (clean RLVP discovery ceiling) |
 
 ### REFUTED / SCOPED DOWN
 | claim | status |
@@ -49,11 +52,7 @@ Efficiency measured in **episodes GENERATED** (counts DAPO's resampling cost).
 | pure penalties / positive-only rewards | inert / useless (earlier toy-env results, still hold) |
 
 ### OPEN / RUNNING
-- **Gated ceiling test** — ALL clean methods fail (outcome/DAPO/clean-RLVP/
-  prompted = 0.00): the hidden precondition (read /acl) is never sampled, so even
-  RLVP's discharge credit can't fire (DISCOVERY CEILING of self-evolution). Decisive
-  test RUNNING: does MIXING (demo injection) break it? -> if yes: T2 ceiling gap +
-  mixing proven NECESSARY here (vs redundant on chains). The R1-Zero vs R1 boundary.
+- **Gated ceiling test** — DONE. T2 ceiling gap shown; mixing necessary here (see Validated).
 - **tau2 head-to-head** — real benchmark (base ~0.5), trained without the policy
   doc in prompt; reduced footprint for the shared GPU; runs last.
 - auto_rlvp seeds (capstone is n=1 so far).

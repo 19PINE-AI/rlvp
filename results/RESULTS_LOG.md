@@ -534,3 +534,16 @@ DECISIVE TEST RUNNING: gated_rlvp_mix (clean RLVP + scripted demo that reads /ac
 lifts success >0 while all others stay 0 -> (a) T2 ceiling gap demonstrated, (b) mixing
 proven NECESSARY in the hidden-precondition regime (vs redundant on discoverable chains).
 If mixing also fails -> task mis-calibrated (too hard); add a discoverable-hint variant.
+
+### GATED ceiling test — RESOLVED: T2 ceiling gap + mixing-necessity boundary
+gated success (non-saturating, base 0.00):
+  outcome-only / DAPO / clean-RLVP / prompted:  0.00  (all stuck — discovery ceiling)
+  RLVP + MIXING:                                1.00  (eval 0.0->1.0 phase transition @iter38, generalizes)
+=> T2 CEILING GAP DEMONSTRATED on a non-saturating task: outcome 0.0 vs RLVP+mixing 1.0
+   (reachable vs UNreachable, not just faster). And the MIXING BOUNDARY is now precise:
+   - discoverable-workflow tasks (chains): clean RLVP suffices, mixing REDUNDANT.
+   - hidden-precondition tasks (gated): clean RLVP hits a DISCOVERY CEILING (can't induce
+     a never-sampled precondition -> discharge never fires); mixing is NECESSARY.
+   Maps to R1-Zero<->R1: reward-only self-evolution works on discoverable workflows but
+   needs a demonstration cold-start for un-discoverable preconditions. Demo injection
+   succeeds where PROMPTING failed (changes weights, not just the ask).
