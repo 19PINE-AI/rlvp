@@ -124,11 +124,17 @@ ALIGN_WRITE = ("update_reservation_", "cancel_reservation", "book_reservation",
 
 
 class RuleTracker:
-    """Per-turn violations/discharges. mode='structural' (generic hygiene) or
-    'aligned' (outcome-instrumental, compiled from the airline policy)."""
+    """Per-turn violations/discharges. mode='structural' (generic hygiene),
+    'aligned' (procedural, policy-derived), or 'semantic' (aligned procedural
+    PLUS verifiable content-validity checks against the actual DB state:
+    do not modify a basic-economy reservation, do not change the passenger
+    count, do not use a payment method not in the user's profile---each a
+    policy constraint the API does not enforce, so violating it guarantees the
+    task fails. These cover what the reward REQUIRES, not just the workflow)."""
 
-    def __init__(self, mode="structural"):
+    def __init__(self, mode="structural", db=None):
         self.mode = mode
+        self.db = db                 # FlightDB, for semantic content checks
         self.seen_read = False
         self.first_read_paid = False
         self.got_user = False        # get_user_details called (aligned)
@@ -142,9 +148,46 @@ class RuleTracker:
         self.turn_discharges = {}
 
     def observe_turn(self, turn_idx: int, tool_calls: list, is_respond: bool):
-        return (self._aligned(turn_idx, tool_calls, is_respond)
-                if self.mode == "aligned"
-                else self._structural(turn_idx, tool_calls, is_respond))
+        if self.mode in ("aligned", "semantic"):
+            v, d = self._aligned(turn_idx, tool_calls, is_respond)
+            if self.mode == "semantic":
+                self._add_semantic(turn_idx, tool_calls, v)
+            return v, d
+        return self._structural(turn_idx, tool_calls, is_respond)
+
+    def _add_semantic(self, turn_idx, tool_calls, v):
+        """Append verifiable content-validity violations (checked against the DB).
+        A modification that violates these policy constraints guarantees task
+        failure, so penalizing it prunes failure-guaranteed actions."""
+        if self.db is None:
+            return
+        extra = []
+        for tc in tool_calls:
+            name, a = tc["name"], (tc.get("arguments") or {})
+            rid = a.get("reservation_id")
+            resv = getattr(self.db, "reservations", {}).get(rid) if rid else None
+            resv = (resv if isinstance(resv, dict)
+                    else resv.__dict__ if resv is not None else None)
+            if name.startswith(("update_reservation_", "cancel_reservation")) and resv:
+                if str(resv.get("cabin", "")).lower() == "basic_economy":
+                    extra.append("modify_basic_economy")          # policy: cannot modify
+            if name == "update_reservation_passengers" and resv:
+                cur = len(resv.get("passengers", []) or [])
+                new = len(a.get("passengers", []) or [])
+                if new and cur and new != cur:
+                    extra.append("change_passenger_count")         # policy: count fixed
+            # payment method must already be in the user profile
+            if name in ("update_reservation_flights", "book_reservation"):
+                uid = a.get("user_id") or (resv or {}).get("user_id")
+                user = getattr(self.db, "users", {}).get(uid) if uid else None
+                user = (user if isinstance(user, dict)
+                        else user.__dict__ if user is not None else None)
+                pid = a.get("payment_id") or (a.get("payment") or {}).get("id") if isinstance(a.get("payment"), dict) else a.get("payment_id")
+                if user and pid and pid not in (user.get("payment_methods", {}) or {}):
+                    extra.append("payment_not_in_profile")
+        if extra:
+            self.turn_violations[turn_idx] = self.turn_violations.get(turn_idx, []) + extra
+            v.extend(extra)
 
     def _structural(self, turn_idx, tool_calls, is_respond):
         v, d = [], []
@@ -251,7 +294,8 @@ def run_one_sim(task, gen, tok, include_policy, user_llm, max_steps=30, rule_mod
     env = get_environment()
     Agent = make_policy_agent_class()
     agent = Agent(tools=env.get_tools(), domain_policy=env.policy,
-                  gen=gen, tok=tok, include_policy=include_policy, rule_mode=rule_mode)
+                  gen=gen, tok=tok, include_policy=include_policy, rule_mode=rule_mode,
+                  db=getattr(env.tools, 'db', None))
     # disable Qwen3 "thinking" on the user sim: thinking-only replies parse to
     # empty content and crash tau2's orchestrator on UserMessage.validate()
     user = UserSimulator(llm=user_llm, instructions=str(task.user_scenario),
@@ -293,11 +337,11 @@ def make_policy_agent_class():
                                          UserMessage)
 
     class HFPolicyAgent(LLMAgent):
-        def __init__(self, tools, domain_policy, gen, tok, include_policy=True, rule_mode='structural'):
+        def __init__(self, tools, domain_policy, gen, tok, include_policy=True, rule_mode='structural', db=None):
             self._gen, self._tok = gen, tok
             self.include_policy = include_policy
             self.episode = None
-            self.tracker = RuleTracker(mode=rule_mode)
+            self.tracker = RuleTracker(mode=rule_mode, db=db)
             super().__init__(tools=tools, domain_policy=domain_policy,
                              llm="local/hf-policy", llm_args={})
 
