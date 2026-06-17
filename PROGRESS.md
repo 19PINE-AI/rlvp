@@ -50,7 +50,7 @@ Efficiency measured in **episodes GENERATED** (counts DAPO's resampling cost).
 | "discharge credit is the hero" (earlier) | corrected — token-channel is the efficiency lever; discharge is secondary (dead-iter reduction) |
 | step_cost as a universal bloat fix | harmful on short horizons (final 0.84<1.0); length control is HORIZON-DEPENDENT |
 | pure penalties / positive-only rewards | inert / useless (earlier toy-env results, still hold) |
-| **RLVP helps outcome UNIVERSALLY** | **REFUTED -> COVERAGE GRADIENT** (tau2). Generic/orthogonal rules HARM (collapse, reward 0). Policy-derived procedural rules + early anneal remove the harm (train 0.37, no collapse) but do NOT beat outcome 0.60 (procedural covers workflow not semantics). Gain needs rules covering the reward's actual requirements. |
+| **RLVP helps outcome UNIVERSALLY** | **REFUTED -> COVERAGE GRADIENT** (tau2). Generic/orthogonal rules HARM (collapse, reward 0). Policy-derived rules (procedural 0.37 AND verifiable-semantic 0.38, peak 0.67) remove the harm but neither beats outcome 0.48-0.60. Gradient SATURATES: rules cover general POLICY (procedure+validity), NOT task INTENT (=the reward). Irreducible ceiling, measured. |
 
 ### OPEN / RUNNING
 - **Gated ceiling test** — DONE. T2 ceiling gap shown; mixing necessary here (see Validated).
