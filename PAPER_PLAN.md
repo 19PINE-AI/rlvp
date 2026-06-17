@@ -1,5 +1,66 @@
 # RLVP v2 — Plan for review (2026-06-13)
 
+## CORE FRAMING (paper spine — do not lose this when writing) [added 2026-06-17]
+
+**Agentic RL is not reasoning RL with more steps.** Reasoning models (math,
+competitive programming) were the origin of RLVR (RL from Verifiable Rewards):
+those tasks have a verifiable OUTCOME but no checkable PROCEDURE — you cannot
+verify a chain-of-thought step mid-stream without redoing it — so outcome-only
+RL is not a choice, it is the only signal available. The agentic era inherited
+that recipe as if it were a law. But an agentic trajectory is a sequence of
+ENVIRONMENT INTERACTIONS, and the environment is itself a VERIFIER: error codes,
+tool results, state transitions, precondition/postcondition checks are all
+verifiable intermediate signal that reasoning never had. Outcome-only RL throws
+it away. So the case for moving beyond outcome-only is STRONGER in agentic
+settings than in reasoning — the opposite of how the field treats it.
+RLVR (verifiable outcomes) and RLVP (verifiable procedures) are COMPLEMENTARY
+channels, not rivals: RLVP densifies + anchors early, RLVR carries terminal
+truth. RLVR is the ceiling when no procedure is verifiable; RLVP is what
+agentic environments additionally make available and inherited-RLVR leaves on
+the table.
+
+**TWO contributions (not four).**
+1. **EFFICIENCY** (denser rewards == faster learning; these are ONE thing —
+   denser verifiable signal -> more efficient sampling -> faster convergence).
+   The process channel produces gradient from FAILED episodes, exactly where
+   outcome-only GRPO is blind (all-fail groups -> zero advantage -> dead
+   updates). Measured: ~4-7x fewer episodes to target success, near-zero seed
+   variance. Operates when rules are OUTCOME-INSTRUMENTAL.
+2. **HARM REDUCTION as an INDEPENDENT contribution** (merge "reduced harm" and
+   "harm on an independent axis" — same concept). The outcome reward is defined
+   on the TERMINAL STATE; harm lives on the PATH. An agent can reach a correct
+   final state via an irreversible harmful path (delete the production DB, then
+   rebuild it -> outcome=success, but catastrophic irreversible harm in the
+   window). Outcome-only RL reinforces "delete and rebuild" because it only sees
+   where you ended, not what you destroyed. Because harm is often IRREVERSIBLE,
+   a successful terminal state does NOT redeem it. In deployment, NOT violating
+   operating principles can matter MORE than achieving the goal (a goal
+   not-yet-done is recoverable; a deleted DB is not). Outcome-only RL is
+   CONSTITUTIONALLY BLIND to orthogonal harm (by definition: if it moved the
+   reward it would not be a separate axis). RLVP is the only lever that reaches
+   it. This is QUALITATIVELY beyond RLVR, not quantitatively better -> co-headline.
+   A reward on terminal states is the WRONG OBJECT to express a constraint on
+   paths; process rewards are NECESSARY, not merely efficient.
+
+**The two axes ARE the two regimes of the coverage gradient.** Instrumental
+rules -> efficiency (axis 1). Orthogonal-but-principled rules -> harm reduction
+(axis 2). Same two-channel machinery; rule-to-reward alignment selects the axis.
+CAVEAT (the tau2 collapse): harm reduction done naively triggers the
+compliance-only attractor (minimize harm by not acting -> safe + useless). The
+contribution is reducing harm WITHOUT the collapse — that is what two SEPARATE
+channels + annealing + outcome-gating are FOR (protect the outcome axis from the
+harm axis). Independence is what makes harm-reduction uniquely RLVP's to give
+AND what makes it dangerous to give carelessly — same coin.
+
+**Benchmark targets = high verifiable-FRACTION tasks (RLVP should GAIN, not just
+neutralize harm):** SWE-bench Verified via SWE-Gym, TerminalBench, formal
+theorem proving (Lean/miniF2F, per-tactic verification). Contrast: math /
+competitive programming have a verifiable OUTCOME but no verifiable PROCEDURE
+(single hard computation) -> RLVR ceiling, RLVP cannot help. tau2 is a HYBRID:
+verifiable policy/validity layer + non-verifiable task-INTENT layer -> RLVP
+neutralizes harm but cannot gain, because intent IS the reward and not a rule
+(coverage gradient saturates at policy-validity; task-intent is irreducible).
+
 ## Positioning: RLVP as R1-Zero extended to long-horizon agents
 
 R1-Zero self-evolves from a verifiable OUTCOME reward alone — elegant, but it
