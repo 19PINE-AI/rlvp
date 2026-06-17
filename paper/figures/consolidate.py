@@ -166,13 +166,21 @@ D["tau2"] = {
     "rlvp_viol": [r.get("viol_per_ep", 0) for r in rows("tau2_rlvp")],
     "aligned_train": [r["reward"] for r in rows("tau2_aligned")],
     "aligned_viol": [r.get("viol_per_ep", 0) for r in rows("tau2_aligned")],
-    # three-tier final eval rewards (generic eval is variance over a collapsed policy)
-    "tiers": {"outcome-only": tev("outcome")["reward"] if tev("outcome") else None,
-              "RLVP\n(generic rules)": tev("rlvp")["reward"] if tev("rlvp") else None,
-              "RLVP\n(aligned rules)": tev("aligned")["reward"] if tev("aligned") else None},
-    "tiers_train": {"outcome-only": st.mean([r["reward"] for r in rows("tau2_outcome")][-5:]),
-                    "RLVP\n(generic rules)": st.mean([r["reward"] for r in rows("tau2_rlvp")][-5:]),
-                    "RLVP\n(aligned rules)": st.mean([r["reward"] for r in rows("tau2_aligned")][-5:])},
+    "semantic_train": [r["reward"] for r in rows("tau2_semantic")],
+    # four-tier coverage gradient, measured on training reward (last-5 mean;
+    # eval is too small-k to separate the middle tiers reliably)
+    "tiers_train": {
+        "outcome-only\nGRPO": st.mean([r["reward"] for r in rows("tau2_outcome")][-5:]),
+        "RLVP: generic\n(orthogonal)": st.mean([r["reward"] for r in rows("tau2_rlvp")][-5:]),
+        "RLVP: aligned\nprocedural": st.mean([r["reward"] for r in rows("tau2_aligned")][-5:]),
+        "RLVP: aligned\nsemantic": st.mean([r["reward"] for r in rows("tau2_semantic")][-5:]),
+    },
+    "tiers_peak": {
+        "outcome-only\nGRPO": max(r["reward"] for r in rows("tau2_outcome")),
+        "RLVP: generic\n(orthogonal)": max(r["reward"] for r in rows("tau2_rlvp")),
+        "RLVP: aligned\nprocedural": max(r["reward"] for r in rows("tau2_aligned")),
+        "RLVP: aligned\nsemantic": max(r["reward"] for r in rows("tau2_semantic")),
+    },
 }
 
 # --- phase0 all-fail mechanism (chain difficulty calibration) ---

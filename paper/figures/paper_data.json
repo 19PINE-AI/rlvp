@@ -1393,15 +1393,44 @@
       0.0,
       0.0
     ],
-    "tiers": {
-      "outcome-only": 0.6,
-      "RLVP\n(generic rules)": 0.45,
-      "RLVP\n(aligned rules)": 0.35
-    },
+    "semantic_train": [
+      0.125,
+      0.0,
+      0.125,
+      0.0,
+      0.041666666666666664,
+      0.125,
+      0.125,
+      0.041666666666666664,
+      0.16666666666666666,
+      0.0,
+      0.125,
+      0.08333333333333333,
+      0.08333333333333333,
+      0.125,
+      0.0,
+      0.20833333333333334,
+      0.125,
+      0.5833333333333334,
+      0.3333333333333333,
+      0.25,
+      0.6666666666666666,
+      0.375,
+      0.20833333333333334,
+      0.4166666666666667,
+      0.25
+    ],
     "tiers_train": {
-      "outcome-only": 0.48333333333333334,
-      "RLVP\n(generic rules)": 0.0,
-      "RLVP\n(aligned rules)": 0.36666666666666664
+      "outcome-only\nGRPO": 0.48333333333333334,
+      "RLVP: generic\n(orthogonal)": 0.0,
+      "RLVP: aligned\nprocedural": 0.36666666666666664,
+      "RLVP: aligned\nsemantic": 0.3833333333333333
+    },
+    "tiers_peak": {
+      "outcome-only\nGRPO": 0.7083333333333334,
+      "RLVP: generic\n(orthogonal)": 0.125,
+      "RLVP: aligned\nprocedural": 0.5,
+      "RLVP: aligned\nsemantic": 0.6666666666666666
     }
   },
   "calib": {

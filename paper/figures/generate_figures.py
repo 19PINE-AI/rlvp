@@ -350,40 +350,43 @@ def fig_tau2_collapse():
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4),
                                    gridspec_kw={'width_ratios': [1.55, 1]})
 
-    # --- Left: three training trajectories ---
-    ot = t2['outcome_train']; rt = t2['rlvp_train']; at = t2.get('aligned_train', [])
+    # --- Left: four training trajectories ---
+    ot = t2['outcome_train']; rt = t2['rlvp_train']
+    at = t2.get('aligned_train', []); se = t2.get('semantic_train', [])
     it = np.arange(1, len(ot) + 1)
     axL.plot(it, ot, color=BLUE, linewidth=2.2, marker='o', markersize=3,
              label='outcome-only GRPO')
     axL.plot(it[:len(rt)], rt, color=RED, linewidth=2.2, marker='s', markersize=3,
-             label='RLVP, generic rules')
+             label='RLVP: generic (orthogonal) rules')
     if at:
-        axL.plot(np.arange(1, len(at) + 1), at, color=GREEN, linewidth=2.2,
-                 marker='D', markersize=3, label='RLVP, policy-derived rules')
+        axL.plot(np.arange(1, len(at) + 1), at, color=ORANGE, linewidth=2.0,
+                 marker='^', markersize=3, label='RLVP: aligned procedural rules')
+    if se:
+        axL.plot(np.arange(1, len(se) + 1), se, color=GREEN, linewidth=2.2,
+                 marker='D', markersize=3, label='RLVP: aligned semantic rules')
     axL.set_xlabel('iteration'); axL.set_ylabel('training task reward')
-    axL.set_ylim(-0.03, 0.7); axL.grid(True, alpha=0.25, linewidth=0.6)
-    axL.annotate('compliance-only attractor\n(generic rules: reward $\\rightarrow$ 0)',
-                 xy=(len(rt), rt[-1]), xytext=(13, 0.47), fontsize=8.5, color=RED, ha='center',
+    axL.set_ylim(-0.03, 0.78); axL.grid(True, alpha=0.25, linewidth=0.6)
+    axL.annotate('compliance-only attractor\n(orthogonal rules: reward $\\rightarrow$ 0)',
+                 xy=(len(rt), rt[-1]), xytext=(13, 0.55), fontsize=8, color=RED, ha='center',
                  arrowprops=dict(arrowstyle='->', color=RED, linewidth=1.0))
-    axL.annotate('aligned rules + early anneal:\nno collapse',
-                 xy=(len(at), at[-1]) if at else (20, 0.37), xytext=(15, 0.09),
-                 fontsize=8.5, color='#15803D', ha='center',
-                 arrowprops=dict(arrowstyle='->', color=GREEN, linewidth=1.0))
-    axL.legend(loc='upper left', frameon=True, framealpha=0.9, fontsize=8.5)
+    axL.legend(loc='upper left', frameon=True, framealpha=0.92, fontsize=7.8)
 
-    # --- Right: the three-tier outcome (final held-out reward) ---
-    tiers = t2['tiers']
+    # --- Right: the coverage gradient (training reward; mean bar + peak tick) ---
+    tiers = t2['tiers_train']; peaks = t2.get('tiers_peak', {})
     labels = list(tiers.keys()); vals = [tiers[k] for k in labels]
-    cols = [BLUE, RED, GREEN]
+    cols = [BLUE, RED, ORANGE, GREEN]
     y = np.arange(len(labels))[::-1]
-    axR.barh(y, vals, color=cols, alpha=0.9, height=0.6, edgecolor=DARKGRAY)
-    for yi, v in zip(y, vals):
-        axR.text(v + 0.015, yi, f'{v:.2f}', va='center', fontsize=10, fontweight='bold')
-    axR.set_yticks(y); axR.set_yticklabels(labels, fontsize=8.5)
-    axR.set_xlim(0, 0.74); axR.set_xlabel('final held-out reward')
+    axR.barh(y, vals, color=cols, alpha=0.9, height=0.62, edgecolor=DARKGRAY)
+    for yi, k, v in zip(y, labels, vals):
+        axR.text(v + 0.015, yi, f'{v:.2f}', va='center', fontsize=9.5, fontweight='bold')
+        if k in peaks:  # peak as a thin marker
+            axR.plot([peaks[k]], [yi], marker='|', markersize=14, color=DARKGRAY, mew=1.6)
+    axR.set_yticks(y); axR.set_yticklabels(labels, fontsize=8)
+    axR.set_xlim(0, 0.82); axR.set_xlabel('training reward (bar: mean; tick: peak)')
     axR.grid(True, axis='x', alpha=0.25, linewidth=0.6)
-    axR.text(0.71, y[1], 'HARM', va='center', ha='right', fontsize=8, color=RED, fontweight='bold')
-    axR.text(0.71, y[2], 'no harm,\nno gain', va='center', ha='right', fontsize=7.5, color='#15803D')
+    axR.text(0.80, y[1], 'HARM', va='center', ha='right', fontsize=7.5, color=RED, fontweight='bold')
+    axR.text(0.80, y[2], 'no harm', va='center', ha='right', fontsize=7, color='#B45309')
+    axR.text(0.80, y[3], 'no harm', va='center', ha='right', fontsize=7, color='#15803D')
     fig.tight_layout()
     save(fig, 'fig_tau2_collapse')
 
