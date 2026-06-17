@@ -603,3 +603,19 @@ discharges for the prerequisite lookups) + early anneal:
           procedural rules don't capture.
 BOUNDARY is a COVERAGE GRADIENT, not a line: misaligned->harm, aligned-procedural->neutral,
 semantic-coverage->(predicted) gain. The remaining gap names the next rule set, not a failure.
+
+### E3c tau2 SEMANTIC-coverage rules — the coverage gradient SATURATES
+tau2 airline, no policy in prompt, train reward (last5 / peak):
+  outcome-only:            0.48 / 0.71
+  RLVP generic rules:      0.0  / 0.12   (collapse / HARM)
+  RLVP aligned-procedural: 0.37 / 0.50   (no harm, no gain)
+  RLVP aligned-semantic:   0.38 / 0.67   (no harm; peak approaches outcome; avg NO gain)
+Semantic rules = verifiable content-validity vs DB (modify_basic_economy,
+change_passenger_count, payment_not_in_profile). They FIRED (viol 0.4->2.4 early,
+agent attempted invalid modifications, then learned to avoid -> viol 0 by iter 10).
+=> Semantic coverage did NOT close the gap to outcome-only. The gradient SATURATES:
+   verifiable rules can cover GENERAL POLICY (procedure + validity) but NOT task-specific
+   INTENT (which specific valid change THIS user wants). Task intent IS the reward; a rule
+   encoding it would just be the task spec. So RLVP accelerates the policy-verifiable part
+   of success and CANNOT substitute for outcome learning of task intent. This is the
+   IRREDUCIBLE limit of verifiable process rewards, measured.

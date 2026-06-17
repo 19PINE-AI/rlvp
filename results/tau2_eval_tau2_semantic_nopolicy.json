@@ -1,0 +1,10 @@
+{
+  "model": "results/run_tau2_semantic/final",
+  "with_policy": false,
+  "n_sims": 40,
+  "mean_reward": 0.3,
+  "success": 0.3,
+  "viol_per_ep": 0.0,
+  "clean_eps": 1.0,
+  "per_rule": {}
+}
