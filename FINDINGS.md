@@ -31,6 +31,7 @@ GRPO throws away.
 | DAPO doesn't solve sample-efficiency | ✅ | 5.6× oversampling tax, no recovery |
 | Lean "faster to threshold" | ❌ retracted | seed-dependent; not robust |
 | τ²: process rewards can't substitute for outcome | ✅ (boundary) | coverage gradient w/ ceiling |
+| Self-critique vs rules ([SELFCRITIC.md](SELFCRITIC.md)) | ✅ Exp0 @1.7B; 🔄 scale+train | blind critic blind to *stateful*/*masked* rules even when told them |
 | SWE-bench at 4B/30B | 🔄 re-measuring | env bug fixed; valid measurement in progress |
 | miniF2F at 30B (vLLM+QLoRA) | 🔄 running | harness built+validated; runs starting |
 
@@ -185,3 +186,18 @@ discards — robustly eliminating dead updates and, independently, cutting harmf
 actions ~4× without trading away success. It accelerates the *verifiable* part of a
 task and reduces harm, but it cannot replace the outcome signal for learning task
 *intent*.
+
+## 9. 30B miniF2F: a regime where RLVP HURTS (compliance attractor, reproduced)
+At 30B the model can actually learn the curated algebra subset:
+ - OUTCOME-only: 0.188 -> 1.0 success over 40 iters (stable). 30B genuinely learns it.
+ - RLVP (c3): success rises 3 iters (0.25->0.48) then COLLAPSES to 0, violations rising.
+   Robust across AdamW lr=1e-4 (also numerically diverged), Muon 5e-3, Muon 1e-3
+   (grad bounded <=1.0 -> NOT optimizer/numeric; it's the reward signal).
+Mechanism: on all-fail batches the OUTCOME advantage is 0, so ONLY the process signal
+drives the gradient. The errored-tactic PENALTY is MISALIGNED with proving (cut errors
+by degenerating, not by proving) -> drives the degenerate compliance-only optimum, the
+SAME attractor seen on tau2. Coverage-gradient boundary reproduced at 30B on a real
+benchmark: when outcome already carries signal, a misaligned process penalty destabilizes
+clean outcome learning. RLVP helps most when outcome is BLIND and the process signal is
+ALIGNED with progress; miniF2F-algebra@30B violates both. (Muon added + validated;
+collapse is a reward-signal property, not the optimizer.)
