@@ -28,12 +28,15 @@ class VLLMGenServer:
     def __init__(self, model_path, tok, max_new_tokens=400, temperature=1.0,
                  top_p=1.0, quantization=None, gpu_mem=0.85, max_model_len=8192,
                  max_batch=64, batch_window_s=0.04, enable_lora=False,
-                 max_lora_rank=32, tensor_parallel_size=1):
+                 max_lora_rank=32, tensor_parallel_size=1, enforce_eager=False):
         self.tok = tok
         self.eot = tok.convert_tokens_to_ids(TEMPLATE.eot)
         self.max_new_tokens = max_new_tokens
+        # enforce_eager drops cudagraph memory -- needed when enable_lora + a big fp8
+        # model would otherwise leave no room for KV cache (trades a little gen speed).
         kw = dict(model=model_path, gpu_memory_utilization=gpu_mem,
                   max_model_len=max_model_len, enable_lora=enable_lora,
+                  enforce_eager=enforce_eager,
                   tensor_parallel_size=tensor_parallel_size, trust_remote_code=True)
         if quantization:                      # "fp8" => online-quantize a bf16 ckpt
             kw["quantization"] = quantization  # (omit for a pre-quantized FP8 ckpt)

@@ -29,9 +29,9 @@ os.environ["PATH"] = f"{ELAN_HOME / 'bin'}:{os.environ.get('PATH', '')}"
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 import torch
-from transformers import (AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig,
-                          get_constant_schedule_with_warmup)
-from peft import LoraConfig, get_peft_model
+from transformers import AutoTokenizer
+# NB: bitsandbytes / peft init CUDA at import -> a forked vLLM EngineCore then can't
+# re-init CUDA. So import them LAZILY inside main(), AFTER vLLM has forked.
 
 from rlvp.grpo import TrainConfig, build_advantages, update_policy
 from rlvp.rollout import set_template
@@ -92,9 +92,22 @@ def main():
     tok = AutoTokenizer.from_pretrained(MODEL_HF)
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
-    torch.manual_seed(SEED)
 
-    # --- HF 4-bit QLoRA model for the backward pass ---
+    # --- vLLM fp8 generator FIRST, before ANY CUDA init in this process. vLLM forks
+    # its EngineCore, and a forked subprocess cannot re-init CUDA -- so torch.manual_
+    # seed (which inits CUDA RNG) and the HF model load MUST come after. ---
+    print("starting vLLM fp8 generator ...", flush=True)
+    gen_srv = VLLMGenServer(MODEL_GEN, tok, max_new_tokens=200, temperature=1.0,
+                            gpu_mem=0.45, max_model_len=4096, max_batch=32,
+                            enable_lora=True, max_lora_rank=32, enforce_eager=True)
+
+    torch.manual_seed(SEED)   # now safe: vLLM's EngineCore already forked
+
+    # --- HF 4-bit QLoRA model for the backward pass (lazy imports: bnb/peft init
+    # CUDA, which is fine now that vLLM has already forked its EngineCore) ---
+    from transformers import (AutoModelForCausalLM, BitsAndBytesConfig,
+                              get_constant_schedule_with_warmup)
+    from peft import LoraConfig, get_peft_model
     bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
                              bnb_4bit_compute_dtype=torch.bfloat16,
                              bnb_4bit_use_double_quant=True)
@@ -109,13 +122,8 @@ def main():
     opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],
                             lr=1e-4, betas=(0.9, 0.95), weight_decay=0.0)
     cfg = TrainConfig(credit=CREDIT, anneal_at=ANNEAL)
+    cfg.micro_token_budget = 2048   # smaller microbatches bound the 30B backward peak
     sched = get_constant_schedule_with_warmup(opt, num_warmup_steps=cfg.warmup)
-
-    # --- vLLM fp8 generator (leaves room for the 4-bit backward) ---
-    print("starting vLLM fp8 generator ...", flush=True)
-    gen_srv = VLLMGenServer(MODEL_GEN, tok, max_new_tokens=200, temperature=1.0,
-                            gpu_mem=0.34, max_model_len=4096, max_batch=48,
-                            enable_lora=True, max_lora_rank=32)
 
     thms = load_minif2f(split="Valid", easy_only=True, algebra_only=ALGEBRA)
     print(f"{len(thms)} miniF2F theorems (algebra_only={ALGEBRA}); credit={CREDIT} "
