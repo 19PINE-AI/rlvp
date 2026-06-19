@@ -46,6 +46,10 @@ class LeanRuleTracker:
     """Per-turn violations/discharges derived ENTIRELY from the REPL oracle.
 
     mode='structural': errored_tactic + goal_progress + no_progress.
+    mode='aligned'   : goal_progress discharge ONLY (no penalties). The errored/
+                       no_progress PENALTIES are misaligned with proving (you can cut
+                       them by degenerating) and drove a compliance-attractor collapse
+                       at 30B; the discharge (goals strictly decreased) is aligned.
     mode='outcome'   : no process signal (pure terminal reward baseline).
     """
 
@@ -62,8 +66,10 @@ class LeanRuleTracker:
         v, d = [], []
         if self.mode == "outcome":
             return v, d
+        aligned = self.mode == "aligned"   # discharge-only: no penalties
         if errored:
-            v.append("errored_tactic")
+            if not aligned:
+                v.append("errored_tactic")
             # an errored tactic does not change the proof state; goal count and
             # stale counter are unaffected.
         else:
@@ -73,7 +79,7 @@ class LeanRuleTracker:
                 self.stale_steps = 0
             elif prev is not None and n_goals >= prev and not done:
                 self.stale_steps += 1
-                if self.stale_steps > 1:
+                if self.stale_steps > 1 and not aligned:
                     v.append("no_progress")
             else:
                 self.stale_steps = 0

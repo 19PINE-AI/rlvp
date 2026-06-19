@@ -45,7 +45,7 @@ from mathlib_repl_wrapper import MathlibREPL    # noqa: E402
 # ---- args ----
 ITERS = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 40
 CREDIT, ANNEAL, OUT_NAME, SEED, ALGEBRA = "c3", 0, "run_minif2f", 7, False
-MUON, LR = False, None
+MUON, LR, RULE_MODE_ARG = False, None, "structural"
 for _i, _a in enumerate(sys.argv):
     if _a == "--credit": CREDIT = sys.argv[_i + 1]
     if _a == "--anneal": ANNEAL = int(sys.argv[_i + 1])
@@ -54,6 +54,7 @@ for _i, _a in enumerate(sys.argv):
     if _a == "--algebra": ALGEBRA = True
     if _a == "--muon": MUON = True
     if _a == "--lr": LR = float(sys.argv[_i + 1])
+    if _a == "--rule-mode": RULE_MODE_ARG = sys.argv[_i + 1]
 # optimizer-dependent default LR (AdamW 1e-4 diverged on 30B QLoRA + c3 advantages;
 # Muon's orthogonalized unit-norm updates take a much larger lr)
 if LR is None:
@@ -64,7 +65,7 @@ MODEL_HF = "Qwen/Qwen3-30B-A3B"        # 4-bit QLoRA backward (bf16 ckpt)
 G = 8
 TASKS_PER_ITER = 6
 MAX_STEPS = 8
-RULE_MODE = "structural"
+RULE_MODE = RULE_MODE_ARG
 OUT = ROOT / "results" / f"run_{OUT_NAME}"
 OUT.mkdir(parents=True, exist_ok=True)
 
