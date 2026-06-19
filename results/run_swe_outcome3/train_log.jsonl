@@ -1,0 +1,6 @@
+{"iter": 1, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 1.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 32.4}
+{"iter": 2, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 1.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 67.5}
+{"iter": 4, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 1.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 29.4}
+{"iter": 6, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 0.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 15.9}
+{"iter": 10, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 0.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 10.7}
+{"iter": 12, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 0.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 4.6}

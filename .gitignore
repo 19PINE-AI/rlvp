@@ -4,3 +4,22 @@ results/run_*/final/
 results/*.log
 nohup.out
 *.swp
+
+# --- Lean toolchain + builds (reproducible via setup, multi-GB) ---
+leanprove/.elan/
+leanprove/repl/
+leanprove/mathlib_repl/
+leanprove/minif2f_src/
+**/.lake/
+*.olean
+
+# --- SWE/model caches, venvs, big downloads (reproducible) ---
+swegym/cache/
+**/venvs/
+*.safetensors
+*.bin
+results/run_*/adapter*/
+results/run_*/final/
+
+# --- misc ---
+*.out

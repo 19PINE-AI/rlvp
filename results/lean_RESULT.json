@@ -1,0 +1,21 @@
+{
+  "tag": "lean",
+  "rlvp": {
+    "iters": 40,
+    "succ_last5": 0.8,
+    "succ_peak": 1.0,
+    "reward_last5": 0.8,
+    "disc_ep_last5": 1.01,
+    "viol_ep_last5": 1.48,
+    "dead_iters": 0
+  },
+  "outcome": {
+    "iters": 40,
+    "succ_last5": 0.717,
+    "succ_peak": 1.0,
+    "reward_last5": 0.717,
+    "disc_ep_last5": 0.72,
+    "viol_ep_last5": 1.33,
+    "dead_iters": 16
+  }
+}

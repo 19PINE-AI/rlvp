@@ -1,0 +1,21 @@
+{
+  "tag": "term",
+  "rlvp": {
+    "iters": 40,
+    "succ_last5": 0.142,
+    "succ_peak": 0.5,
+    "reward_last5": 0.142,
+    "disc_ep_last5": 0,
+    "viol_ep_last5": 0.47,
+    "dead_iters": 0
+  },
+  "outcome": {
+    "iters": 40,
+    "succ_last5": 0.133,
+    "succ_peak": 0.5,
+    "reward_last5": 0.133,
+    "disc_ep_last5": 0,
+    "viol_ep_last5": 3.67,
+    "dead_iters": 31
+  }
+}

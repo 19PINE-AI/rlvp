@@ -1,0 +1,3 @@
+{"iter": 5, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 0.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 8.3}
+{"iter": 10, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 0.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 23.3}
+{"iter": 13, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disc_per_ep": 0.0, "n_eps": 2, "n_groups": 1, "loss": 0.0, "entropy": 0.0, "wall_s": 38.1}
