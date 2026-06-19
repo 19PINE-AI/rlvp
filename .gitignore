@@ -23,3 +23,5 @@ results/run_*/final/
 
 # --- misc ---
 *.out
+leanprove/mathlib_build.log
+termbench/terminal-bench/
