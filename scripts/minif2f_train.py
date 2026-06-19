@@ -98,7 +98,7 @@ def main():
     # seed (which inits CUDA RNG) and the HF model load MUST come after. ---
     print("starting vLLM fp8 generator ...", flush=True)
     gen_srv = VLLMGenServer(MODEL_GEN, tok, max_new_tokens=200, temperature=1.0,
-                            gpu_mem=0.45, max_model_len=4096, max_batch=32,
+                            gpu_mem=0.48, max_model_len=4096, max_batch=32,
                             enable_lora=True, max_lora_rank=32, enforce_eager=True)
 
     torch.manual_seed(SEED)   # now safe: vLLM's EngineCore already forked
