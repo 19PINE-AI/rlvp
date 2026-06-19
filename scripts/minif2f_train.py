@@ -146,8 +146,14 @@ def main():
                               for _ in range(G)]
                 for thm in batch}
         for name, fs in futs.items():
-            grp = [f.result() for f in fs]
-            grp = [e for e in grp if e is not None and e.n_turns > 0]
+            grp = []
+            for f in fs:
+                try:
+                    e = f.result()
+                except Exception:        # a single rollout error can't kill the run
+                    e = None
+                if e is not None and e.n_turns > 0:
+                    grp.append(e)
             if len(grp) >= 2:
                 groups.append(grp)
         eps = [e for g in groups for e in g]
