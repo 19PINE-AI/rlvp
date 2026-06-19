@@ -45,12 +45,19 @@ from mathlib_repl_wrapper import MathlibREPL    # noqa: E402
 # ---- args ----
 ITERS = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 40
 CREDIT, ANNEAL, OUT_NAME, SEED, ALGEBRA = "c3", 0, "run_minif2f", 7, False
+MUON, LR = False, None
 for _i, _a in enumerate(sys.argv):
     if _a == "--credit": CREDIT = sys.argv[_i + 1]
     if _a == "--anneal": ANNEAL = int(sys.argv[_i + 1])
     if _a == "--out": OUT_NAME = sys.argv[_i + 1]
     if _a == "--seed": SEED = int(sys.argv[_i + 1])
     if _a == "--algebra": ALGEBRA = True
+    if _a == "--muon": MUON = True
+    if _a == "--lr": LR = float(sys.argv[_i + 1])
+# optimizer-dependent default LR (AdamW 1e-4 diverged on 30B QLoRA + c3 advantages;
+# Muon's orthogonalized unit-norm updates take a much larger lr)
+if LR is None:
+    LR = 5e-3 if MUON else 3e-5
 
 MODEL_GEN = "Qwen/Qwen3-30B-A3B-FP8"   # vLLM rollouts
 MODEL_HF = "Qwen/Qwen3-30B-A3B"        # 4-bit QLoRA backward (bf16 ckpt)
@@ -119,8 +126,14 @@ def main():
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj"]))
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     model.eval()
-    opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],
-                            lr=1e-4, betas=(0.9, 0.95), weight_decay=0.0)
+    trainable = [p for p in model.parameters() if p.requires_grad]
+    if MUON:
+        from rlvp.muon import Muon
+        opt = Muon(trainable, lr=LR, momentum=0.95)
+        print(f"optimizer=Muon lr={LR}", flush=True)
+    else:
+        opt = torch.optim.AdamW(trainable, lr=LR, betas=(0.9, 0.95), weight_decay=0.0)
+        print(f"optimizer=AdamW lr={LR}", flush=True)
     cfg = TrainConfig(credit=CREDIT, anneal_at=ANNEAL)
     cfg.micro_token_budget = 2048   # smaller microbatches bound the 30B backward peak
     sched = get_constant_schedule_with_warmup(opt, num_warmup_steps=cfg.warmup)

@@ -75,6 +75,8 @@ class TrainConfig:
                                      # discharge-credit farming on long-horizon tasks
     auto_rules: bool = False         # capstone: derive the process signal from
                                      # tool tags + env errors (no hand predicates)
+    critic_mode: str = "blind"       # llmcritic: "blind" (no rules) | "rule_aware"
+    critic_temp: float = 0.0         # llmcritic: critic decoding temperature
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -114,7 +116,7 @@ def build_advantages(groups, cfg: TrainConfig):
         scalar_grp = grp if cfg.script_scalar else [e for e in grp if not e.scripted]
         if not scalar_grp:
             scalar_grp = grp
-        if cfg.credit in ("outcome", "c2", "c2pos", "c4"):
+        if cfg.credit in ("outcome", "c2", "c2pos", "c4", "llmcritic"):
             rs = {id(e): e.env.outcome_reward() for e in scalar_grp}
         elif cfg.credit in ("c1", "c3"):
             rs = {id(e): e.env.outcome_reward()
@@ -127,7 +129,16 @@ def build_advantages(groups, cfg: TrainConfig):
         base = [(rs[id(e)] - mu) if id(e) in rs else 0.0 for e in grp]
         for e, a in zip(grp, base):
             per_turn = {}
-            if cfg.credit in ("c2", "c3", "c4"):
+            if cfg.credit == "llmcritic":
+                # dense penalty from on-policy self-critique, NOT rule predicates.
+                # (env.turn_violations is still tracked, but only as an offline
+                # reward-hacking monitor -- never enters the reward here.)
+                for turn in getattr(e, "critic_turns", set()) or set():
+                    per_turn[turn] = -cfg.lam
+                if cfg.step_cost and not e.scripted:
+                    for (s, t, turn) in e.action_spans:
+                        per_turn[turn] = per_turn.get(turn, 0.0) - cfg.step_cost
+            elif cfg.credit in ("c2", "c3", "c4"):
                 for turn, rules in e.turn_violations.items():
                     per_turn[turn] = -cfg.lam * len(rules)
                 # c4: discharge credit is outcome-gated — a compliance-only
@@ -240,8 +251,15 @@ def update_policy(model, tok, adv_eps, cfg, optimizer, scheduler):
             loss.backward()
             loss_sum += loss.item()
             del logits, logp, ratio, surr
-        gnorms.append(float(torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)))
-        optimizer.step()
+        gnorm = float(torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip))
+        gnorms.append(gnorm)
+        # Skip the step on a non-finite gradient: clip_grad_norm_ can't rescue
+        # NaN/Inf grads (they'd write NaN into the weights and never recover).
+        # No-op for healthy runs; a safety net against divergence.
+        if gnorm == gnorm and gnorm != float("inf"):
+            optimizer.step()
+        else:
+            optimizer.zero_grad(set_to_none=True)
         scheduler.step()
     model.eval()
     return {"loss": loss_sum, "entropy": ent_sum / max(ent_n, 1),
@@ -323,6 +341,12 @@ def train(cfg: TrainConfig):
             run_episodes(model, tok, [e for live, _ in gen_groups for e in live],
                          temperature=cfg.temp, top_p=1.0, gen_batch=cfg.gen_batch,
                          max_episode_tokens=cfg.max_episode_tokens)
+            if cfg.credit == "llmcritic":
+                from .self_critic import label_episodes
+                model.config.use_cache = True
+                label_episodes(model, tok, [e for live, _ in gen_groups for e in live],
+                               mode=cfg.critic_mode, batch=max(cfg.gen_batch // 8, 2),
+                               temperature=cfg.critic_temp)
             groups = [full for _, full in gen_groups]
         else:
             # DAPO dynamic sampling: keep only groups with 0<acc<1, resample the
@@ -354,6 +378,17 @@ def train(cfg: TrainConfig):
                                     for live, _ in gen_groups) / max(len(gen_groups), 1)
         st["all_pass_groups"] = sum(all(e.env.success for e in live)
                                     for live, _ in gen_groups) / max(len(gen_groups), 1)
+        if cfg.credit == "llmcritic":
+            # reward-hacking monitor: how well do the self-critic's flags line up
+            # with the (unused-for-reward) rule oracle, at the turn level?
+            tp = fp = fn = 0
+            for e in all_eps:
+                gt = set(e.turn_violations)
+                pr = getattr(e, "critic_turns", set()) or set()
+                tp += len(gt & pr); fp += len(pr - gt); fn += len(gt - pr)
+            st["critic_precision"] = tp / max(tp + fp, 1)
+            st["critic_recall"] = tp / max(tp + fn, 1)
+            st["critic_flags_per_ep"] = (tp + fp) / max(len(all_eps), 1)
         if not groups:   # nothing informative found (DAPO stall) — skip update
             rec = {"iter": it, "train": st, "loss": 0.0, "entropy": 0.0,
                    "roll_s": round(roll_s, 1), "upd_s": 0.0}
