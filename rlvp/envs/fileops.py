@@ -233,6 +233,49 @@ def make_chain_env(seed: int, n_stages: int, **kw) -> "FileOpsEnv":
     return env
 
 
+class ChainPotentialEnv(FileOpsEnv):
+    """Exposes the VERIFIABLE POTENTIAL Phi = #satisfied stages as a granularity-
+    controllable 'stage_progress' discharge (potential-only: track_rules off, so NO
+    penalties). For experiments E-A/E-B validating 'RLVP helps iff the domain has a
+    verifiable Phi strictly finer than the terminal outcome':
+      granularity='fine'  : credit every -dPhi   (finest verifiable potential)
+      granularity='mid'   : one milestone at >= half the stages
+      granularity='coarse': nothing -> reduces to outcome (Phi == terminal outcome)
+    n_stages is the SPARSITY knob (more stages -> lower success -> blinder outcome)."""
+
+    def __init__(self, task: dict, granularity: str = "fine", **kw):
+        kw.setdefault("track_rules", False)
+        super().__init__(task, **kw)
+        self.granularity = granularity
+        self.n_stages = task.get("n_stages", 1)
+        self._phi = 0
+        self._mid_paid = False
+
+    def step_text(self, model_text: str):
+        res = super().step_text(model_text)
+        phi = sum(1 for sub in self.task["stages"] if _check_one(sub, self.fs))
+        new = []
+        if phi > self._phi:
+            if self.granularity == "fine":
+                new = ["stage_progress"] * (phi - self._phi)
+            elif self.granularity == "mid" and not self._mid_paid \
+                    and phi >= (self.n_stages + 1) // 2:
+                new = ["stage_progress"]
+                self._mid_paid = True
+            self._phi = phi
+        for r in new:
+            self.discharges.append((self.turn, r))
+        res.discharges = (res.discharges or []) + new
+        return res
+
+
+def make_chain_potential_env(seed: int, n_stages: int, granularity: str = "fine",
+                             **kw) -> "ChainPotentialEnv":
+    env = ChainPotentialEnv(make_chain_task(seed, n_stages), granularity=granularity, **kw)
+    env.max_turns = 8 + 7 * n_stages
+    return env
+
+
 def compliant_script(task: dict, imperfect: bool = False, skip_rules: tuple = ()) -> list:
     """Assistant texts for a compliant trajectory. With imperfect=True the
     workflow is identical but the task is botched (wrong content / partial
