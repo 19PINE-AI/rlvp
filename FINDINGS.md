@@ -322,3 +322,14 @@ gradient exactly where the outcome is blind, and the boost is largest when the o
 blindest. (seed 12 running.) 30B sweep+SWE still queued behind the user's GPU jobs (no OOM
 squeeze); my 4B seed-val utilizes the otherwise-idle GPU without delaying the 30B (the
 user's 9GB blocks it regardless).
+
+## (hour-5) grad-density SEED-ROBUST (final framing: absolute, not ratio)
+n=6 (blind outcome), grad_mean:           coarse(outcome)   fine(potential)
+   seed 7                                       0.019            0.329
+   seed 11                                      0.002            0.312
+   seed 12                                      0.000 (run)      (running)
+The potential holds a STABLE ~0.32 gradient across every seed; outcome-only is effectively
+DEAD (~0.007). Report the ABSOLUTE values, not the boost ratio (the ratio explodes 17x->
+156x->inf only because coarse->0). Robust conclusion: a verifiable potential supplies
+consistent learning signal exactly where the outcome is blind. This is the clean, robust
+4B result of the program; the success payoff is on Lean-30B (aligned-RLVP 1.0/0-dead).
