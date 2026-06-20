@@ -31,7 +31,7 @@ GRPO throws away.
 | DAPO doesn't solve sample-efficiency | ✅ | 5.6× oversampling tax, no recovery |
 | Lean "faster to threshold" | ❌ retracted | seed-dependent; not robust |
 | τ²: process rewards can't substitute for outcome | ✅ (boundary) | coverage gradient w/ ceiling |
-| Self-critique vs rules ([SELFCRITIC.md](SELFCRITIC.md)) | ✅ Exp0 @1.7B; 🔄 scale+train | blind critic blind to *stateful*/*masked* rules even when told them |
+| Self-critique vs rules ([SELFCRITIC.md](SELFCRITIC.md)) | ✅ full 2×2 (Exp0+probe+Exp1+τ² cell-C) | symmetric: rules win on stateful (signal *stationarity*); self-critique wins on τ² *intent* (F1 .61 vs rules .14) |
 | SWE-bench at 4B/30B | 🔄 re-measuring | env bug fixed; valid measurement in progress |
 | miniF2F at 30B (vLLM+QLoRA) | 🔄 running | harness built+validated; runs starting |
 
@@ -201,3 +201,26 @@ benchmark: when outcome already carries signal, a misaligned process penalty des
 clean outcome learning. RLVP helps most when outcome is BLIND and the process signal is
 ALIGNED with progress; miniF2F-algebra@30B violates both. (Muon added + validated;
 collapse is a reward-signal property, not the optimizer.)
+
+## 10. The unifying principle: un-gameability of process rewards
+The structural collapse + aligned fix generalize to a single, predictive criterion:
+
+> A process reward is admissible as a LEARNING signal iff it is UN-GAMEABLE -- the
+> cheapest policy that maximizes it must solve the task.
+
+Test it BEFORE training: "what is the cheapest policy that maximizes signal P without
+solving the task?" If that policy is degenerate (do nothing / pad safe moves / avoid
+errors by inaction), P is misaligned, and where the outcome is blind (all-fail groups)
+P is the ONLY gradient -- so the optimizer climbs the degenerate direction (the
+compliance attractor). Penalties almost never pass (cheapest maximizer = inaction) ->
+they belong on the HARM axis, not as the learning gradient. Aligned discharges can pass
+(Lean goal-count strictly decreased is kernel-verified, unfakeable) -> admissible.
+
+Deeper: a good progress reward is a cheap, un-gameable, monotone proxy for dV (change in
+value). Where the domain gives one free (Lean goals, SAT clauses, distance, failing->
+passing tests), RLVP wins. Where it doesn't, "define progress" == "approximate V" == the
+credit-assignment problem itself, and a learned proxy just moves reward-hacking up a
+level (same wall as tau2's "intent is the reward"). RLVP's real deliverable is telling
+you WHICH regime you're in. Planned experiments to push into hard domains: (1) turn the
+un-gameability test into a measured law; (2) outcome-gated credit (c4); (3) SWE
+verifiable-progress ladder (reproduced->localized->test-passes). See PAPER_PLAN.md.

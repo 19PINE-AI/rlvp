@@ -226,3 +226,64 @@ that the process channel teaches real behavior, not prompt-following.
 E1 (1h) -> E2 main (20h) -> E3 (8h) -> E2 seeds (10h) -> E4 (8h) -> writeup.
 ~2.5 days GPU total. Driver: scripts/run_flagship.sh (written, NOT launched —
 awaiting review).
+
+================================================================================
+## NEW CORE PRINCIPLE (do NOT forget — promote to a main paper section)
+### "Admissibility of process rewards: the un-gameability criterion"
+================================================================================
+
+UNIFYING CLAIM (ties tau2 + 30B miniF2F into ONE principle, stronger than 3 obs):
+  A process reward is admissible as a LEARNING signal iff it is UN-GAMEABLE: the
+  cheapest policy that maximizes it must solve the task. Operational test, applied
+  BEFORE training: "what is the cheapest policy that maximizes signal P WITHOUT
+  solving the task?" If that policy is degenerate (do nothing / pad safe moves /
+  avoid errors by inaction), P is misaligned and -- in the regime where outcome is
+  BLIND (all-fail groups) and P is the ONLY gradient -- the optimizer WILL climb the
+  degenerate direction. This is the compliance attractor.
+
+  * A PENALTY almost never passes (cheapest maximizer = inaction). Penalties belong
+    on the HARM axis (bound the path), NEVER as the learning gradient when outcome
+    is blind.
+  * An ALIGNED DISCHARGE can pass: Lean goal-count STRICTLY DECREASED is kernel-
+    verified and cannot be earned by degenerating -> admissible, dense, safe.
+
+EMPIRICAL TRIPTYCH (30B Qwen3-30B-A3B, miniF2F algebra, vLLM-fp8 + QLoRA + Muon):
+  * outcome-only        -> learns to 1.0 (stable).
+  * RLVP structural(c3) -> COLLAPSES to 0 (misaligned errored-tactic penalty;
+                           compliance attractor; robust across AdamW/Muon -> signal
+                           not optimizer).
+  * RLVP aligned        -> stable, recovered a hard-batch dip and reached 0.92
+                           (goal-progress discharge only; un-gameable).
+  [quantitative aligned-vs-outcome numbers: PENDING the running matched-Muon compare;
+   fill in when results/minif2f_aln_RESULT.json lands -- do NOT fabricate.]
+
+DEEP POINT (for discussion): a good progress reward is a cheap, un-gameable, monotone
+proxy for dV (change in value function). When the domain provides one for free
+(Lean goals, SAT clauses, distance, failing->passing tests) RLVP shines. When it
+does NOT, "define progress" == "approximate V" == the credit-assignment problem
+itself; a learned proxy (LLM-critic) just relocates reward-hacking one level up.
+This is the same wall as tau2 "intent is the reward, learnable only from outcome".
+
+PAPER INTEGRATION:
+  - New section after the mechanism: "Admissibility of process rewards" w/ the
+    un-gameability test + the triptych figure (3 curves: outcome / structural-collapse
+    / aligned-stable).
+  - Reframe harm result (Terminal) as the LEGITIMATE penalty use: bound harm on the
+    independent axis, NOT a learning signal.
+  - Fold tau2 coverage-gradient + miniF2F collapse as the SAME phenomenon, 2 scales.
+
+PLANNED EXPERIMENTS (run after current compare; orchestrated):
+  #1 Un-gameability as a MEASURED LAW: ~5 Lean process-signal variants spanning
+     aligned->misaligned (goal-decrease / valid-tactic / non-error / shorter-than-peers
+     / orthogonal). Pre-register each one's cheapest gaming policy, train short, show
+     predicted-misaligned collapse & predicted-aligned help. Turns criterion -> test.
+  #2 Outcome-gated process credit (c4, already in grpo.py): discharge paid ONLY if the
+     episode eventually succeeds -> structurally un-gameable. c3-structural collapsed;
+     does c4-structural stay stable? Existing infra, just --credit c4.
+  #3 HARD-DOMAIN headline (SWE): manufacture an un-gameable verifiable-progress LADDER
+     (failing test reproduces bug -> edit targets the file -> test passes; "reproduced"
+     cannot be faked) and test whether RLVP makes progress where the raw outcome is
+     all-fail at 30B -- and whether the un-gameable ladder avoids the collapse a naive
+     "ran-tests" credit would farm. Plus control: process-as-PRECONDITION (gate, don't
+     pay) vs process-as-reward; and verifiable-discharge vs learned llmcritic (does the
+     learned proxy get hacked).
