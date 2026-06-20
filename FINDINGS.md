@@ -270,3 +270,23 @@ gradient, not loss==0.)
 (=outcome) at n=2 (grad_mean 0.30 vs 0.12) -> confirms the gradient-density mechanism;
 success payoff needs harder regime / more training (shown instead on Lean-30B:
 aligned-RLVP 1.0 / 0 dead vs outcome-Muon 0.125 / 25 dead).
+
+## 13. E-A/E-B RESULT (4B chain): potential's gradient boost GROWS with outcome sparsity
+Granularity x sparsity matrix (grad_mean = effective learning gradient):
+                coarse(=outcome)   fine    boost
+   n=2 stages       0.118          0.297   2.5x
+   n=4 stages       0.072          0.272   3.8x
+   n=6 stages       0.019          0.329   17.3x
+As the outcome blinds (n->6), outcome-only's gradient collapses to ~0 (effectively
+dead) while the verifiable potential keeps it strong -> the potential's benefit GROWS
+2.5x -> 17x. This is the E-B sparsity phase diagram, CONFIRMED: the verifiable Phi
+matters most exactly when the outcome is blindest. (E-A: at n=4, coarse 0.072 << mid
+0.332 ~ fine 0.272 -- any potential >> outcome.)
+
+CAVEAT (success payoff is optimizer-fragile, NOT automatic): at AdamW lr=3e-5 the dense
+potential DESTABILIZES (success collapses to 0; compliance-attractor instability, same
+as 30B structural), while sparse outcome learns slowly but stably. So the dense
+potential gives gradient but its conversion to SUCCESS needs bounded updates -- which is
+exactly why MUON was needed at 30B (aligned-RLVP 1.0 stable). Muon success-payoff run
+re-queued. Lesson: a verifiable potential is necessary (E-A/E-B) but the optimizer must
+bound the dense signal or it overfits to partial progress and degenerates.
