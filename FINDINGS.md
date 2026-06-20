@@ -253,3 +253,20 @@ FALSIFIABLE PREDICTIONS + EXPERIMENTS (queued):
   E-C IFF on a hard domain: SWE instances WITH a finer verifiable Phi (multiple F2P
       tests -> Phi = # failing F2P) vs WITHOUT (single F2P == outcome). Predict RLVP helps
       on multi-test, not single-test -- same domain, the structural property flips.
+
+## 12. REFINEMENT (within-group variance): a uniform potential is centered out
+The verifiable-potential claim needs a corollary discovered in the 4B chain matrix:
+GRPO's advantage is GROUP-RELATIVE (reward - group mean), so a process reward only
+creates gradient if it VARIES WITHIN THE GROUP. A potential that is uniform across
+rollouts (every rollout makes the same partial progress) cancels under group-centering
+-> no gradient, even though it is non-zero per episode. (Caught because loss==0 said
+"0 dead iters" while effective grad_norm was ~0; the right metric is effective
+gradient, not loss==0.)
+  Refined claim: RLVP helps iff a verifiable Phi exists that is (a) finer than outcome
+  AND (b) produces within-group variance (different rollouts reach different Phi).
+  This is WHY it worked on Lean (proof attempts reach genuinely different goal-counts
+  -> variance -> gradient) and why the n=2 chain doesn't (progress too uniform).
+4B chain matrix (controlled): the fine potential ~2x the effective gradient of coarse
+(=outcome) at n=2 (grad_mean 0.30 vs 0.12) -> confirms the gradient-density mechanism;
+success payoff needs harder regime / more training (shown instead on Lean-30B:
+aligned-RLVP 1.0 / 0 dead vs outcome-Muon 0.125 / 25 dead).
