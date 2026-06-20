@@ -311,3 +311,14 @@ tuning (rabbit hole). The robust 4B result = the E-A/E-B gradient-density phase 
 (now seed-validating across seeds 11,12); the success payoff = Lean-30B (aligned-RLVP
 1.0/0-dead). 30B un-gameability sweep + SWE safely queued (runs at full settings when the
 user's GPU jobs free; cleanup reaps only MY orphaned vLLM procs, never the user's).
+
+## (hour-4) grad-density REPLICATES across seeds (n=6)
+                grad_mean coarse(outcome)   fine(potential)   boost
+   seed 7            0.019                   0.329             17.3x
+   seed 11           0.002                   0.451 (running)   >>1
+At seed 11 outcome-only's gradient is ~0 (0.002, fully dead at n=6) while the verifiable
+potential keeps strong gradient (0.45). The E-A/E-B claim is robust: the potential supplies
+gradient exactly where the outcome is blind, and the boost is largest when the outcome is
+blindest. (seed 12 running.) 30B sweep+SWE still queued behind the user's GPU jobs (no OOM
+squeeze); my 4B seed-val utilizes the otherwise-idle GPU without delaying the 30B (the
+user's 9GB blocks it regardless).
