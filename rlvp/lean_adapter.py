@@ -62,24 +62,33 @@ class LeanRuleTracker:
 
     def observe_turn(self, turn_idx, *, errored, n_goals, done):
         """Called once per tactic. `n_goals` is the goal count AFTER the tactic
-        (ignored when errored). Returns (violations, discharges)."""
+        (ignored when errored). Returns (violations, discharges).
+
+        Un-gameability sweep modes (each row = pre-registered cheapest gaming policy):
+          aligned   : goal_progress discharge only        -- UNGAMEABLE (must decrease goals)
+          structural: + errored & no_progress PENALTIES   -- gameable: avoid errors by inaction
+          valid     : discharge ANY non-errored tactic    -- gameable: pad trivial valid no-ops
+          noerror   : errored PENALTY only, no discharge   -- gameable: stop attempting
+          outcome   : no process signal
+        """
         v, d = [], []
-        if self.mode == "outcome":
+        m = self.mode
+        if m == "outcome":
             return v, d
-        aligned = self.mode == "aligned"   # discharge-only: no penalties
         if errored:
-            if not aligned:
+            if m in ("structural", "noerror"):
                 v.append("errored_tactic")
-            # an errored tactic does not change the proof state; goal count and
-            # stale counter are unaffected.
         else:
             prev = self.prev_n_goals
-            if prev is not None and n_goals < prev:
-                d.append("goal_progress")
+            if m == "valid":
+                d.append("valid_tactic")               # GAMEABLE: any non-error
+            elif prev is not None and n_goals < prev:
+                if m in ("aligned", "structural"):
+                    d.append("goal_progress")          # aligned: real progress
                 self.stale_steps = 0
             elif prev is not None and n_goals >= prev and not done:
                 self.stale_steps += 1
-                if self.stale_steps > 1 and not aligned:
+                if self.stale_steps > 1 and m == "structural":
                     v.append("no_progress")
             else:
                 self.stale_steps = 0
