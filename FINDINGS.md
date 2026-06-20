@@ -290,3 +290,15 @@ potential gives gradient but its conversion to SUCCESS needs bounded updates -- 
 exactly why MUON was needed at 30B (aligned-RLVP 1.0 stable). Muon success-payoff run
 re-queued. Lesson: a verifiable potential is necessary (E-A/E-B) but the optimizer must
 bound the dense signal or it overfits to partial progress and degenerates.
+
+## 14. (hour-2 monitor) 4B chain SUCCESS payoff is optimizer-fragile (gradient is not)
+The E-A/E-B gradient-density result (potential gives 2.5x->17x more gradient as outcome
+blinds) is ROBUST. But converting that gradient to task SUCCESS on the 4B chain is
+delicate and so far fragile: AdamW 1e-5 undertrains (flat); AdamW 3e-5 -> dense potential
+DESTABILIZES (succ->0, compliance attractor) while outcome learns slow+stable; Muon 2e-3
+-> both arms collapse (LR too high, even outcome degrades 0.15->0). One bounded attempt
+(Muon 5e-4 @ n=6, the 17x-gap regime) running. Interim conclusion: a verifiable potential
+reliably supplies gradient where the outcome is blind, but the optimizer/LR must bound the
+dense signal or it overfits to partial progress and degenerates -- the SAME fragility seen
+at 30B (where Muon at the right LR did convert it: aligned-RLVP 1.0 stable). The clean,
+robust 4B result is the gradient-density phase diagram; the success payoff lives on Lean-30B.
