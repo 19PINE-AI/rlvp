@@ -302,3 +302,12 @@ reliably supplies gradient where the outcome is blind, but the optimizer/LR must
 dense signal or it overfits to partial progress and degenerates -- the SAME fragility seen
 at 30B (where Muon at the right LR did convert it: aligned-RLVP 1.0 stable). The clean,
 robust 4B result is the gradient-density phase diagram; the success payoff lives on Lean-30B.
+
+## (hour-3 monitor) 4B success-payoff CONCLUDED fragile; redirected GPU
+4 optimizer/LR settings tried for the 4B-chain success payoff (AdamW 1e-5/3e-5, Muon
+2e-3/5e-4); none cleanly converts the potential's gradient into task success on this
+finicky long-horizon 4B task (under/over-shoot + compliance-attractor collapse). STOPPED
+tuning (rabbit hole). The robust 4B result = the E-A/E-B gradient-density phase diagram
+(now seed-validating across seeds 11,12); the success payoff = Lean-30B (aligned-RLVP
+1.0/0-dead). 30B un-gameability sweep + SWE safely queued (runs at full settings when the
+user's GPU jobs free; cleanup reaps only MY orphaned vLLM procs, never the user's).
