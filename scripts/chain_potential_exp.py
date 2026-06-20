@@ -31,6 +31,7 @@ ITERS = int(sys.argv[3]) if len(sys.argv) > 3 else 30
 OUT = sys.argv[4] if len(sys.argv) > 4 else f"chainpot_{GRAN}_n{NSTAGES}"
 SEED = int(sys.argv[5]) if len(sys.argv) > 5 else 7
 LR = float(sys.argv[6]) if len(sys.argv) > 6 else 1e-5
+OPT = sys.argv[7] if len(sys.argv) > 7 else "adamw"   # adamw | muon (bounded updates)
 MODEL = "Qwen/Qwen3-4B"
 G, TASKS_PER_ITER = 8, 4
 OUTD = ROOT / "results" / f"run_{OUT}"
@@ -50,8 +51,13 @@ def main():
                         "gate_proj", "up_proj", "down_proj"]))
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     model.eval()
-    opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],
-                            lr=LR, betas=(0.9, 0.95), weight_decay=0.0)
+    trainable = [p for p in model.parameters() if p.requires_grad]
+    if OPT == "muon":
+        from rlvp.muon import Muon
+        opt = Muon(trainable, lr=LR, momentum=0.95)
+    else:
+        opt = torch.optim.AdamW(trainable, lr=LR, betas=(0.9, 0.95), weight_decay=0.0)
+    print(f"optimizer={OPT} lr={LR}", flush=True)
     # all arms: potential-based shaping (no penalties). coarse emits no discharge -> outcome.
     cfg = TrainConfig(credit="c3", beta=0.5, lam=0.0, max_episode_tokens=3500)
     sched = get_constant_schedule_with_warmup(opt, num_warmup_steps=cfg.warmup)
