@@ -271,75 +271,47 @@ gradient, not loss==0.)
 success payoff needs harder regime / more training (shown instead on Lean-30B:
 aligned-RLVP 1.0 / 0 dead vs outcome-Muon 0.125 / 25 dead).
 
-## 13. E-A/E-B RESULT (4B chain): potential's gradient boost GROWS with outcome sparsity
-Granularity x sparsity matrix (grad_mean = effective learning gradient):
-                coarse(=outcome)   fine    boost
-   n=2 stages       0.118          0.297   2.5x
-   n=4 stages       0.072          0.272   3.8x
-   n=6 stages       0.019          0.329   17.3x
-As the outcome blinds (n->6), outcome-only's gradient collapses to ~0 (effectively
-dead) while the verifiable potential keeps it strong -> the potential's benefit GROWS
-2.5x -> 17x. This is the E-B sparsity phase diagram, CONFIRMED: the verifiable Phi
-matters most exactly when the outcome is blindest. (E-A: at n=4, coarse 0.072 << mid
-0.332 ~ fine 0.272 -- any potential >> outcome.)
 
-CAVEAT (success payoff is optimizer-fragile, NOT automatic): at AdamW lr=3e-5 the dense
-potential DESTABILIZES (success collapses to 0; compliance-attractor instability, same
-as 30B structural), while sparse outcome learns slowly but stably. So the dense
-potential gives gradient but its conversion to SUCCESS needs bounded updates -- which is
-exactly why MUON was needed at 30B (aligned-RLVP 1.0 stable). Muon success-payoff run
-re-queued. Lesson: a verifiable potential is necessary (E-A/E-B) but the optimizer must
-bound the dense signal or it overfits to partial progress and degenerates.
+## 13. E-A/E-B VALIDATION (4B synthetic chain): the verifiable potential supplies gradient where outcome is blind
+Controlled test of the central claim. Knobs: granularity of the verifiable potential
+Phi=#satisfied-stages (coarse=outcome / mid=1 milestone / fine=every -dPhi) x outcome
+sparsity (n_stages 2/4/6; more stages -> blinder outcome). All arms credit=c3 (potential-
+based shaping, no penalties).
 
-## 14. (hour-2 monitor) 4B chain SUCCESS payoff is optimizer-fragile (gradient is not)
-The E-A/E-B gradient-density result (potential gives 2.5x->17x more gradient as outcome
-blinds) is ROBUST. But converting that gradient to task SUCCESS on the 4B chain is
-delicate and so far fragile: AdamW 1e-5 undertrains (flat); AdamW 3e-5 -> dense potential
-DESTABILIZES (succ->0, compliance attractor) while outcome learns slow+stable; Muon 2e-3
--> both arms collapse (LR too high, even outcome degrades 0.15->0). One bounded attempt
-(Muon 5e-4 @ n=6, the 17x-gap regime) running. Interim conclusion: a verifiable potential
-reliably supplies gradient where the outcome is blind, but the optimizer/LR must bound the
-dense signal or it overfits to partial progress and degenerates -- the SAME fragility seen
-at 30B (where Muon at the right LR did convert it: aligned-RLVP 1.0 stable). The clean,
-robust 4B result is the gradient-density phase diagram; the success payoff lives on Lean-30B.
+E-A/E-B grad-density (effective learning gradient, grad_mean):
+                coarse(=outcome)   fine(potential)   boost
+   n=2 stages       0.118            0.297            2.5x
+   n=4 stages       0.072            0.272            3.8x   (mid 0.332 ~ fine: any potential >> outcome)
+   n=6 stages       0.019            0.329            17x
+The potential's gradient advantage GROWS as the outcome blinds (2.5x -> 17x): outcome-only
+collapses toward zero gradient (effectively dead) while the potential stays strong. This is
+the sparsity phase-diagram prediction, confirmed.
 
-## (hour-3 monitor) 4B success-payoff CONCLUDED fragile; redirected GPU
-4 optimizer/LR settings tried for the 4B-chain success payoff (AdamW 1e-5/3e-5, Muon
-2e-3/5e-4); none cleanly converts the potential's gradient into task success on this
-finicky long-horizon 4B task (under/over-shoot + compliance-attractor collapse). STOPPED
-tuning (rabbit hole). The robust 4B result = the E-A/E-B gradient-density phase diagram
-(now seed-validating across seeds 11,12); the success payoff = Lean-30B (aligned-RLVP
-1.0/0-dead). 30B un-gameability sweep + SWE safely queued (runs at full settings when the
-user's GPU jobs free; cleanup reaps only MY orphaned vLLM procs, never the user's).
+SEED-ROBUST (n=6, 3 seeds 7/11/12):
+   coarse(outcome) : [0.019, 0.002, 0.008] -> 0.010 mean   (DEAD)
+   fine(potential) : [0.329, 0.312, 0.376] -> 0.339 +/- 0.027  (ALIVE, tight)
+~34x gradient difference, tight across seeds.
 
-## (hour-4) grad-density REPLICATES across seeds (n=6)
-                grad_mean coarse(outcome)   fine(potential)   boost
-   seed 7            0.019                   0.329             17.3x
-   seed 11           0.002                   0.451 (running)   >>1
-At seed 11 outcome-only's gradient is ~0 (0.002, fully dead at n=6) while the verifiable
-potential keeps strong gradient (0.45). The E-A/E-B claim is robust: the potential supplies
-gradient exactly where the outcome is blind, and the boost is largest when the outcome is
-blindest. (seed 12 running.) 30B sweep+SWE still queued behind the user's GPU jobs (no OOM
-squeeze); my 4B seed-val utilizes the otherwise-idle GPU without delaying the 30B (the
-user's 9GB blocks it regardless).
+TWO REFINEMENTS the chain exposed (both important, both real):
+ (a) WITHIN-GROUP VARIANCE: GRPO's advantage is group-relative, so a potential only gives
+     gradient if it VARIES across rollouts in a group; a uniform potential is centered out.
+     (This is WHY Lean works -- proof attempts reach different goal-counts -- and a too-easy
+     task with uniform progress would not.) The metric must be EFFECTIVE gradient, not loss==0.
+ (b) SUCCESS PAYOFF IS OPTIMIZER-FRAGILE: the potential reliably supplies gradient, but
+     converting it to task SUCCESS on the 4B chain was fragile across 4 optimizer/LR settings
+     (AdamW under/over-shoots; the dense signal can hit the compliance-attractor collapse).
+     The success payoff is demonstrated cleanly on Lean-30B (aligned-RLVP 1.0 / 0 dead,
+     stable under Muon) -- the optimizer must BOUND the dense signal or it overfits to
+     partial progress and degenerates.
 
-## (hour-5) grad-density SEED-ROBUST (final framing: absolute, not ratio)
-n=6 (blind outcome), grad_mean:           coarse(outcome)   fine(potential)
-   seed 7                                       0.019            0.329
-   seed 11                                      0.002            0.312
-   seed 12                                      0.000 (run)      (running)
-The potential holds a STABLE ~0.32 gradient across every seed; outcome-only is effectively
-DEAD (~0.007). Report the ABSOLUTE values, not the boost ratio (the ratio explodes 17x->
-156x->inf only because coarse->0). Robust conclusion: a verifiable potential supplies
-consistent learning signal exactly where the outcome is blind. This is the clean, robust
-4B result of the program; the success payoff is on Lean-30B (aligned-RLVP 1.0/0-dead).
+NET: the verifiable potential provides learning signal exactly where the outcome is blind
+(robust, seed-validated); converting that signal to success needs an un-gameable potential
+(sec 11) AND a bounded optimizer. Refines, does not refute, the central claim.
 
-## (hour-6) FINAL E-A/E-B grad-density result (3 seeds, complete)
-n=6 (blind outcome), grad_mean over 25 iters x 3 seeds (7,11,12):
-   coarse (outcome) : [0.019, 0.002, 0.008]  -> 0.010 mean   (effectively DEAD)
-   fine   (potential): [0.329, 0.312, 0.376]  -> 0.339 +/- 0.027  (stable, ALIVE)
-The verifiable potential supplies a stable ~0.34 gradient where outcome-only is ~dead
-(~0.01) -- a ~34x difference, tight across seeds. This is the clean, seed-robust 4B
-result: the potential provides learning signal exactly where the outcome is blind. The
-success payoff of that signal is on Lean-30B (aligned-RLVP 1.0 / 0 dead). 4B program
-COMPLETE; 30B sweep+SWE queued behind the user's GPU jobs.
+## STATUS (end of overnight monitoring block)
+DONE + seed-robust: core mechanism; Lean efficiency (3 seeds); Terminal harm (3 seeds);
+tau2 boundary; 30B miniF2F compliance-attractor + aligned-RLVP fix; un-gameability /
+verifiable-potential principle; E-A/E-B grad-density (3 seeds). QUEUED (GPU-blocked by the
+user's jobs, runs at gpu_mem 0.48 when the GPU frees): 30B un-gameability sweep
+(aligned/valid/noerror/structural/c4-gated) + SWE structural/gated; E-C (SWE multi-vs-
+single-F2P) not yet built.
