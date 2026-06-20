@@ -333,3 +333,13 @@ DEAD (~0.007). Report the ABSOLUTE values, not the boost ratio (the ratio explod
 156x->inf only because coarse->0). Robust conclusion: a verifiable potential supplies
 consistent learning signal exactly where the outcome is blind. This is the clean, robust
 4B result of the program; the success payoff is on Lean-30B (aligned-RLVP 1.0/0-dead).
+
+## (hour-6) FINAL E-A/E-B grad-density result (3 seeds, complete)
+n=6 (blind outcome), grad_mean over 25 iters x 3 seeds (7,11,12):
+   coarse (outcome) : [0.019, 0.002, 0.008]  -> 0.010 mean   (effectively DEAD)
+   fine   (potential): [0.329, 0.312, 0.376]  -> 0.339 +/- 0.027  (stable, ALIVE)
+The verifiable potential supplies a stable ~0.34 gradient where outcome-only is ~dead
+(~0.01) -- a ~34x difference, tight across seeds. This is the clean, seed-robust 4B
+result: the potential provides learning signal exactly where the outcome is blind. The
+success payoff of that signal is on Lean-30B (aligned-RLVP 1.0 / 0 dead). 4B program
+COMPLETE; 30B sweep+SWE queued behind the user's GPU jobs.
