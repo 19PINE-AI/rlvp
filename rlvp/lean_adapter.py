@@ -57,6 +57,7 @@ class LeanRuleTracker:
         self.mode = mode
         self.prev_n_goals = None          # goal count before the current step
         self.stale_steps = 0              # consecutive valid steps w/o progress
+        self._n_progress = 0              # E-A granularity: count of goal-decreases so far
         self.turn_violations = {}
         self.turn_discharges = {}
 
@@ -83,8 +84,11 @@ class LeanRuleTracker:
             if m == "valid":
                 d.append("valid_tactic")               # GAMEABLE: any non-error
             elif prev is not None and n_goals < prev:
-                if m in ("aligned", "structural"):
-                    d.append("goal_progress")          # aligned: real progress
+                self._n_progress += 1
+                if m in ("aligned", "structural"):     # FINE potential: every -dPhi
+                    d.append("goal_progress")
+                elif m == "pot_mid" and self._n_progress == 1:  # MID: 1 milestone only
+                    d.append("goal_progress")
                 self.stale_steps = 0
             elif prev is not None and n_goals >= prev and not done:
                 self.stale_steps += 1

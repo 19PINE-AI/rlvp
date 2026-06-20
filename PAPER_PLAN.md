@@ -287,3 +287,5 @@ PLANNED EXPERIMENTS (run after current compare; orchestrated):
      "ran-tests" credit would farm. Plus control: process-as-PRECONDITION (gate, don't
      pay) vs process-as-reward; and verifiable-discharge vs learned llmcritic (does the
      learned proxy get hacked).
+
+## VERIFIABLE-POTENTIAL CLAIM (central, see FINDINGS.md sec 11): RLVP helps iff domain has a verifiable Phi strictly finer than outcome. Formalize via potential-based shaping (Ng 1999). Experiments E-A granularity / E-B sparsity-phase-diagram / E-C SWE multi-vs-single-F2P-test. Validate or refute before paper.

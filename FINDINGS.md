@@ -224,3 +224,32 @@ level (same wall as tau2's "intent is the reward"). RLVP's real deliverable is t
 you WHICH regime you're in. Planned experiments to push into hard domains: (1) turn the
 un-gameability test into a measured law; (2) outcome-gated credit (c4); (3) SWE
 verifiable-progress ladder (reproduced->localized->test-passes). See PAPER_PLAN.md.
+
+## 11. THE CENTRAL CLAIM: verifiable-potential characterization (to validate/refute)
+> A domain admits a useful dense process reward IFF it has a VERIFIABLE POTENTIAL
+> function Phi strictly finer than the terminal outcome -- a cheap, certifiable
+> quantity that decreases only on real progress toward a verifiable terminal state.
+
+Grounding (potential-based shaping, Ng/Harada/Russell 1999): shaping with F = g*Phi(s')
+- Phi(s) leaves the optimal policy invariant for ANY Phi. So:
+  * admissible dense process reward == verifiable potential-based shaping. Aligned
+    signal = -dPhi for a verifiable Phi (Lean: Phi = # open goals; goal_progress = -dPhi).
+    It improves OPTIMIZATION (gradient on all-fail batches) WITHOUT moving the optimum.
+  * a non-potential penalty (errored-tactic: a per-action cost that doesn't telescope)
+    MOVES the optimum; when outcome is blind the moved optimum is degenerate -> collapse.
+  * un-gameability test = cheap verifiable SUFFICIENT condition for being potential-based.
+Corollary (domain hardness): RLVP can help iff Phi exists strictly finer than outcome.
+  Theorem proving HAS it (subgoal count). SWE-single-test does NOT (only pass/fail ==
+  outcome) -> structurally predicts the hard-domain wall. Constructive fix: manufacture
+  a finer verifiable Phi by sub-goal certification (Phi = # uncertified sub-goals).
+
+FALSIFIABLE PREDICTIONS + EXPERIMENTS (queued):
+  E-A GRANULARITY: hold Phi aligned, vary its FINENESS coarse(=outcome) -> mid(1
+      milestone) -> fine(every -dPhi). Predict RLVP benefit (dead-iter elim, speed)
+      scales with fineness; zero at coarse(=outcome). [Lean full-easy; synthetic chain]
+  E-B SPARSITY PHASE DIAGRAM: fix the signal, sweep outcome density (task difficulty,
+      all-fail fraction 0->1). Predict aligned-Phi benefit and misaligned-penalty COLLAPSE
+      both APPEAR only as outcome blinds -> harm/help are gated by outcome sparsity.
+  E-C IFF on a hard domain: SWE instances WITH a finer verifiable Phi (multiple F2P
+      tests -> Phi = # failing F2P) vs WITHOUT (single F2P == outcome). Predict RLVP helps
+      on multi-test, not single-test -- same domain, the structural property flips.
