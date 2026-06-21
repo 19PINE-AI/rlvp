@@ -1,0 +1,25 @@
+{"iter": 1, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 103.8}
+{"iter": 2, "succ": 0.094, "disch_per_ep": 0.0, "n_eps": 32, "loss": -0.01870279759168625, "entropy": 0.009874673413980694, "grad_norm": 0.48066046833992004, "wall_s": 56.8}
+{"iter": 3, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 24.2}
+{"iter": 4, "succ": 0.156, "disch_per_ep": 0.0, "n_eps": 32, "loss": -0.025660619139671326, "entropy": 0.013414074077346468, "grad_norm": 0.17103706300258636, "wall_s": 35.8}
+{"iter": 5, "succ": 0.188, "disch_per_ep": 0.0, "n_eps": 32, "loss": -0.009108006954193115, "entropy": 0.011225289274743722, "grad_norm": 0.1647697538137436, "wall_s": 90.6}
+{"iter": 6, "succ": 0.062, "disch_per_ep": 0.0, "n_eps": 32, "loss": -0.16780076920986176, "entropy": 0.015823646642636323, "grad_norm": 0.3612622916698456, "wall_s": 52.2}
+{"iter": 7, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 57.5}
+{"iter": 8, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 64.2}
+{"iter": 9, "succ": 0.438, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.006556818232638761, "entropy": 0.010395522785717391, "grad_norm": 0.1866031438112259, "wall_s": 49.8}
+{"iter": 10, "succ": 0.25, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 52.2}
+{"iter": 11, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 36.2}
+{"iter": 12, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 58.7}
+{"iter": 13, "succ": 0.25, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 50.8}
+{"iter": 14, "succ": 0.25, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 39.8}
+{"iter": 15, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 20.3}
+{"iter": 16, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 50.6}
+{"iter": 17, "succ": 0.156, "disch_per_ep": 0.0, "n_eps": 32, "loss": -0.016926183365285397, "entropy": 0.010507632946145946, "grad_norm": 0.24680987000465393, "wall_s": 42.5}
+{"iter": 18, "succ": 0.219, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.16889802925288677, "entropy": 0.005215883539287767, "grad_norm": 0.11909498274326324, "wall_s": 54.9}
+{"iter": 19, "succ": 0.219, "disch_per_ep": 0.0, "n_eps": 32, "loss": -0.003455987200140953, "entropy": 0.005410895991016889, "grad_norm": 0.06553743779659271, "wall_s": 33.3}
+{"iter": 20, "succ": 0.25, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 28.5}
+{"iter": 21, "succ": 0.5, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 54.8}
+{"iter": 22, "succ": 0.25, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 41.5}
+{"iter": 23, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 18.2}
+{"iter": 24, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 38.0}
+{"iter": 25, "succ": 0.0, "disch_per_ep": 0.0, "n_eps": 32, "loss": 0.0, "entropy": 0.0, "wall_s": 32.7}

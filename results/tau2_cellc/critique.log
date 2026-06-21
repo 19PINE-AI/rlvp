@@ -1,0 +1,35 @@
+loading critic Qwen/Qwen3-4B for 60 tau2 episodes ...
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.37it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.36it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.50it/s]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+{
+  "critic": "Qwen/Qwen3-4B",
+  "n": 60,
+  "counts": {
+    "succ_clean": 7,
+    "succ_dirty": 0,
+    "fail_clean": 49,
+    "fail_dirty": 4
+  },
+  "critic_flag_rate": {
+    "succ_clean": 0.286,
+    "succ_dirty": 0.0,
+    "fail_clean": 0.408,
+    "fail_dirty": 1.0
+  },
+  "INTENT_MISS_critic_recall": 0.408,
+  "success_false_flag_rate": 0.286,
+  "failure_prediction": {
+    "semantic_rule (P,R,F1)": [
+      1.0,
+      0.075,
+      0.14
+    ],
+    "self_critic (P,R,F1)": [
+      0.923,
+      0.453,
+      0.608
+    ]
+  }
+}
+
+HEADLINE: on INTENT-MISS episodes (failed & semantically clean), the semantic rules flag 0% by construction; the blind self-critic flags 41%.

@@ -1,0 +1,16 @@
+{"iter": 1, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.58, "n_eps": 12, "loss": 0.0, "entropy": 0.0, "wall_s": 818.2}
+{"iter": 2, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 1.94, "n_eps": 16, "loss": 0.0, "entropy": 0.0, "wall_s": 1158.8}
+{"iter": 3, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 2.53, "n_eps": 15, "loss": 0.0, "entropy": 0.0, "wall_s": 1159.5}
+{"iter": 4, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.93, "n_eps": 14, "loss": 0.0, "entropy": 0.0, "wall_s": 600.8}
+{"iter": 5, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.38, "n_eps": 16, "loss": 0.0, "entropy": 0.0, "wall_s": 978.3}
+{"iter": 6, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 1.75, "n_eps": 16, "loss": 0.0, "entropy": 0.0, "wall_s": 693.3}
+{"iter": 7, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.93, "n_eps": 15, "loss": 0.0, "entropy": 0.0, "wall_s": 726.9}
+{"iter": 8, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 2.0, "n_eps": 14, "loss": 0.0, "entropy": 0.0, "wall_s": 873.5}
+{"iter": 9, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 1.33, "n_eps": 12, "loss": 0.0, "entropy": 0.0, "wall_s": 1087.6}
+{"iter": 10, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 2.21, "n_eps": 14, "loss": 0.0, "entropy": 0.0, "wall_s": 1134.9}
+{"iter": 11, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.38, "n_eps": 16, "loss": 0.0, "entropy": 0.0, "wall_s": 696.0}
+{"iter": 12, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.43, "n_eps": 14, "loss": 0.0, "entropy": 0.0, "wall_s": 299.9}
+{"iter": 13, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 1.33, "n_eps": 12, "loss": 0.0, "entropy": 0.0, "wall_s": 676.9}
+{"iter": 14, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 2.22, "n_eps": 18, "loss": 0.0, "entropy": 0.0, "wall_s": 936.9}
+{"iter": 15, "succ": 0.0, "viol_per_ep": 0.06, "disch_per_ep": 2.0, "n_eps": 16, "loss": 1.4987306594848633, "entropy": 0.08051067140064974, "grad_norm": 0.7388035655021667, "wall_s": 936.8}
+{"iter": 16, "succ": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.4, "n_eps": 10, "loss": 0.0, "entropy": 0.0, "wall_s": 1050.6}

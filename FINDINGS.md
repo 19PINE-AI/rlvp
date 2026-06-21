@@ -348,3 +348,53 @@ and co-locating many verifier-bound runs per GPU; for the GPU-bound case those d
 the usual GPU-scaling intuitions apply. The practical point for RLVP: a cheap machine-checkable
 verifier can move the bottleneck OFF the GPU and onto the CPU -- when it does, the systems
 design must follow -- but this is a property of the task's verifier, not of RLVP in general.
+
+---
+
+## 15. 30B UN-GAMEABILITY SWEEP (complete) — penalty-is-lethal, gating rescues, hard-domain limit
+Pre-registered sweep on Qwen3-30B-A3B (vLLM-fp8 rollouts + 4-bit QLoRA + Muon, lr=1e-3,
+14 iters Lean / 16 iters SWE, seed 7). Each arm = one "cheapest gaming policy"; we ask
+whether the process signal survives an agent that games it.
+
+### Lean (miniF2F algebra) — 5 arms
+| arm | rule / credit | signal | first3 | last3 | terminal |
+|-----|---------------|--------|--------|-------|----------|
+| validgated | valid / **c4 (outcome-gated)** | gameable discharge, gated on success | 0.361 | **0.305** | ALIVE — best |
+| aligned    | aligned / c3 | goal_progress discharge only (no penalty) | 0.368 | 0.243 | ALIVE |
+| valid      | valid / c3   | any-non-error discharge (gameable), ungated | 0.354 | 0.180 | ALIVE, declines |
+| structural | structural / c3 | goal_progress discharge **+ errored/no_progress PENALTIES** | 0.382 | **0.00** | DEAD (stays 0) |
+| noerror    | noerror / c3 | errored **PENALTY only** (no discharge) | 0.34 | **0.00** | DEAD (stays 0) |
+
+### SWE-bench dask (hard / blind domain) — 2 arms
+| arm | credit | succ (all 16 iters) | disch/ep | reading |
+|-----|--------|---------------------|----------|---------|
+| swe_structural | c3 | **0/16 (0.0 every iter)** | ~1.0 flat (peak 2.19) | FARMS the discharge, never solves |
+| swe_gated      | c4 | **0/16 (0.0 every iter)** | bounces 0.4–2.5 | gating WITHHOLDS credit, ~0 usable signal |
+
+### Three findings
+1. **The PENALTY is the lethal ingredient.** Both penalty-bearing Lean arms (structural,
+   noerror) collapse to the compliance/inaction attractor and STAY dead (last 4–5 iters = 0);
+   both penalty-free arms (aligned, valid) survive. A misaligned penalty — satisfiable by not
+   acting — is what kills the policy, not the presence of a dense signal per se. (Confirms the
+   original compliance-attractor result at 30B.)
+2. **Outcome-gating RESCUES a gameable discharge.** The same gameable "any-valid-tactic"
+   discharge is harmful ungated (valid declines to 0.180 as it farms the signal — discharge/ep
+   climbs) but BEST when gated on the real outcome (validgated recovers to 0.305). Gating the
+   process credit on terminal success converts a farmable signal into a useful one — the core
+   RLVP design lever.
+3. **Hard domain → no free un-gameable progress.** On blind SWE (0% solve), neither SWE arm
+   moves success off zero: structural farms its discharge (~1/ep) without ever fixing a bug,
+   and gating withholds the credit so there is ~0 learning signal. When no cheap verifiable
+   progress metric exists that the agent can't game, there is no safe dense signal to add —
+   the dense-reward win is domain-gated, exactly as the verifiable-potential frame predicts.
+
+### Honest caveats
+- 30B at lr=1e-3, single seed, small batch is HIGH-VARIANCE: every arm swings iter-to-iter
+  (aligned hits 0.0 twice mid-run and recovers to 0.65). The robust discriminator is the
+  **terminal state over last3 + whether it STAYS dead**, NOT a single final iter. (The helper
+  `ungameability_report.py` uses a single-final-iter heuristic and therefore over-flags aligned
+  as "collapsed" because aligned's very last iter was 0.04, though its last3 is 0.243 and it is
+  clearly alive.) Multi-seed runs would firm up the exact last3 numbers; the qualitative
+  ordering (penalty-free survive, penalty-bearing die, gating rescues) is stable.
+- SWE arms are a 0%-success regime: they demonstrate the ABSENCE of a usable dense signal in a
+  blind hard domain, not a positive training result.

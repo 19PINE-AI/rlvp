@@ -1,0 +1,21 @@
+{
+  "tag": "minif2f_aln",
+  "rlvp": {
+    "iters": 40,
+    "succ_last5": 1.0,
+    "succ_peak": 1.0,
+    "reward_last5": 1.0,
+    "disc_ep_last5": 0,
+    "viol_ep_last5": 0.0,
+    "dead_iters": 0
+  },
+  "outcome": {
+    "iters": 40,
+    "succ_last5": 0.125,
+    "succ_peak": 0.479,
+    "reward_last5": 0.125,
+    "disc_ep_last5": 0,
+    "viol_ep_last5": 2.62,
+    "dead_iters": 25
+  }
+}

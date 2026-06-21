@@ -1,0 +1,21 @@
+{
+  "tag": "minif2f",
+  "rlvp": {
+    "iters": 23,
+    "succ_last5": 0.0,
+    "succ_peak": 0.562,
+    "reward_last5": 0.0,
+    "disc_ep_last5": 0,
+    "viol_ep_last5": 3.0,
+    "dead_iters": 0
+  },
+  "outcome": {
+    "iters": 40,
+    "succ_last5": 0.992,
+    "succ_peak": 1.0,
+    "reward_last5": 0.992,
+    "disc_ep_last5": 0,
+    "viol_ep_last5": 0.05,
+    "dead_iters": 21
+  }
+}

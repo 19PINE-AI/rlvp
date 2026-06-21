@@ -1,0 +1,10 @@
+
+=== fixed trajectories from policy Qwen3-1.7B (72 episodes), judged by each critic (BLIND) ===
+rule                     class         Qwen3-4B     Qwen3-8B
+no_kb_before_call        surface   0.955(21/22)   1.0(22/22)
+access_without_acl       surface      0.0(0/24)    0.0(0/24)
+untested_submit          stateful     0.0(0/24)    0.0(0/24)
+blind_write              stateful      0.0(0/8)     0.0(0/8)
+write_without_access     masked     0.75(18/24) 0.833(20/24)
+OVERALL blind R                           0.382        0.412
+OVERALL blind P                           0.867         0.84

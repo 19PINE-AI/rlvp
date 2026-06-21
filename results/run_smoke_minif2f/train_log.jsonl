@@ -1,0 +1,2 @@
+{"iter": 1, "succ": 0.208, "reward": 0.208, "viol_per_ep": 2.79, "disch_per_ep": 0.29, "n_eps": 48, "loss": 1.4101009159348905, "entropy": 0.11598135712795055, "grad_norm": 0.5836361050605774, "wall_s": 329.6}
+{"iter": 2, "succ": 0.438, "reward": 0.438, "viol_per_ep": 2.02, "disch_per_ep": 0.44, "n_eps": 48, "loss": 1.5785478970501572, "entropy": 0.12384294544403052, "grad_norm": 0.5133605599403381, "wall_s": 292.9}

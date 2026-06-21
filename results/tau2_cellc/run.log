@@ -1,0 +1,8 @@
+[06-20_01:18:17] waiting for >=28GB free for tau2 cell-C ...
+[06-20_01:40:19] window open (94GB free). launching user-sim vLLM (Qwen3-4B :8011)
+[06-20_01:40:51] user-sim up. rolling out tau2 episodes (semantic rules)
+[06-20_01:44:12] rollout done
+scripts/tau2_cellc_run.sh: line 33: 4113883 Killed                  PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True nohup python3 -m vllm.entrypoints.openai.api_server --model Qwen/Qwen3-4B --port 8011 --gpu-memory-utilization 0.18 --max-model-len 16384 --enable-auto-tool-choice --tool-call-parser hermes --reasoning-parser qwen3 > "$LOG/usersim_vllm.log" 2>&1
+[06-20_01:44:15] critiquing (blind self-critique, Qwen3-4B)
+[06-20_01:44:50] critique done
+[06-20_01:44:50] CELLC_DONE
