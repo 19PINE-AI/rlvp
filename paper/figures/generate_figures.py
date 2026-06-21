@@ -391,9 +391,68 @@ def fig_tau2_collapse():
     save(fig, 'fig_tau2_collapse')
 
 
+# ----------------------------------------------------------------------------
+# 9. fig_selfcritique_2x2 : when does a rule vs a learned self-critic work?
+#    (schematic; headline numbers from the self-critique ablation / SELFCRITIC.md)
+# ----------------------------------------------------------------------------
+def fig_selfcritique_2x2():
+    from matplotlib.patches import FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(8.6, 6.6))
+    ax.set_xlim(0, 10); ax.set_ylim(0, 10); ax.axis('off')
+
+    def cell(x, y, w, h, tag, edge, face, title, lines, verdict, vcol):
+        ax.add_patch(FancyBboxPatch((x, y), w, h,
+                     boxstyle='round,pad=0.08,rounding_size=0.25',
+                     linewidth=1.6, edgecolor=edge, facecolor=face))
+        ax.text(x + 0.30, y + h - 0.28, tag, ha='left', va='top',
+                fontsize=13, fontweight='bold', color=edge)
+        ax.text(x + w / 2, y + h - 0.95, title, ha='center', va='center',
+                fontsize=10.2, fontweight='bold', color=DARKGRAY)
+        yy = y + h - 1.65
+        for ln in lines:
+            ax.text(x + w / 2, yy, ln, ha='center', va='top', fontsize=8.6,
+                    color=DARKGRAY)
+            yy -= 0.55
+        ax.add_patch(FancyBboxPatch((x + w / 2 - 1.6, y + 0.30), 3.2, 0.72,
+                     boxstyle='round,pad=0.04,rounding_size=0.16',
+                     linewidth=1.2, edgecolor=vcol, facecolor='white'))
+        ax.text(x + w / 2, y + 0.66, verdict, ha='center', va='center',
+                fontsize=10, fontweight='bold', color=vcol)
+
+    xL, xR, w, h = 1.45, 5.55, 3.9, 3.7
+    yT, yB = 4.6, 0.6
+    cell(xL, yT, w, h, 'A', BLUE, LIGHTBLUE, 'surface-ordering norms',
+         ['both detect it — rule is the', 'cleaner reward (critic = noisy proxy)'],
+         'use the rule', BLUE)
+    cell(xR, yT, w, h, 'B', GREEN, LIGHTGREEN, 'stateful-bookkeeping norms',
+         ['critic blind even when told;', 'rule decisive, critic inert (3 seeds)'],
+         'RULES WIN', GREEN)
+    cell(xL, yB, w, h, 'C', ORANGE, LIGHTORANGE, r'task intent ($\tau$2)',
+         ['detects offline (F1 .63 vs .23)', 'but collapses as a reward (0.0)'],
+         'DIAGNOSE ONLY', '#B45309')
+    cell(xR, yB, w, h, 'D', GRAY, '#F3F4F6', 'hidden / masked failures',
+         ['neither channel has signal;', 'needs outcome or a demo'],
+         'open', DARKGRAY)
+
+    ax.text(5.5, 9.6, 'On-policy self-critic detects the violation?',
+            ha='center', va='center', fontsize=11, fontweight='bold', color='black')
+    ax.text(xL + w / 2, 8.5, 'DETECTS from trajectory', ha='center', va='bottom',
+            fontsize=9.5, fontweight='bold', color=DARKGRAY)
+    ax.text(xR + w / 2, 8.5, 'BLIND', ha='center', va='bottom',
+            fontsize=9.5, fontweight='bold', color=DARKGRAY)
+    ax.text(0.95, 4.65, 'Verifiable rule cheaply specifiable?', ha='center',
+            va='center', rotation=90, fontsize=11, fontweight='bold', color='black')
+    ax.text(1.30, yT + h / 2, 'YES', ha='center', va='center', rotation=90,
+            fontsize=9.5, fontweight='bold', color=DARKGRAY)
+    ax.text(1.30, yB + h / 2, 'NO', ha='center', va='center', rotation=90,
+            fontsize=9.5, fontweight='bold', color=DARKGRAY)
+    save(fig, 'fig_selfcritique_2x2')
+
+
 def main():
     figs = [fig_mechanism, fig_efficiency, fig_seeds, fig_paired_dead,
-            fig_ablation, fig_gated_ceiling, fig_boundary, fig_tau2_collapse]
+            fig_ablation, fig_gated_ceiling, fig_boundary, fig_tau2_collapse,
+            fig_selfcritique_2x2]
     for fn in figs:
         fn()
     print(f'Wrote {len(WRITTEN)} figures:')
