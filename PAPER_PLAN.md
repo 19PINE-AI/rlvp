@@ -264,10 +264,36 @@ does NOT, "define progress" == "approximate V" == the credit-assignment problem
 itself; a learned proxy (LLM-critic) just relocates reward-hacking one level up.
 This is the same wall as tau2 "intent is the reward, learnable only from outcome".
 
+COMPLETED EMPIRICAL ABLATION (the learned-proxy arm; DONE, see SELFCRITIC.md + paper
+\S"Verifiable Rules vs. a Learned Self-Critic", sec:selfcritique):
+  Tests the line-264 claim directly. Same-model on-policy self-critique (no distillation)
+  as a drop-in for the rule channel (credit="llmcritic" in grpo.py), across a 2x2 of
+  (rule specifiable?) x (critic detects?). Results:
+  * DETECTOR: blind self-critique is structurally blind to stateful-bookkeeping rules
+    (recall ~0, even told the rules), persists 1.7B->8B on fixed trajectories, overall
+    recall flat 0.46/0.38/0.41 -> does NOT scale (one masked rule is capability-gated =
+    distillation-only).
+  * REWARD (all-fail regime, csops, 1.7B, 3 seeds): a penalty-only RULE with identical
+    credit structure + PERFECT recall is decisive every seed (viol->~0.05 stuck, or
+    escape to 0.99 success); live AND frozen self-critics are inert. frozen~=live =>
+    cause is the critic's ~6% false-POSITIVE imprecision, NOT non-stationarity. Gap is
+    all-fail-regime-specific (washes out at 4B once outcome dominates).
+  * INTENT frontier (tau2, 3 seeds): self-critique DETECTS intent failures offline
+    (failure-pred F1 0.63 vs rules 0.23; flags 0.42 of rule-clean failures) but COLLAPSES
+    as a training reward (0.01->0.00 vs outcome 0.50, sem-rules 0.35).
+  * No self-rewarding bootstrap (critic-oracle agreement flat across training).
+  PAYOFF: empirically substantiates "a learned proxy relocates reward-hacking one level
+  up" and closes the "why not let the model judge itself?" reviewer attack; upgrades the
+  tau2 boundary (E3/sec:boundary) into a TWO-SIDED result. Tables tab:sc-train,
+  tab:sc-tau2. Positioning added vs self-rewarding LMs / RLAIF / Constitutional AI / LLM-judge.
+
 PAPER INTEGRATION:
   - New section after the mechanism: "Admissibility of process rewards" w/ the
     un-gameability test + the triptych figure (3 curves: outcome / structural-collapse
     / aligned-stable).
+  - Learned-critic ablation (above) goes right AFTER the alignment-boundary section
+    (sec:boundary -> sec:selfcritique): it is the boundary's empirical companion (rules
+    can't reach intent; a learned critic detects intent but can't train it).
   - Reframe harm result (Terminal) as the LEGITIMATE penalty use: bound harm on the
     independent axis, NOT a learning signal.
   - Fold tau2 coverage-gradient + miniF2F collapse as the SAME phenomenon, 2 scales.

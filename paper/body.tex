@@ -138,11 +138,57 @@ The reason is the most important conclusion of this section: the coverage gradie
 \label{fig:boundary}
 \end{figure}
 
+\section{Verifiable Rules vs.\ a Learned Self-Critic}
+\label{sec:selfcritique}
+
+The boundary above shows what verifiable rules \emph{cannot} reach---task intent. This invites the obvious alternative: rather than hand-specify rules, let the policy \emph{judge itself}, in the lineage of self-rewarding language models and RL from AI feedback~\citep{selfreward,rlaif,constitutional,llmjudge}. If a model can flag its own bad tool calls in natural language, perhaps a learned self-critique can supply the dense process signal with no rules at all---and even reach the intent that rules cannot. We test this directly, under one constraint that keeps the comparison honest: the critic is the \emph{same model} as the policy (same weights, no larger judge), so any signal is genuine on-policy self-reflection rather than distillation. The question is whether \emph{verifiability} is essential to a process reward or merely convenient. The answer sharpens the admissibility view of \S\ref{sec:method}: a learned proxy does not remove reward-hacking, it relocates it one level up.
+
+\paragraph{As a \emph{detector}, self-critique has a structural blind spot.} We first ask, offline, whether the model can recover its own rule violations when shown only the domain tools and its own transcript---no rules. Blind self-critique reliably flags violations that are \emph{self-evident from the trajectory surface} (calling before doing any lookup), but is essentially blind to \emph{stateful-bookkeeping} norms that require reconstructing history---did it read \emph{this} file before overwriting it, did it test after its \emph{last} mutation (recall $\approx 0$)---and remains so \emph{even when handed the rules}. Judging a fixed set of trajectories with critics of increasing size (1.7B, 4B, 8B) shows the blind spot is structural, not a capability gap: per-rule recall on the stateful norms stays near zero across all three, and overall recall is flat ($0.46, 0.38, 0.41$). On-policy self-critique does not scale. (The one violation whose recall \emph{does} rise with critic size is one whose consequence is masked in the environment; closing it requires a larger judge---i.e.\ distillation, which the constraint forbids.)
+
+\paragraph{As a \emph{reward}, a rule beats the self-critic even at equal structure and perfect recall.} We replace the rule channel with the same model's blind self-critique (the per-turn penalty now fires on the turns the critic flags) and train, in the all-fail regime where the process channel is the only gradient (Table~\ref{tab:sc-train}). A penalty-only \emph{rule} with the identical credit structure is decisive on every seed---it drives violations to near zero when the policy stays stuck, or pushes it out of the all-fail regime entirely to $99\%$ success. The \emph{self-critic}, with the same structure and \emph{perfect recall} against the rule oracle, is inert on both axes on every seed. Crucially, a \emph{frozen} critic (a never-updated copy of the base model, hence a stationary reward) fails identically to the live one: the gap is not the critic's co-evolution with the policy but its imperfect \emph{precision}---a $\sim$6\% false-positive rate that penalizes correct actions, with nothing to wash it out when the process channel is the sole gradient. The gap is also regime-specific: repeating the comparison at 4B, where the tasks become solvable and the outcome channel dominates, the distinction washes out---consistent with the thesis that process rewards matter most precisely on the all-fail groups outcome-only RL cannot use.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{A deterministic rule beats a same-model self-critic as a dense reward}, in the all-fail regime (consumer-service domain, 1.7B, three seeds; late-training means $\pm$ std). The rule and both critics share the identical penalty-only credit structure; the critic additionally has \emph{perfect recall} against the rule oracle. The rule is decisive every seed (violations$\to$0 when stuck, or escape to high success); the critics are inert. The \emph{frozen} (stationary) critic fails like the live one, isolating the cause as the critic's $\sim$6\% false-positive imprecision rather than non-stationarity.}
+\label{tab:sc-train}
+\begin{tabular}{lccc}
+\toprule
+process reward & detection (P/R) & violations/episode & task success \\
+\midrule
+rule penalty (deterministic) & $1.00/1.00$ & $\mathbf{0.38 \pm 0.44}$ & $\mathbf{0.33 \pm 0.47}$ \\
+self-critic, live (co-evolving) & $0.94/1.00$ & $0.94 \pm 0.05$ & $0.00$ \\
+self-critic, frozen (stationary) & $0.94/1.00$ & $0.93 \pm 0.02$ & $0.00$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{At the intent frontier, self-critique \emph{detects} but cannot \emph{train}.} Finally we return to $\tau$-bench, where rules cannot reach intent. Here the self-critic does have signal the rules lack: offline, on episodes that failed but are rule-clean---where the verifiable rules are silent by construction---blind self-critique flags a mistake $42\%$ of the time, and as a predictor of episode failure it reaches $\mathrm{F1}=0.63 \pm 0.02$ against the semantic rules' $0.23 \pm 0.06$ (Table~\ref{tab:sc-tau2}, left). But that diagnostic signal does not convert into a training reward: used as the dense channel it \emph{collapses} the policy to zero reward, far below outcome-only and below even the verifiable rules (Table~\ref{tab:sc-tau2}, right). The noisy per-turn critic penalties corrupt the graded outcome signal rather than complementing it.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Self-critique is a usable intent \emph{detector} but a failed intent \emph{reward}} ($\tau$-bench airline, Qwen3-4B). \emph{Left:} as a failure predictor on rule-clean (intent) failures the self-critic far exceeds the verifiable semantic rules (3 rollout seeds). \emph{Right:} as the dense training reward, the same self-critique collapses, while outcome-only and the rules both learn (training reward, early$\to$late; 20 iterations). The intent signal is real for diagnosis but unusable as a gradient.}
+\label{tab:sc-tau2}
+\begin{tabular}{lc@{\hskip 2.5em}lc}
+\toprule
+\multicolumn{2}{c}{\emph{offline: failure prediction}} & \multicolumn{2}{c}{\emph{trained as reward}} \\
+channel & F1 & channel & reward (early$\to$late) \\
+\midrule
+semantic rules & $0.23 \pm 0.06$ & outcome-only & $0.09 \to \mathbf{0.50}$ \\
+blind self-critique & $\mathbf{0.63 \pm 0.02}$ & semantic rules & $0.10 \to 0.35$ \\
+ & & blind self-critique & $0.01 \to \mathbf{0.00}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Synthesis.} Across the map, a learned same-model self-critic is a poor \emph{training} reward: where a verifiable rule exists it loses to one even at equal structure and perfect recall (its imprecision is fatal once the process channel is the only gradient), and where no rule exists it can flag intent failures offline but collapses when used as a gradient. Its only robust value is offline diagnosis, and it neither scales with critic size nor bootstraps as the policy improves (the critic's agreement with the oracle stays flat through training). This is the un-gameability criterion of \S\ref{sec:method} applied to a \emph{learned} signal: defining a progress reward by a learned proxy relocates the credit-assignment problem into the proxy, which is then either too imprecise to train against or---at the intent frontier---reduces to approximating the value function itself, the same wall as ``intent is the reward, learnable only from the outcome.'' Verifiability is not a convenience; it is what makes the dense channel safe to optimize. (These results are centered on a 1.7B policy with a 4B replication, in the regime where the outcome channel is blind; the $\tau$-bench training comparison is short and single-seed, so we read its \emph{collapse} as the result, not its magnitude.)
+
 \section{Related Work}
 
 \paragraph{Outcome RL for LLMs and its credit-assignment problem.} GRPO~\citep{deepseekmath} and the R1 line~\citep{deepseekr1} established outcome-only RL with verifiable rewards as the dominant agent-training recipe. The credit-assignment difficulty on long horizons is now a recognized subfield, with step-level value estimation and turn-level reward shaping among the proposed remedies~\citep{gigpo,steptool}. We differ in framing the problem as the \emph{all-fail-group blindness} of group-relative methods and in showing that a \emph{verifiable, non-learned} process signal---rather than a learned process reward model---fills exactly that gap. DAPO's dynamic sampling~\citep{dapo} is the closest direct comparison; we show it relocates the all-fail cost into sampling rather than recovering the discarded signal, and that the two are complementary in principle (DAPO's clip-higher and token-level loss are orthogonal to our credit scheme).
 
 \paragraph{Process rewards, rubrics, and tool-use RL.} Step-grained tool-use RL~\citep{steptool} and fine-grained tool reward design~\citep{toolrl} attach rewards at the call boundary, as we do; our emphasis is the asymmetry between verifiable wrongness and unverifiable rightness, the discharge-credit construction, and the auto-derivation of the signal from tool metadata. Rubric- and verifier-based rewards~\citep{rubrics} extend verifiable RL beyond automatically-checkable domains; our rules are a deterministic, online instance applied per tool call.
+
+\paragraph{Learned rewards and self-critique.} Self-rewarding language models~\citep{selfreward}, RL from AI feedback~\citep{rlaif}, Constitutional AI~\citep{constitutional}, and LLM-as-judge evaluation~\citep{llmjudge} replace human or rule-based reward with a model's own judgments. Our ablation (\S\ref{sec:selfcritique}) is a controlled, same-model instance of this idea used as a \emph{process} reward, and our finding is a cautionary one: a learned self-critic is dominated by a deterministic verifiable rule even at equal credit structure and perfect recall, and collapses where no rule applies---defining process reward by a learned proxy relocates reward-hacking rather than removing it. This motivates our emphasis on \emph{verifiable}, non-learned process signals.
 
 \paragraph{Demonstrations, self-evolution, and the discovery wall.} R1-Zero~\citep{deepseekr1} self-evolves with no cold-start; R1 adds a small supervised seed. Off-policy guidance that mixes expert trajectories into on-policy RL~\citep{luffy} is the lineage of our demonstration-mixing. Our contribution is to \emph{locate the boundary} between the two regimes empirically: reward-only RLVP suffices on discoverable workflows, and a demonstration becomes necessary precisely when a required behavior is never sampled---a wall we exhibit with a silent-precondition task. Customer-service benchmarks with explicit policy documents and reliability metrics~\citep{taubench} motivate both our real-benchmark study and the outcome-instrumental rules our boundary analysis identifies as future work.
 
