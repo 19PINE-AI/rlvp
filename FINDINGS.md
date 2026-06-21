@@ -315,3 +315,27 @@ verifiable-potential principle; E-A/E-B grad-density (3 seeds). QUEUED (GPU-bloc
 user's jobs, runs at gpu_mem 0.48 when the GPU frees): 30B un-gameability sweep
 (aligned/valid/noerror/structural/c4-gated) + SWE structural/gated; E-C (SWE multi-vs-
 single-F2P) not yet built.
+
+## 14. SYSTEMS FINDING: verifiable agentic RL is VERIFIER-bound (CPU), not GPU-bound
+Measured during 30B miniF2F RLVP training: GPU MEMORY ~86GB (full -- 30B weights + KV +
+QLoRA) but GPU COMPUTE only ~4-15% SM (avg ~8%). The bottleneck is the CPU-side VERIFIER,
+not the model: each rollout step generates ONE short tactic on the GPU (~ms) then waits on
+the Mathlib REPL where the Lean KERNEL checks it on CPU (~seconds); across ~8 sequential
+proof steps x 48 episodes, wall-clock is dominated by environment latency + Python
+orchestration, while the GPU-heavy parts (vLLM gen, QLoRA backward) are brief bursts.
+
+This GENERALIZES across RLVP's environments -- the very thing that makes RLVP's signal cheap
+and verifiable (a machine-checkable environment) is usually a CPU process: the Lean kernel,
+pytest (SWE), Docker exec (Terminal), the tau2 simulator. So for VERIFIABLE agentic RL the
+throughput is gated by ENVIRONMENT/CPU efficiency, not GPU FLOPs -- the opposite of the usual
+"GPU is the bottleneck" assumption from pretraining. Consequences:
+ * Scaling the GPU does little; scaling environment-verification parallelism (more REPL/test
+   workers, faster verifiers, async rollouts that overlap CPU verify with GPU generate) is
+   what speeds training.
+ * On a shared box, CPU contention directly throttles the RL even with the GPU near-idle
+   (observed: a co-tenant 27-core job pushed load to 38/32 and starved our rollouts).
+ * Cost/efficiency implication: a verifier-bound run leaves an expensive GPU ~90% idle, so
+   the right systems design co-locates many environment workers per GPU (or shares one GPU
+   across several verifier-bound runs) rather than scaling GPU count.
+This is a practical systems contribution alongside the algorithmic RLVP results: RLVP's
+verifiability buys a dense reward but moves the efficiency bottleneck from the GPU to the CPU.
