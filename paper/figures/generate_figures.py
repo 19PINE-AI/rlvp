@@ -400,6 +400,19 @@ def fig_selfcritique_2x2():
     fig, ax = plt.subplots(figsize=(8.6, 6.6))
     ax.set_xlim(0, 10); ax.set_ylim(0, 10); ax.axis('off')
 
+    # numbers from the ablation (paper_data.json['selfcritique'])
+    sc = D.get('selfcritique', {})
+    _off = sc.get('tau2_offline', {})
+    scf1 = _off.get('selfcritic_F1', {}).get('mean')
+    semf1 = _off.get('semantic_F1', {}).get('mean')
+    llm_late = sc.get('tau2_train', {}).get('llmcritic', {}).get('late')
+    nseed = sc.get('multiseed_csops', {}).get('rule', {}).get('viol', {}).get('n', 3)
+    c_l1 = (f'detects offline (F1 {scf1:.2f} vs {semf1:.2f})'
+            if scf1 is not None and semf1 is not None else 'detects offline (F1 .63 vs .23)')
+    c_l2 = (f'but collapses as a reward ({llm_late:.1f})'
+            if llm_late is not None else 'but collapses as a reward (0.0)')
+    b_l2 = f'rule decisive, critic inert ({nseed} seeds)'
+
     def cell(x, y, w, h, tag, edge, face, title, lines, verdict, vcol):
         ax.add_patch(FancyBboxPatch((x, y), w, h,
                      boxstyle='round,pad=0.08,rounding_size=0.25',
@@ -425,10 +438,10 @@ def fig_selfcritique_2x2():
          ['both detect it — rule is the', 'cleaner reward (critic = noisy proxy)'],
          'use the rule', BLUE)
     cell(xR, yT, w, h, 'B', GREEN, LIGHTGREEN, 'stateful-bookkeeping norms',
-         ['critic blind even when told;', 'rule decisive, critic inert (3 seeds)'],
+         ['critic blind even when told;', b_l2],
          'RULES WIN', GREEN)
     cell(xL, yB, w, h, 'C', ORANGE, LIGHTORANGE, r'task intent ($\tau$2)',
-         ['detects offline (F1 .63 vs .23)', 'but collapses as a reward (0.0)'],
+         [c_l1, c_l2],
          'DIAGNOSE ONLY', '#B45309')
     cell(xR, yB, w, h, 'D', GRAY, '#F3F4F6', 'hidden / masked failures',
          ['neither channel has signal;', 'needs outcome or a demo'],

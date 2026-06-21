@@ -194,8 +194,92 @@ for tag, run in [("1.7B", "c3mix_1p7b"), ("8B-LoRA", "c3mix_8b_lora")]:
         d = json.loads(f.read_text())
         D["scale"][tag] = {dm: d[dm]["perfect^k"] for dm in ("fileops", "csops")}
 
+# --- self-critique vs rules ablation (SELFCRITIC.md) ---
+def srows(name):
+    """Read results/<name>/train_log.jsonl (arbitrary dir, not just run_*)."""
+    f = R / name / "train_log.jsonl"
+    return [json.loads(l) for l in open(f)] if f.exists() else []
+
+
+def _late(vals, k=4):
+    vals = [v for v in vals if v is not None]
+    return st.mean(vals[-k:]) if vals else None
+
+
+def _ms(tag, key, k=4):  # late-mean per seed, across seeds 11/22/33 (csops, nested 'train')
+    out = []
+    for s in (11, 22, 33):
+        v = _late([r["train"].get(key) for r in srows(f"exp_sc_train_{tag}_s{s}_csops")], k)
+        if v is not None:
+            out.append(v)
+    return out
+
+
+def _msstat(tag, key):
+    xs = _ms(tag, key)
+    return {"mean": st.mean(xs) if xs else None,
+            "std": (st.pstdev(xs) if len(xs) > 1 else 0.0) if xs else None,
+            "seeds": [round(x, 3) for x in xs], "n": len(xs)}
+
+
+def _screport(slug):
+    f = R / "exp_selfcritic" / slug / "report.json"
+    return json.loads(f.read_text()) if f.exists() else None
+
+
+def _rule_recall(rep, rule):
+    for dd in (rep or {}).get("domains", {}).values():
+        pr = dd.get("blind", {}).get("per_rule_recall", {})
+        if rule in pr:
+            return pr[rule]["recall"]
+    return None
+
+
+sc = {"multiseed_csops": {}, "scale": {}, "tau2_offline": {}, "tau2_train": {}}
+# Driver A: penalty-only rule vs live vs frozen self-critic (all-fail regime, 3 seeds)
+for label, tag in [("rule", "c2nodis"), ("live", "llmcritic"), ("frozen", "llmcriticfrozen")]:
+    e = {"viol": _msstat(tag, "viol_per_episode"), "succ": _msstat(tag, "success")}
+    if label in ("live", "frozen"):
+        cp, cr = _ms(tag, "critic_precision"), _ms(tag, "critic_recall")
+        e["critic_P"] = round(st.mean(cp), 3) if cp else None
+        e["critic_R"] = round(st.mean(cr), 3) if cr else None
+    sc["multiseed_csops"][label] = e
+# cross-model scale sweep (blind detection): overall recall + stateful per-rule recall
+for size, slug in [("1.7B", "Qwen3-1_7B"), ("4B", "Qwen3-4B"), ("8B", "Qwen3-8B")]:
+    rep = _screport(slug)
+    if rep:
+        sc["scale"][size] = {
+            "overall_blind_recall": rep["overall"]["blind"]["turn_recall"],
+            "blind_write": _rule_recall(rep, "blind_write"),
+            "untested_submit": _rule_recall(rep, "untested_submit"),
+        }
+# tau2 cell-C offline: intent-miss recall + failure-prediction F1 (self-critic vs rules)
+_cc = [json.loads(p.read_text()) for p in sorted((R / "tau2_cellc").glob("run*/report.json"))]
+if _cc:
+    imr = [r["INTENT_MISS_critic_recall"] for r in _cc]
+    sf1 = [r["failure_prediction"]["self_critic (P,R,F1)"][2] for r in _cc]
+    rf1 = [r["failure_prediction"]["semantic_rule (P,R,F1)"][2] for r in _cc]
+    msd = lambda x: {"mean": st.mean(x), "std": st.pstdev(x) if len(x) > 1 else 0.0, "n": len(x)}
+    sc["tau2_offline"] = {"intent_recall": msd(imr), "selfcritic_F1": msd(sf1),
+                          "semantic_F1": msd(rf1)}
+# tau2 cell-C training: early->late reward for outcome / semantic-c3 / llmcritic
+for label, run in [("outcome", "tau2_cellc_outcome"), ("semantic", "tau2_cellc_sem"),
+                   ("llmcritic", "tau2_cellc_llmcritic")]:
+    rw = [r.get("reward") for r in rows(run)]
+    if rw:
+        sc["tau2_train"][label] = {"early": _late(rw[:4]) if len(rw) >= 1 else None,
+                                   "late": _late(rw), "curve": rw}
+D["selfcritique"] = sc
+
 OUT.write_text(json.dumps(D, indent=2, default=str))
 print("wrote", OUT)
+print("selfcritique multiseed viol:",
+      {k: round(v["viol"]["mean"], 2) for k, v in D["selfcritique"]["multiseed_csops"].items() if v["viol"]["mean"] is not None})
+print("selfcritique tau2 train late:",
+      {k: round(v["late"], 2) for k, v in D["selfcritique"]["tau2_train"].items()})
+print("selfcritique tau2 offline F1 self/sem:",
+      round(D["selfcritique"]["tau2_offline"].get("selfcritic_F1", {}).get("mean", 0), 2),
+      round(D["selfcritique"]["tau2_offline"].get("semantic_F1", {}).get("mean", 0), 2))
 # sanity print
 print("chain4 RLVP eps50:", D["chain4"]["flag_rlvp"]["eps50"])
 print("seeds:", {k: (round(v["eps50_mean"]), round(v["eps50_std"])) for k, v in D["seeds"].items()})
