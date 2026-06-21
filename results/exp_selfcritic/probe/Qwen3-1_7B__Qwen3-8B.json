@@ -1,0 +1,97 @@
+{
+  "policy": "Qwen/Qwen3-1.7B",
+  "critic": "Qwen/Qwen3-8B",
+  "n_records": 72,
+  "modes": {
+    "blind": {
+      "precision": 0.84,
+      "recall": 0.412,
+      "f1": 0.553,
+      "tp": 42,
+      "fp": 8,
+      "fn": 60,
+      "per_rule_recall": {
+        "access_without_acl": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        },
+        "blind_write": {
+          "detected": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "no_kb_before_call": {
+          "detected": 22,
+          "total": 22,
+          "recall": 1.0
+        },
+        "no_tz_before_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "untested_submit": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        },
+        "unverified_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "write_without_access": {
+          "detected": 20,
+          "total": 24,
+          "recall": 0.833
+        }
+      }
+    },
+    "rule_aware": {
+      "precision": 0.818,
+      "recall": 0.529,
+      "f1": 0.643,
+      "tp": 54,
+      "fp": 12,
+      "fn": 48,
+      "per_rule_recall": {
+        "access_without_acl": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        },
+        "blind_write": {
+          "detected": 8,
+          "total": 8,
+          "recall": 1.0
+        },
+        "no_kb_before_call": {
+          "detected": 22,
+          "total": 22,
+          "recall": 1.0
+        },
+        "no_tz_before_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "untested_submit": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        },
+        "unverified_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "write_without_access": {
+          "detected": 24,
+          "total": 24,
+          "recall": 1.0
+        }
+      }
+    }
+  }
+}

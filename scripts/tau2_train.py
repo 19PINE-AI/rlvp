@@ -105,6 +105,9 @@ def main():
         if not eps:
             print("no episodes this iter", flush=True)
             continue
+        if CREDIT == "llmcritic":
+            from rlvp.tau2_adapter import label_tau2_episodes
+            label_tau2_episodes(model, tok, eps)
         succ = sum(e.env.success for e in eps) / len(eps)
         rew = sum(e.env.outcome_reward() for e in eps) / len(eps)
         viol = sum(len(e.env.violations) for e in eps) / len(eps)

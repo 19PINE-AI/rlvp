@@ -1,0 +1,30 @@
+{
+  "critic": "Qwen/Qwen3-4B",
+  "n": 60,
+  "counts": {
+    "succ_clean": 6,
+    "succ_dirty": 0,
+    "fail_clean": 50,
+    "fail_dirty": 4
+  },
+  "critic_flag_rate": {
+    "succ_clean": 0.0,
+    "succ_dirty": 0.0,
+    "fail_clean": 0.44,
+    "fail_dirty": 1.0
+  },
+  "INTENT_MISS_critic_recall": 0.44,
+  "success_false_flag_rate": 0.0,
+  "failure_prediction": {
+    "semantic_rule (P,R,F1)": [
+      1.0,
+      0.074,
+      0.138
+    ],
+    "self_critic (P,R,F1)": [
+      1.0,
+      0.481,
+      0.65
+    ]
+  }
+}

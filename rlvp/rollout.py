@@ -72,6 +72,8 @@ class Episode:
     turn_violations: dict = field(default_factory=dict)  # turn_idx -> [rule names]
     turn_discharges: dict = field(default_factory=dict)  # turn_idx -> [rule names]
     turn_errors: set = field(default_factory=set)        # turn_idx with env ERROR obs
+    turn_obs: dict = field(default_factory=dict)         # turn_idx -> observation text
+    critic_turns: set = field(default_factory=set)       # turn_idx flagged by LLM self-critic
     done: bool = False
     truncated: bool = False
     scripted: bool = False  # off-policy rule-engine-synthesized episode
@@ -139,6 +141,7 @@ def run_episodes(model, tok, episodes, temperature=1.0, top_p=1.0,
                 e.action_spans.append((start, start + len(g), turn_idx))
                 text = tok.decode(g, skip_special_tokens=True)
                 res = e.env.step_text(text)
+                e.turn_obs[turn_idx] = res.observation
                 if res.violations:
                     e.turn_violations[turn_idx] = list(res.violations)
                 if res.discharges:
@@ -174,6 +177,7 @@ def scripted_episode(tok, env, script_texts, include_rules=False) -> Episode:
         turn_idx = e.n_turns
         e.action_spans.append((start, start + len(g), turn_idx))
         res = env.step_text(text)
+        e.turn_obs[turn_idx] = res.observation
         if res.violations:
             e.turn_violations[turn_idx] = list(res.violations)
         if res.discharges:

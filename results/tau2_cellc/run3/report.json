@@ -1,0 +1,30 @@
+{
+  "critic": "Qwen/Qwen3-4B",
+  "n": 60,
+  "counts": {
+    "succ_clean": 8,
+    "succ_dirty": 0,
+    "fail_clean": 44,
+    "fail_dirty": 8
+  },
+  "critic_flag_rate": {
+    "succ_clean": 0.25,
+    "succ_dirty": 0.0,
+    "fail_clean": 0.409,
+    "fail_dirty": 0.875
+  },
+  "INTENT_MISS_critic_recall": 0.409,
+  "success_false_flag_rate": 0.25,
+  "failure_prediction": {
+    "semantic_rule (P,R,F1)": [
+      1.0,
+      0.154,
+      0.267
+    ],
+    "self_critic (P,R,F1)": [
+      0.926,
+      0.481,
+      0.633
+    ]
+  }
+}

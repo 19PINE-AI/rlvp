@@ -77,6 +77,9 @@ class TrainConfig:
                                      # tool tags + env errors (no hand predicates)
     critic_mode: str = "blind"       # llmcritic: "blind" (no rules) | "rule_aware"
     critic_temp: float = 0.0         # llmcritic: critic decoding temperature
+    frozen_critic: bool = False      # llmcritic: judge with a FROZEN copy of the base
+                                     # model (vs the live co-evolving policy) — isolates
+                                     # critic non-stationarity from imperfect precision
 
 
 def build_advantages(groups, cfg: TrainConfig):
@@ -308,6 +311,16 @@ def train(cfg: TrainConfig):
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=(0.9, 0.95), weight_decay=0.0)
     scheduler = get_constant_schedule_with_warmup(optimizer, num_warmup_steps=cfg.warmup)
 
+    # frozen critic: a separate, never-updated copy of the base model used to judge
+    # the live rollouts each iter (vs the live policy judging itself).
+    critic_model = model
+    if cfg.credit == "llmcritic" and cfg.frozen_critic:
+        critic_model = AutoModelForCausalLM.from_pretrained(
+            cfg.model_name, dtype=torch.bfloat16, device_map="cuda")
+        critic_model.eval()
+        for p in critic_model.parameters():
+            p.requires_grad_(False)
+
     rng = random.Random(cfg.data_seed)
     seeds = list(range(cfg.train_seed_lo, cfg.train_seed_hi))
 
@@ -343,8 +356,9 @@ def train(cfg: TrainConfig):
                          max_episode_tokens=cfg.max_episode_tokens)
             if cfg.credit == "llmcritic":
                 from .self_critic import label_episodes
-                model.config.use_cache = True
-                label_episodes(model, tok, [e for live, _ in gen_groups for e in live],
+                critic_model.config.use_cache = True
+                label_episodes(critic_model, tok,
+                               [e for live, _ in gen_groups for e in live],
                                mode=cfg.critic_mode, batch=max(cfg.gen_batch // 8, 2),
                                temperature=cfg.critic_temp)
             groups = [full for _, full in gen_groups]

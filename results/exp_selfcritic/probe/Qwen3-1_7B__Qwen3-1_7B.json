@@ -1,0 +1,97 @@
+{
+  "policy": "Qwen/Qwen3-1.7B",
+  "critic": "Qwen/Qwen3-1.7B",
+  "n_records": 72,
+  "modes": {
+    "blind": {
+      "precision": 0.855,
+      "recall": 0.461,
+      "f1": 0.599,
+      "tp": 47,
+      "fp": 8,
+      "fn": 55,
+      "per_rule_recall": {
+        "access_without_acl": {
+          "detected": 24,
+          "total": 24,
+          "recall": 1.0
+        },
+        "blind_write": {
+          "detected": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "no_kb_before_call": {
+          "detected": 22,
+          "total": 22,
+          "recall": 1.0
+        },
+        "no_tz_before_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "untested_submit": {
+          "detected": 1,
+          "total": 24,
+          "recall": 0.042
+        },
+        "unverified_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "write_without_access": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        }
+      }
+    },
+    "rule_aware": {
+      "precision": 0.75,
+      "recall": 0.529,
+      "f1": 0.621,
+      "tp": 54,
+      "fp": 18,
+      "fn": 48,
+      "per_rule_recall": {
+        "access_without_acl": {
+          "detected": 24,
+          "total": 24,
+          "recall": 1.0
+        },
+        "blind_write": {
+          "detected": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "no_kb_before_call": {
+          "detected": 22,
+          "total": 22,
+          "recall": 1.0
+        },
+        "no_tz_before_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "untested_submit": {
+          "detected": 8,
+          "total": 24,
+          "recall": 0.333
+        },
+        "unverified_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "write_without_access": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        }
+      }
+    }
+  }
+}

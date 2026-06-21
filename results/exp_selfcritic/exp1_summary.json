@@ -1,0 +1,62 @@
+{
+  "outcome/fileops": {
+    "iters": 40,
+    "succ_early": 0.219,
+    "succ_late": 0.375,
+    "trueviol100_early": 41.3,
+    "trueviol100_late": 40.9,
+    "trueviol_ep_early": 1.4,
+    "trueviol_ep_late": 1.34,
+    "all_fail_late": 0.62,
+    "critic_P_late": null,
+    "critic_R_late": null
+  },
+  "c3/fileops": {
+    "iters": 40,
+    "succ_early": 0.219,
+    "succ_late": 0.25,
+    "trueviol100_early": 41.3,
+    "trueviol100_late": 51.1,
+    "trueviol_ep_early": 1.4,
+    "trueviol_ep_late": 1.25,
+    "all_fail_late": 0.75,
+    "critic_P_late": null,
+    "critic_R_late": null
+  },
+  "llmcritic/fileops": {
+    "iters": 40,
+    "succ_early": 0.219,
+    "succ_late": 0.535,
+    "trueviol100_early": 40.9,
+    "trueviol100_late": 44.5,
+    "trueviol_ep_early": 1.41,
+    "trueviol_ep_late": 1.34,
+    "all_fail_late": 0.44,
+    "critic_P_late": 0.44,
+    "critic_R_late": 0.19
+  },
+  "c3/csops": {
+    "iters": 40,
+    "succ_early": 0.0,
+    "succ_late": 0.0,
+    "trueviol100_early": 20.6,
+    "trueviol100_late": 0.2,
+    "trueviol_ep_early": 1.0,
+    "trueviol_ep_late": 0.01,
+    "all_fail_late": 1.0,
+    "critic_P_late": null,
+    "critic_R_late": null
+  },
+  "llmcritic/csops": {
+    "iters": 40,
+    "succ_early": 0.0,
+    "succ_late": 0.0,
+    "trueviol100_early": 20.7,
+    "trueviol100_late": 18.7,
+    "trueviol_ep_early": 1.02,
+    "trueviol_ep_late": 0.92,
+    "all_fail_late": 1.0,
+    "critic_P_late": 0.94,
+    "critic_R_late": 1.0
+  }
+}

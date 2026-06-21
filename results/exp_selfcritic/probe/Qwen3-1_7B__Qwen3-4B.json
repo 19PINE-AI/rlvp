@@ -1,0 +1,97 @@
+{
+  "policy": "Qwen/Qwen3-1.7B",
+  "critic": "Qwen/Qwen3-4B",
+  "n_records": 72,
+  "modes": {
+    "blind": {
+      "precision": 0.867,
+      "recall": 0.382,
+      "f1": 0.531,
+      "tp": 39,
+      "fp": 6,
+      "fn": 63,
+      "per_rule_recall": {
+        "access_without_acl": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        },
+        "blind_write": {
+          "detected": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "no_kb_before_call": {
+          "detected": 21,
+          "total": 22,
+          "recall": 0.955
+        },
+        "no_tz_before_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "untested_submit": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        },
+        "unverified_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "write_without_access": {
+          "detected": 18,
+          "total": 24,
+          "recall": 0.75
+        }
+      }
+    },
+    "rule_aware": {
+      "precision": 0.846,
+      "recall": 0.431,
+      "f1": 0.571,
+      "tp": 44,
+      "fp": 8,
+      "fn": 58,
+      "per_rule_recall": {
+        "access_without_acl": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        },
+        "blind_write": {
+          "detected": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "no_kb_before_call": {
+          "detected": 22,
+          "total": 22,
+          "recall": 1.0
+        },
+        "no_tz_before_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "untested_submit": {
+          "detected": 0,
+          "total": 24,
+          "recall": 0.0
+        },
+        "unverified_call": {
+          "detected": 1,
+          "total": 1,
+          "recall": 1.0
+        },
+        "write_without_access": {
+          "detected": 22,
+          "total": 24,
+          "recall": 0.917
+        }
+      }
+    }
+  }
+}

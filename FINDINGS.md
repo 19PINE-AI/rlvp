@@ -31,7 +31,7 @@ GRPO throws away.
 | DAPO doesn't solve sample-efficiency | ✅ | 5.6× oversampling tax, no recovery |
 | Lean "faster to threshold" | ❌ retracted | seed-dependent; not robust |
 | τ²: process rewards can't substitute for outcome | ✅ (boundary) | coverage gradient w/ ceiling |
-| Self-critique vs rules ([SELFCRITIC.md](SELFCRITIC.md)) | ✅ full 2×2 (Exp0+probe+Exp1+τ² cell-C) | symmetric: rules win on stateful (signal *stationarity*); self-critique wins on τ² *intent* (F1 .61 vs rules .14) |
+| Self-critique vs rules ([SELFCRITIC.md](SELFCRITIC.md)) | ✅ complete (Exp0+probe+Exp1 3-seed+frozen+4B+τ² offline+train) | rules>self-critique even at equal structure+perfect recall (critic's 6% FP, not non-stationarity; all-fail-regime-specific); self-critique only useful as an *offline intent detector* (F1 .63 vs .23) — as a training reward it **collapses** (0.0 vs outcome 0.5) |
 | SWE-bench at 4B/30B | 🔄 re-measuring | env bug fixed; valid measurement in progress |
 | miniF2F at 30B (vLLM+QLoRA) | 🔄 running | harness built+validated; runs starting |
 

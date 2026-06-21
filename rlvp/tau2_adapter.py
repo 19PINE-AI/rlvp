@@ -401,3 +401,53 @@ def make_policy_agent_class():
                                      arguments=call.args)])
 
     return HFPolicyAgent
+
+
+# --------------------------------------------------------------------------
+# llmcritic support for tau2: build a critic-ready record from a tau2 episode
+# (whose token stream interleaves system/customer/tool/assistant turns) and
+# label episodes with on-policy blind self-critique.
+# --------------------------------------------------------------------------
+import re as _re
+
+_BLOCK = _re.compile(r"<\|im_start\|>(\w+)\n(.*?)<\|im_end\|>", _re.S)
+_THINK = _re.compile(r"^<think>.*?</think>\s*", _re.S)
+
+
+def tau2_episode_record(ep, tok) -> dict:
+    """Decode a tau2 Episode's token stream into a {domain_sys, goal, transcript,
+    turn_ids} record for the self-critic (transcript steps align to ep turns)."""
+    full = tok.decode(ep.ids, skip_special_tokens=False)
+    blocks = _BLOCK.findall(full)
+    system = next((c for r, c in blocks if r == "system"), "")
+    seq = [(r, c) for r, c in blocks if r in ("user", "assistant")]
+    goal = next((c.strip() for r, c in seq if r == "user"), "")
+    steps, turn_ids, k = [], [], 0
+    for i, (r, c) in enumerate(seq):
+        if r != "assistant":
+            continue
+        action = _THINK.sub("", c).strip()
+        m = list(_re.finditer(r"Action:\s*\S+", action))
+        if m:
+            action = action[m[-1].start():].strip()
+        result = seq[i + 1][1].strip() if i + 1 < len(seq) and seq[i + 1][0] == "user" else ""
+        if len(result) > 400:
+            result = result[:400] + " ...[truncated]"
+        steps.append(f"Step {k + 1}:\n  action: {action}\n  result: {result}")
+        turn_ids.append(k)
+        k += 1
+    return {"domain_sys": system.strip(), "rules_block": "", "goal": goal,
+            "transcript": "\n".join(steps), "turn_ids": turn_ids}
+
+
+def label_tau2_episodes(critic_model, tok, episodes, mode="blind", batch=3):
+    """Set ep.critic_turns for each tau2 episode via blind self-critique."""
+    from .self_critic import label_records
+    work = [e for e in episodes if e.action_spans]
+    recs = [tau2_episode_record(e, tok) for e in work]
+    flagged = label_records(critic_model, tok, recs, mode=mode, batch=batch, temperature=0.0)
+    for e, f in zip(work, flagged):
+        e.critic_turns = f
+    for e in episodes:
+        if not e.action_spans:
+            e.critic_turns = set()

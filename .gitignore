@@ -25,3 +25,7 @@ results/run_*/final/
 *.out
 leanprove/mathlib_build.log
 termbench/terminal-bench/
+
+# --- self-critique study: exclude merged checkpoints, keep logs/configs ---
+results/*/final/
+results/**/final/
