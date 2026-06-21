@@ -316,26 +316,35 @@ user's jobs, runs at gpu_mem 0.48 when the GPU frees): 30B un-gameability sweep
 (aligned/valid/noerror/structural/c4-gated) + SWE structural/gated; E-C (SWE multi-vs-
 single-F2P) not yet built.
 
-## 14. SYSTEMS FINDING: verifiable agentic RL is VERIFIER-bound (CPU), not GPU-bound
-Measured during 30B miniF2F RLVP training: GPU MEMORY ~86GB (full -- 30B weights + KV +
-QLoRA) but GPU COMPUTE only ~4-15% SM (avg ~8%). The bottleneck is the CPU-side VERIFIER,
-not the model: each rollout step generates ONE short tactic on the GPU (~ms) then waits on
-the Mathlib REPL where the Lean KERNEL checks it on CPU (~seconds); across ~8 sequential
-proof steps x 48 episodes, wall-clock is dominated by environment latency + Python
-orchestration, while the GPU-heavy parts (vLLM gen, QLoRA backward) are brief bursts.
+## 14. SYSTEMS OBSERVATION: the bottleneck is TASK-DEPENDENT -- our Lean run was verifier(CPU)-bound
+SCOPE: this is a measured observation about ONE workload (30B miniF2F theorem-proving), NOT a
+general law about verifiable agentic RL. Whether a run is GPU-bound or CPU/verifier-bound
+depends on the specific task -- do not assume either.
 
-This GENERALIZES across RLVP's environments -- the very thing that makes RLVP's signal cheap
-and verifiable (a machine-checkable environment) is usually a CPU process: the Lean kernel,
-pytest (SWE), Docker exec (Terminal), the tau2 simulator. So for VERIFIABLE agentic RL the
-throughput is gated by ENVIRONMENT/CPU efficiency, not GPU FLOPs -- the opposite of the usual
-"GPU is the bottleneck" assumption from pretraining. Consequences:
- * Scaling the GPU does little; scaling environment-verification parallelism (more REPL/test
-   workers, faster verifiers, async rollouts that overlap CPU verify with GPU generate) is
-   what speeds training.
- * On a shared box, CPU contention directly throttles the RL even with the GPU near-idle
-   (observed: a co-tenant 27-core job pushed load to 38/32 and starved our rollouts).
- * Cost/efficiency implication: a verifier-bound run leaves an expensive GPU ~90% idle, so
-   the right systems design co-locates many environment workers per GPU (or shares one GPU
-   across several verifier-bound runs) rather than scaling GPU count.
-This is a practical systems contribution alongside the algorithmic RLVP results: RLVP's
-verifiability buys a dense reward but moves the efficiency bottleneck from the GPU to the CPU.
+What we measured (Lean theorem proving, 30B): GPU MEMORY ~86GB (full -- 30B weights + KV +
+QLoRA) but GPU COMPUTE only ~4-15% SM (avg ~8%, bursty 0->28%). In THIS task the binding
+resource is the CPU-side verifier, not the model: each rollout step generates ONE short tactic
+on the GPU (~ms) then waits on the Mathlib REPL where the Lean KERNEL checks it on CPU
+(~seconds); across ~8 sequential proof steps x 48 episodes, wall-clock is dominated by
+environment latency + Python orchestration, while the GPU-heavy parts (vLLM gen, QLoRA
+backward) are brief bursts. So for THIS run, scaling the GPU does little and CPU contention
+directly throttles it (observed: a co-tenant 27-core job pushed load to 38/32 and starved our
+rollouts; when it freed, load dropped to ~4.5 and iters sped up).
+
+Where this does and does NOT transfer (the bottleneck is per-task, must be profiled):
+ * CPU/verifier-bound when the checker is a cheap CPU process AND generation is short:
+   Lean kernel (measured), and plausibly pytest (SWE), Docker exec (Terminal) -- but verify
+   per task, not assume.
+ * GPU-bound when generation dominates or the verifier itself runs on the GPU: long-CoT /
+   long-horizon rollouts with large outputs, big batches, a LEARNED reward model or LLM-judge
+   verifier, or simulators/renderers that run on the GPU. There the GPU stays busy and the
+   CPU verifier is cheap.
+ * Mixed/shifting: the same pipeline can flip between regimes as you change batch size,
+   sequence length, model size, or verifier cost.
+Takeaway: PROFILE each task (SM% vs verifier latency) rather than assuming "GPU is the
+bottleneck." For the verifier-bound case specifically, the levers are environment-verification
+parallelism (more REPL/test workers, async rollouts overlapping CPU-verify with GPU-generate)
+and co-locating many verifier-bound runs per GPU; for the GPU-bound case those do nothing and
+the usual GPU-scaling intuitions apply. The practical point for RLVP: a cheap machine-checkable
+verifier can move the bottleneck OFF the GPU and onto the CPU -- when it does, the systems
+design must follow -- but this is a property of the task's verifier, not of RLVP in general.
