@@ -247,15 +247,35 @@ UNIFYING CLAIM (ties tau2 + 30B miniF2F into ONE principle, stronger than 3 obs)
   * An ALIGNED DISCHARGE can pass: Lean goal-count STRICTLY DECREASED is kernel-
     verified and cannot be earned by degenerating -> admissible, dense, safe.
 
-EMPIRICAL TRIPTYCH (30B Qwen3-30B-A3B, miniF2F algebra, vLLM-fp8 + QLoRA + Muon):
-  * outcome-only        -> learns to 1.0 (stable).
-  * RLVP structural(c3) -> COLLAPSES to 0 (misaligned errored-tactic penalty;
-                           compliance attractor; robust across AdamW/Muon -> signal
-                           not optimizer).
-  * RLVP aligned        -> stable, recovered a hard-batch dip and reached 0.92
-                           (goal-progress discharge only; un-gameable).
-  [quantitative aligned-vs-outcome numbers: PENDING the running matched-Muon compare;
-   fill in when results/minif2f_aln_RESULT.json lands -- do NOT fabricate.]
+EMPIRICAL SWEEP — COMPLETE (30B Qwen3-30B-A3B, miniF2F algebra, vLLM-fp8 + QLoRA +
+Muon, lr=1e-3, 14 iters, seed 7; full table in FINDINGS.md sec 15). Five process-signal
+variants, each a pre-registered cheapest-gaming-policy, scored by terminal success (last3
+of 14) + whether it STAYS dead:
+  arm         signal                                    last3   terminal
+  validgated  gameable discharge, OUTCOME-GATED (c4)     0.305   ALIVE (best)
+  aligned     goal-progress discharge only (no penalty)  0.243   ALIVE
+  valid       any-valid discharge, ungated (gameable)    0.180   ALIVE, declines
+  structural  discharge + errored/no_progress PENALTIES  0.00    DEAD (stays 0)
+  noerror     errored PENALTY only (no discharge)        0.00    DEAD (stays 0)
+
+  THREE RESULTS:
+  (1) PENALTY IS THE LETHAL INGREDIENT. Both penalty-bearing arms (structural, noerror)
+      collapse to the compliance/inaction attractor and STAY dead; both penalty-free arms
+      survive. It is the misaligned penalty -- satisfiable by not acting -- that kills the
+      policy, not the presence of a dense signal. (Refines the earlier "structural
+      collapses" obs: the discharge is not what saves structural; removing the penalty is.)
+  (2) OUTCOME-GATING RESCUES a gameable discharge. The SAME farmable any-valid discharge is
+      harmful ungated (valid declines to 0.180 as discharge/ep climbs) but BEST gated on
+      success (validgated 0.305). c4-gating converts a farmable signal into a useful one ->
+      this is experiment #2 below, CONFIRMED.
+  (3) Robust across the single-seed noise (see caveat); the qualitative ordering
+      penalty-free-survive > penalty-bearing-die, and gated > ungated, is stable.
+
+  HONEST CAVEAT (in the paper): 30B/lr=1e-3/single-seed is HIGH-VARIANCE -- every arm swings
+  iter-to-iter (aligned touches 0.0 twice mid-run, recovers to 0.65). The robust
+  discriminator is last3 + STAYS-dead, NOT a single final iter (a naive last-iter heuristic
+  over-flags aligned as collapsed). Multi-seed (seeds 8,9; running) firms the exact numbers;
+  ordering already stable.
 
 DEEP POINT (for discussion): a good progress reward is a cheap, un-gameable, monotone
 proxy for dV (change in value function). When the domain provides one for free
@@ -298,20 +318,23 @@ PAPER INTEGRATION:
     independent axis, NOT a learning signal.
   - Fold tau2 coverage-gradient + miniF2F collapse as the SAME phenomenon, 2 scales.
 
-PLANNED EXPERIMENTS (run after current compare; orchestrated):
-  #1 Un-gameability as a MEASURED LAW: ~5 Lean process-signal variants spanning
-     aligned->misaligned (goal-decrease / valid-tactic / non-error / shorter-than-peers
-     / orthogonal). Pre-register each one's cheapest gaming policy, train short, show
-     predicted-misaligned collapse & predicted-aligned help. Turns criterion -> test.
-  #2 Outcome-gated process credit (c4, already in grpo.py): discharge paid ONLY if the
-     episode eventually succeeds -> structurally un-gameable. c3-structural collapsed;
-     does c4-structural stay stable? Existing infra, just --credit c4.
-  #3 HARD-DOMAIN headline (SWE): manufacture an un-gameable verifiable-progress LADDER
-     (failing test reproduces bug -> edit targets the file -> test passes; "reproduced"
-     cannot be faked) and test whether RLVP makes progress where the raw outcome is
-     all-fail at 30B -- and whether the un-gameable ladder avoids the collapse a naive
-     "ran-tests" credit would farm. Plus control: process-as-PRECONDITION (gate, don't
-     pay) vs process-as-reward; and verifiable-discharge vs learned llmcritic (does the
-     learned proxy get hacked).
+EXPERIMENTS — STATUS (FINDINGS.md sec 15):
+  #1 Un-gameability as a MEASURED LAW [DONE]: 5 Lean process-signal variants spanning
+     aligned->misaligned (aligned / valid / noerror / structural / validgated), each
+     pre-registered with its cheapest gaming policy. RESULT: penalty-bearing variants die,
+     penalty-free survive (see sweep table above). Criterion -> measured test, confirmed.
+  #2 Outcome-gated process credit (c4) [DONE]: discharge paid ONLY if the episode
+     eventually succeeds. RESULT: the SAME gameable discharge declines ungated (valid 0.180)
+     but recovers to best gated (validgated 0.305) -> outcome-gating restores admissibility.
+     Confirmed.
+  #3 HARD-DOMAIN (SWE-bench dask, blind 0% domain) [DONE, as a NEGATIVE/boundary result]:
+     two arms, structural(c3) vs gated(c4), 16 iters each. RESULT: BOTH stay at 0% success
+     -- structural farms its discharge (~1/ep) without ever fixing a bug; gating withholds
+     the credit so there is ~0 usable signal. Demonstrates the ABSENCE of a free un-gameable
+     progress metric in a blind hard domain: when no cheap verifiable progress exists that
+     the agent can't game, there is no safe dense signal to add. Matches the
+     verifiable-potential frame (no Phi strictly finer than outcome that any rollout
+     actually moves). [E-C below probes WHY: is a finer Phi even reachable on these
+     instances?]
 
 ## VERIFIABLE-POTENTIAL CLAIM (central, see FINDINGS.md sec 11): RLVP helps iff domain has a verifiable Phi strictly finer than outcome. Formalize via potential-based shaping (Ng 1999). Experiments E-A granularity / E-B sparsity-phase-diagram / E-C SWE multi-vs-single-F2P-test. Validate or refute before paper.
