@@ -312,6 +312,18 @@ class SweWorktree:
         except Exception:  # noqa: BLE001
             return 0.0
 
+    def phi(self):
+        """E-C verifiable potential: (#FAIL_TO_PASS tests now passing, total).
+        Phi = n_pass/total is strictly FINER than the all-pass binary outcome iff
+        total > 1 AND intermediate values are reachable. Single-F2P (total==1) has
+        Phi in {0,1} == outcome (no finer structure)."""
+        total = len(self.f2p)
+        try:
+            rc_f, p_f, fail_f, _ = self._pytest(self.f2p)
+            return (p_f, total)
+        except Exception:  # noqa: BLE001
+            return (0, total)
+
 
 # --------------------------------------------------------------------------
 # Prompt
@@ -401,7 +413,8 @@ def build_task_msg(instance, oracle=False):
 # Episode driver
 # --------------------------------------------------------------------------
 def run_swe_episode(instance, gen, tok, rule_mode="structural", max_steps=12,
-                    workdir=None, keep_worktree=False, verbose=False, oracle=False):
+                    workdir=None, keep_worktree=False, verbose=False, oracle=False,
+                    measure_phi=False):
     """Roll out one SWE episode and return a trainer-ready Episode (or None if
     setup failed). `gen` is GenServer.generate (ids -> ids). One worktree per
     episode, cleaned up at the end unless keep_worktree."""
@@ -423,6 +436,7 @@ def run_swe_episode(instance, gen, tok, rule_mode="structural", max_steps=12,
 
     ep = Episode(env=None, ids=_ids(tok, TEMPLATE.initial(sys_p, task_msg)))
     reward = 0.0
+    phi_pass, phi_total = 0, len(_node_ids(instance["FAIL_TO_PASS"]))  # E-C default
     tool_log: list = []  # (turn, tool_name) for reporting
 
     try:
@@ -470,6 +484,8 @@ def run_swe_episode(instance, gen, tok, rule_mode="structural", max_steps=12,
 
         # terminal oracle (real hidden test suite)
         reward = wt.oracle()
+        if measure_phi:                       # E-C: verifiable potential = #F2P passing
+            phi_pass, phi_total = wt.phi()
     except Exception as exc:  # noqa: BLE001
         if verbose:
             print(f"[{iid}] rollout error: {str(exc)[:200]}", flush=True)
@@ -480,6 +496,8 @@ def run_swe_episode(instance, gen, tok, rule_mode="structural", max_steps=12,
 
     ep.done = True
     ep.env = ShimEnv(reward, tracker)
+    if measure_phi:                           # (n_f2p_pass, n_f2p_total) for E-C
+        ep._swe_phi = (phi_pass, phi_total)   # type: ignore[attr-defined]
     # attach tool log + per-tool flags for smoke reporting (ShimEnv.calls unused
     # by the trainer; we stuff a lightweight record there for convenience).
     ep.env.calls = list(tool_log)
