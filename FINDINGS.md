@@ -427,3 +427,25 @@ do multi-F2P rollouts ever land at INTERMEDIATE Phi (0<Phi<1)? If yes -> multi-F
 usable finer potential single-F2P lacks (predicts dense reward helps there). If multi-F2P
 rollouts are also all-or-nothing -> the finer potential is VACUOUS (unreachable), explaining
 the sec-15 null directly. Run: `python3 scripts/ec_f2p.py rollout --n 16 --iters 6` when GPU free.
+
+**E-C rollout-reachability (30B, COMPLETE on the multi side):** ran G=6 rollouts on each of
+the 16 multi-F2P instances (96 rollouts) + 10/16 single-F2P (60 rollouts), measuring Phi per
+rollout. **Every one of the 156 rollouts scored Phi=0** (n_partial=0, n_solved=0, phi_var=0
+in every group) -- the 30B never made even a SINGLE FAIL_TO_PASS test pass, let alone an
+intermediate fraction. So although a finer Phi STRUCTURALLY exists for the 16 multi-F2P
+instances, it is **empirically VACUOUS at 30B: unreachable, zero within-group variance**.
+
+**Why this matters (mechanism):** GRPO's advantage is group-relative, so a process potential
+only yields gradient if it VARIES across the rollouts in a group. Phi here is a constant 0 in
+every group -> it would be centered out -> **zero gradient**. This is the direct mechanistic
+cause of the sec-15 SWE null: the dense SWE signal failed not because it was gameable but
+because **the policy gets no partial traction at all** -- there is no reachable intermediate
+state for any potential, gameable or not, to reward. "No verifiable Phi finer than outcome
+that the policy can move" is the operative condition, and it is empirically true here.
+
+**Honest caveat:** this is measured at 30B on SWE-bench dask, a 0%-solve regime for this model.
+The finding is conditional on REACHABILITY -- a stronger model (or easier instances) that
+achieves partial fixes would make the multi-F2P potential non-vacuous and potentially useful.
+The claim is therefore: a finer verifiable potential helps iff it both EXISTS (structural:
+multi-F2P) AND is REACHABLE (empirical: partial Phi occurs with within-group variance). In SWE
+at 30B, the first holds for 1/3 of instances but the second fails everywhere we measured.
