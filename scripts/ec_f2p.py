@@ -96,7 +96,7 @@ def mode_validate():
             continue
         base = wt.phi()                      # no source fix -> expect (0, total)
         try:
-            H._apply_patch(wt.repo_dir, inst["patch"], "goldfix", log=lambda *a: None)
+            H._apply_patch(wt.repo_dir, inst["patch"], "goldfix", log=[])
             gold = wt.phi()                  # gold fix -> expect (total, total)
         except Exception as e:               # noqa: BLE001
             gold = (-1, total)

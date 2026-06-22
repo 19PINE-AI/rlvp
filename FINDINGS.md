@@ -398,3 +398,32 @@ whether the process signal survives an agent that games it.
   ordering (penalty-free survive, penalty-bearing die, gating rescues) is stable.
 - SWE arms are a 0%-success regime: they demonstrate the ABSENCE of a usable dense signal in a
   blind hard domain, not a positive training result.
+
+---
+
+## 16. E-C — SWE verifiable-potential: a finer Phi is STRUCTURALLY RARE (CPU part done)
+Tests the verifiable-potential claim (sec 11) in SWE: Phi = (#FAIL_TO_PASS tests passing)/
+total. A dense process reward can only help if Phi is strictly FINER than the all-pass
+outcome AND intermediate Phi is reachable.
+
+**Structural split (48 small-patch dask instances, metadata only):**
+- **SINGLE-F2P (|F2P|==1): 32 / 48 (2/3).** Phi in {0,1} == outcome — *no finer potential
+  exists at all*; the claim predicts dense process reward cannot help on these by construction.
+- **MULTI-F2P (|F2P|>=2): 16 / 48 (1/3).** A strictly finer Phi exists — but coarse:
+  F2P-count distribution {1:32, 2:10, 3:3, 4:1, 5:1, 9:1}, i.e. most multi-F2P instances
+  have only 2–3 sub-tests.
+- **Finding: in SWE a finer verifiable potential is structurally RARE and shallow** — most
+  bug-fix instances are all-or-nothing. This is a domain-level reason the sec-15 SWE arms
+  found no usable dense signal: for 2/3 of instances there is no finer Phi to exploit even
+  in principle.
+
+**Instrument validated (CPU, no GPU):** for 4 instances (3 multi + 1 single), Phi reads
+(0, total) on the un-fixed base and (total, total) after the gold patch — instrument_ok on
+all. Phi measures exactly #F2P-pass; the 0 and full extremes are reachable.
+
+**PENDING (GPU, queued):** rollout-reachability — run G 30B rollouts/instance with
+measure_phi and compare WITHIN-GROUP Phi variance on multi-F2P vs single-F2P. The sharp test:
+do multi-F2P rollouts ever land at INTERMEDIATE Phi (0<Phi<1)? If yes -> multi-F2P has a
+usable finer potential single-F2P lacks (predicts dense reward helps there). If multi-F2P
+rollouts are also all-or-nothing -> the finer potential is VACUOUS (unreachable), explaining
+the sec-15 null directly. Run: `python3 scripts/ec_f2p.py rollout --n 16 --iters 6` when GPU free.
