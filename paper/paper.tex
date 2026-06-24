@@ -12,6 +12,10 @@
 \usepackage{subcaption}
 \usepackage{enumitem}
 \usepackage{natbib}
+\usepackage{pifont}
+\newcommand{\cmark}{\textcolor{codegreen}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{alertred}{\ding{55}}}
+\definecolor{alertred}{rgb}{0.70,0.10,0.10}
 
 \usepackage{hyperref}
 \usepackage{url}
@@ -50,8 +54,8 @@
 }
 \lstset{style=pythonstyle}
 
-\title{Reinforcement Learning from Verifiable Penalties:\\
-Process Rewards as Gradient Where Outcome Rewards Are Blind}
+\title{When Do Dense Process Rewards Help Agentic\\
+Reinforcement Learning? A Verifiable-Potential Criterion}
 
 \author{
   Bojie Li \\
@@ -59,13 +63,15 @@ Process Rewards as Gradient Where Outcome Rewards Are Blind}
 }
 
 \date{}
-\runningtitle{Reinforcement Learning from Verifiable Penalties}
+\runningtitle{A Verifiable-Potential Criterion for Process Rewards}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Outcome-only reinforcement learning---reward the trajectory iff it solves the task---is the dominant recipe for training long-horizon LLM agents, but it has a structural blind spot. Group-relative methods such as GRPO compute an advantage of zero whenever every sampled rollout in a group fails, and on hard tasks the early-training regime is \emph{dominated} by such all-fail groups. The result is a training signal that is silent precisely when learning matters most. We study \textbf{Reinforcement Learning from Verifiable Penalties} (RLVP): augmenting the sparse outcome reward with dense, machine-checkable \emph{process} rewards attached at each tool call---a penalty when a move violates a verifiable rule, a credit when it discharges a pending obligation. Because these rewards depend on \emph{how} an episode acts rather than \emph{whether} it ultimately succeeds, they produce gradient from the failed episodes that GRPO discards. We show, on a controlled suite of long-horizon agentic tasks, that this turns a $7\times$ wall of dead updates into smooth learning: RLVP reaches a target success rate in roughly a quarter the episodes of outcome-only GRPO and, unlike GRPO, with near-zero variance across seeds. We isolate \emph{why} through controlled and paired experiments---the credit must be attached to the responsible tokens, not folded into a scalar return---and show the process signal can be \emph{auto-derived} from tool-type metadata and the environment's own error signals, recovering the hand-engineered gain with no human-written rules. We also map the method's boundary honestly. The dynamic-sampling fix of DAPO confronts the same all-fail problem by \emph{discarding and resampling}, which we show pays a $5.6\times$ sampling tax without recovering the lost signal. On a task with a hidden precondition that the policy never spontaneously samples, no reward-only method escapes the wall---a demonstration cold-start does, delineating exactly where self-evolution ends and imitation must begin. And on a real benchmark we trace the method's boundary as a \emph{coverage gradient with an irreducible ceiling}: rules orthogonal to the reward actively \emph{harm}, driving the policy into a degenerate compliance-only optimum; policy-derived rules---procedural \emph{and} verifiable semantic ones---remove that harm; but neither beats outcome-only, because verifiable rules can express policy \emph{validity} while the reward's residual difficulty is task \emph{intent}, which is the reward itself and learnable only from the outcome. Process rewards accelerate the policy-verifiable component of success and cannot substitute for outcome learning of intent.
+Agentic reinforcement learning inherited its reward from reasoning models: a single bit at the end of a trajectory saying whether the task was solved. This is doubly wasteful. On long-horizon tasks the base policy rarely succeeds, so most sampled groups are \emph{all-fail}, and group-relative methods such as GRPO assign them an advantage of exactly zero---no gradient---during precisely the phase of training when the policy most needs shaping. And an agent's environment is itself a \emph{verifier}: every tool call returns a machine-checkable result, a dense intermediate signal that reasoning RL never had and that outcome-only RL discards. The obvious fix---reward the process---is treacherous: a penalty an agent can satisfy by doing nothing drives it into a degenerate \emph{compliance} optimum, and a learned progress critic is simply hacked. We ask precisely \emph{when} a dense process reward helps, and answer with a criterion: \textbf{a process reward improves agentic RL if and only if it is an un-gameable, verifiable proxy for progress---a potential strictly finer than the terminal outcome whose intermediate values the policy can actually reach.} Whether such a signal exists is a property of the \emph{domain}, not the algorithm.
+
+We turn the criterion into a test applied \emph{before} training and validate it as a predictive law across five settings spanning both verdicts. Where it says \emph{yes}: in theorem proving a verifiable progress signal turns the all-fail groups into gradient and eliminates dead updates entirely; in system administration an un-gameable harm penalty cuts destructive actions roughly fourfold at \emph{equal} task success---reducing harm on the path that the terminal outcome cannot see. Where it says \emph{no}: in customer-service workflows the residual difficulty is task \emph{intent}, which no verifiable rule can encode, so process rewards neutralize harm but cannot beat outcome-only; in software repair the finer signal exists for only a third of problems and is \emph{empirically unreachable}---the policy never makes partial progress---so it supplies no gradient at all. A controlled sweep that walks a single signal from aligned to misaligned reproduces the criterion's verdict arm by arm: signals carrying a misaligned penalty collapse, penalty-free progress signals survive, and gating a gameable signal on the outcome restores it. The criterion explains our gains and our failures with one rule, and tells a practitioner, before spending any compute, whether a dense process reward is worth adding.
 \end{abstract}
 
 \vspace{-0.4em}

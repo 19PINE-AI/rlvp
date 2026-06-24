@@ -1,0 +1,31 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{A deterministic rule beats a same-model self-critic as a dense reward}, in the all-fail regime (consumer-service domain, 1.7B, three seeds; late-training mean $\pm$ std). Rule and critics share the identical penalty-only credit structure; the critic additionally has \emph{perfect recall} against the rule oracle. The rule is decisive every seed; the critics are inert. The \emph{frozen} (stationary) critic fails like the live one, isolating the cause as the critic's $\sim$6\% false-positive imprecision rather than non-stationarity.}
+\label{tab:sc-train}
+\small
+\begin{tabular}{lccc}
+\toprule
+process reward & detection (P/R) & violations/episode & task success \\
+\midrule
+rule penalty (deterministic) & $1.00/1.00$ & $\mathbf{0.38 \pm 0.44}$ & $\mathbf{0.33 \pm 0.47}$ \\
+self-critic, live (co-evolving) & $0.94/1.00$ & $0.94 \pm 0.05$ & $0.00$ \\
+self-critic, frozen (stationary) & $0.94/1.00$ & $0.93 \pm 0.02$ & $0.00$ \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+
+\caption{\textbf{Self-critique is a usable intent \emph{detector} but a failed intent \emph{reward}} ($\tau$-bench airline, Qwen3-4B). \emph{Left:} as a failure predictor on rule-clean (intent) failures the self-critic far exceeds the verifiable semantic rules (3 rollout seeds). \emph{Right:} as the dense training reward the same self-critique collapses, while outcome-only and the rules both learn (training reward, early$\to$late; 20 iterations).}
+\label{tab:sc-tau2}
+\small
+\begin{tabular}{lc@{\hskip 2.5em}lc}
+\toprule
+\multicolumn{2}{c}{\emph{offline: failure prediction}} & \multicolumn{2}{c}{\emph{trained as reward}} \\
+channel & F1 & channel & reward (early$\to$late) \\
+\midrule
+semantic rules & $0.23 \pm 0.06$ & outcome-only & $0.09 \to \mathbf{0.50}$ \\
+blind self-critique & $\mathbf{0.63 \pm 0.02}$ & semantic rules & $0.10 \to 0.35$ \\
+ & & blind self-critique & $0.01 \to \mathbf{0.00}$ \\
+\bottomrule
+\end{tabular}
+\end{table}

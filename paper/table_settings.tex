@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{The criterion sorts five settings, and its verdict matches the measured outcome in every one.} Each row is a domain; the three middle columns are the criterion's gates (does a verifiable potential finer than the outcome exist; is it un-gameable; are its intermediate values reachable). ``\cmark/\xmark'' marks the gate that decides the row. The criterion predicts \emph{help} only when all three pass.}
+\label{tab:settings}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{2.9cm}p{2.0cm}cccp{1.6cm}p{2.7cm}@{}}
+\toprule
+\textbf{Setting} & \textbf{Domain / model} & \textbf{Finer $\Phi$?} & \textbf{Un-game?} & \textbf{Reach?} & \textbf{Verdict} & \textbf{Observed} \\
+\midrule
+Theorem proving (progress) & Lean miniF2F 30B; synth.\ 4B & \cmark & \cmark & \cmark & \textbf{help} & dead updates $\to 0$; dense gradient \\
+System admin (harm) & TerminalBench 4B & \cmark & \cmark & \cmark & \textbf{help} (harm axis) & $\sim$4$\times$ fewer violations, equal success \\
+Lean signal sweep (controlled) & miniF2F 30B & varies & \textbf{varies} & \cmark & per arm & penalty dies, gating rescues \\
+Customer service (intent) & $\tau$-bench airline 4B & \xmark & --- & --- & \textbf{no help} & rules match, never beat outcome \\
+Software repair & SWE-bench 30B & 1/3 only & --- & \xmark & \textbf{no help} & $0\%$ solve; all rollouts $\Phi{=}0$ \\
+\bottomrule
+\end{tabular}
+\end{table}
