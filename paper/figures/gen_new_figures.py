@@ -219,3 +219,45 @@ if __name__ == "__main__":
     fig_ungameability_sweep()
     fig_ec_reachability()
     print("wrote fig_criterion_map, fig_ungameability_sweep, fig_ec_reachability")
+
+
+def fig_verifier_bound():
+    """Systems observation: verifiable agentic RL is verifier(CPU)-bound -- GPU memory
+    full but compute idle, because the CPU verifier dominates each rollout step."""
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 3.3),
+                                   gridspec_kw={"width_ratios": [1, 1.35]})
+    # (a) memory full vs compute idle
+    bars = axL.bar([0, 1], [88, 8], color=[BLUE, RED], alpha=0.9, width=0.6,
+                   edgecolor="white")
+    for x, v in [(0, 88), (1, 8)]:
+        axL.text(x, v + 2.5, f"{v}%", ha="center", fontweight="bold", fontsize=11,
+                 color=DARK)
+    axL.set_xticks([0, 1])
+    axL.set_xticklabels(["GPU memory\n(86 / 98 GB)", "GPU compute\n(SM %, avg)"])
+    axL.set_ylabel("utilization (%)"); axL.set_ylim(0, 100)
+    axL.set_title("(a) 30B theorem-proving RL:\nfull memory, idle compute", fontsize=10)
+    axL.grid(axis="y", alpha=0.25)
+
+    # (b) one rollout step: brief GPU generate, long CPU verify
+    # schematic timeline (illustrative proportions: generate ~ms, verify ~seconds)
+    axR.barh([1], [0.4], left=[0], color=BLUE, alpha=0.9, height=0.5,
+             label="GPU: generate tactic (~ms)")
+    axR.barh([1], [3.2], left=[0.4], color=ORANGE, alpha=0.9, height=0.5,
+             label="CPU verifier: Lean kernel (~s)")
+    axR.barh([0], [0.4], left=[0], color=BLUE, alpha=0.9, height=0.5)
+    axR.barh([0], [3.2], left=[0.4], color=ORANGE, alpha=0.9, height=0.5)
+    axR.text(0.4 + 3.2 / 2, 1.0, "GPU idle here", ha="center", va="center",
+             fontsize=8.5, color=DARK, style="italic")
+    axR.set_yticks([0, 1]); axR.set_yticklabels(["step $i{+}1$", "step $i$"])
+    axR.set_xlabel("wall-clock per rollout step (schematic)")
+    axR.set_xlim(0, 3.8); axR.set_ylim(-0.6, 1.7)
+    axR.set_title("(b) Each step: a millisecond of generation,\nthen seconds on the CPU verifier", fontsize=10)
+    axR.legend(loc="upper right", fontsize=8, framealpha=0.9)
+    axR.spines[["top", "right"]].set_visible(False)
+    fig.tight_layout()
+    fig.savefig(os.path.join(os.path.dirname(__file__), "fig_verifier_bound.pdf"))
+    plt.close(fig)
+
+
+if __name__ == "__main__":
+    fig_verifier_bound()
