@@ -30,6 +30,16 @@ def _load(arm):
     return [json.loads(l)["succ"] for l in open(p)]
 
 
+def _last3_seeds(arm):
+    """last3 success for seeds 7 (no suffix), 8, 9."""
+    out = []
+    for suf in ["", "_s8", "_s9"]:
+        p = os.path.join(RES, f"run_swp_{arm}{suf}", "train_log.jsonl")
+        r = [json.loads(l)["succ"] for l in open(p)]
+        out.append(sum(r[-3:]) / len(r[-3:]))
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Figure: the criterion as a decision flow, settings as leaves
 # ---------------------------------------------------------------------------
@@ -99,45 +109,58 @@ def fig_criterion_map():
 # Figure: the un-gameability sweep (real seed-7 data)
 # ---------------------------------------------------------------------------
 def fig_ungameability_sweep():
+    # arms ordered: penalty-free (survive) then penalty-bearing; label, colour, has-penalty
     arms = [
-        ("validgated", "outcome-gated discharge", BLUE, "-"),
-        ("aligned",    "aligned discharge",       GREEN, "-"),
-        ("valid",      "gameable discharge",      ORANGE, "-"),
-        ("structural", "discharge + penalty",     RED, "--"),
-        ("noerror",    "penalty only",            PURPLE, "--"),
+        ("validgated", "outcome-gated\ndischarge", BLUE, False),
+        ("aligned",    "aligned\ndischarge",       GREEN, False),
+        ("valid",      "gameable\ndischarge",      "#14B8A6", False),
+        ("structural", "discharge\n+ penalty",     RED, True),
+        ("noerror",    "penalty\nonly",            PURPLE, True),
     ]
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.0),
-                                   gridspec_kw={"width_ratios": [1.45, 1]})
-    # left: trajectories
-    for arm, lab, c, ls in arms:
-        s = _load(arm)
-        axL.plot(range(1, len(s) + 1), s, ls, color=c, linewidth=1.8,
-                 marker="o", markersize=3, label=lab, alpha=0.9)
-    axL.set_xlabel("training iteration")
-    axL.set_ylabel("task success")
-    axL.set_title("(a) Success trajectory per signal (Qwen3-30B, miniF2F)", fontsize=10.5)
-    axL.set_ylim(-0.03, 0.72); axL.grid(alpha=0.25)
-    axL.legend(loc="upper left", fontsize=8, framealpha=0.9, ncol=1)
-    axL.axhspan(-0.03, 0.06, color=RED, alpha=0.07)
-    axL.text(7, 0.015, "dead zone", color=RED, fontsize=7.5, ha="center", style="italic")
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.1),
+                                   gridspec_kw={"width_ratios": [1.25, 1]})
 
-    # right: terminal (last3) bars, colored by admissibility
-    names, vals, cols, dead = [], [], [], []
-    for arm, lab, c, ls in arms:
-        s = _load(arm)
-        names.append(lab.replace(" ", "\n", 1)); vals.append(np.mean(s[-3:])); cols.append(c)
-        dead.append(np.mean(s[-3:]) <= 0.05)
-    y = np.arange(len(names))[::-1]
-    axR.barh(y, vals, color=cols, alpha=0.9, edgecolor="white")
-    for yi, v, d in zip(y, vals, dead):
-        axR.text(v + 0.012, yi, ("DEAD" if d else f"{v:.2f}"),
-                 va="center", fontsize=8.5,
-                 fontweight="bold", color=(RED if d else DARK))
-    axR.set_yticks(y); axR.set_yticklabels(names, fontsize=8)
-    axR.set_xlabel("terminal success (last 3 iters)")
-    axR.set_xlim(0, 0.40)
-    axR.set_title("(b) Terminal state: penalty kills,\ngating rescues", fontsize=10.5)
-    axR.grid(axis="x", alpha=0.25)
+    # (a) per-arm terminal success across 3 seeds: dots + mean + std error bar
+    axL.axhspan(-0.04, 0.05, color=RED, alpha=0.07)
+    axL.text(len(arms) - 1, 0.0, "dead", color=RED, fontsize=7.5, ha="center",
+             va="center", style="italic")
+    rng = np.random.default_rng(1)
+    for i, (arm, lab, c, pen) in enumerate(arms):
+        v = _last3_seeds(arm)
+        m, sd = np.mean(v), np.std(v)
+        xs = i + rng.uniform(-0.07, 0.07, len(v))
+        axL.scatter(xs, v, s=34, color=c, alpha=0.55, edgecolors="none", zorder=3)
+        axL.errorbar(i, m, yerr=sd, fmt="o", color=c, markersize=8, capsize=4,
+                     linewidth=1.8, markeredgecolor="white", zorder=4)
+    axL.set_xticks(range(len(arms)))
+    axL.set_xticklabels([a[1] for a in arms], fontsize=8)
+    axL.set_ylabel("terminal success (last 3 iters)")
+    axL.set_ylim(-0.06, 1.06)
+    axL.set_title("(a) Terminal success over 3 seeds (Qwen3-30B, miniF2F)\n"
+                  "mean $\\pm$ std; dots are seeds 7/8/9", fontsize=10)
+    axL.axvline(2.5, color=GRAY, ls=":", lw=1)
+    axL.text(1.0, 1.0, "penalty-free: survive", color=GREEN, fontsize=8.5,
+             ha="center", fontweight="bold")
+    axL.text(3.5, 1.0, "penalty-bearing", color=RED, fontsize=8.5,
+             ha="center", fontweight="bold")
+    axL.grid(axis="y", alpha=0.25)
+
+    # (b) the two penalty arms across seeds: structural bimodal vs noerror reliably dead
+    for arm, c, lab in [("structural", RED, "discharge+penalty"),
+                        ("noerror", PURPLE, "penalty only")]:
+        for k, suf in enumerate(["", "_s8", "_s9"]):
+            p = os.path.join(RES, f"run_swp_{arm}{suf}", "train_log.jsonl")
+            s = [json.loads(l)["succ"] for l in open(p)]
+            axR.plot(range(1, len(s) + 1), s, "-" if arm == "structural" else "--",
+                     color=c, alpha=0.75, linewidth=1.5,
+                     label=(lab if k == 0 else None))
+    axR.axhspan(-0.04, 0.05, color=RED, alpha=0.07)
+    axR.set_xlabel("training iteration"); axR.set_ylabel("task success")
+    axR.set_ylim(-0.06, 1.06)
+    axR.set_title("(b) Why the big error bar: structural\n"
+                  "is bimodal (1 seed to 1.0, 2 collapse)", fontsize=10)
+    axR.legend(loc="center right", fontsize=8, framealpha=0.9)
+    axR.grid(alpha=0.25)
     fig.tight_layout()
     fig.savefig(os.path.join(os.path.dirname(__file__), "fig_ungameability_sweep.pdf"))
     plt.close(fig)

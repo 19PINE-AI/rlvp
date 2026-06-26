@@ -449,3 +449,32 @@ achieves partial fixes would make the multi-F2P potential non-vacuous and potent
 The claim is therefore: a finer verifiable potential helps iff it both EXISTS (structural:
 multi-F2P) AND is REACHABLE (empirical: partial Phi occurs with within-group variance). In SWE
 at 30B, the first holds for 1/3 of instances but the second fails everywhere we measured.
+
+## 15b. MULTI-SEED FIRMING (n=3, seeds 7/8/9) — sharpens the un-gameability sweep
+The single-seed (seed-7) sweep in sec 15 was high-variance; we re-ran all 5 Lean arms at
+seeds 8 and 9 (Qwen3-30B, 14 iters, Muon lr=1e-3). Per-arm terminal success (last3),
+mean +/- std over 3 seeds:
+
+| arm | rule / credit | seed7 | seed8 | seed9 | mean +/- std | verdict |
+|-----|---------------|-------|-------|-------|--------------|---------|
+| aligned    | aligned / c3       | 0.243 | 0.993 | 0.993 | 0.74 +/- 0.35 | ALIVE (variable) |
+| validgated | valid / c4 (gated) | 0.305 | 0.333 | 0.743 | 0.46 +/- 0.20 | ALIVE |
+| valid      | valid / c3         | 0.180 | 0.236 | 0.215 | 0.21 +/- 0.02 | ALIVE (very stable) |
+| structural | structural / c3    | 0.000 | 1.000 | 0.007 | 0.34 +/- 0.47 | EXTREME variance |
+| noerror    | noerror / c3       | 0.000 | 0.007 | 0.000 | 0.002 +/- 0.003 | RELIABLY DEAD |
+
+REVISED (more honest) FINDINGS — the n=3 data refines the single-seed "penalty kills":
+1. **Penalty-free signals reliably SURVIVE.** All three (aligned, valid, validgated) stay
+   well above the dead zone on every seed. valid is the most stable (0.21+/-0.02);
+   outcome-gated validgated is the best stable survivor (0.46+/-0.20); aligned is highest on
+   average but seed-variable (one low seed).
+2. **PURE penalty (noerror, no discharge) RELIABLY DIES** — 0.002+/-0.003, the only arm at
+   ~0 on every seed. This is the robust compliance-attractor result.
+3. **Penalty+discharge (structural) is EXTREME-variance, not reliably dead.** 0.00/1.00/0.007
+   across seeds: it collapses on 2 of 3 seeds but the goal-progress discharge can occasionally
+   rescue it all the way to 1.0. So the single-seed claim "structural dies" was a seed artifact;
+   the honest claim is "structural usually collapses but is high-variance — the discharge
+   sometimes saves it." The large error bar IS the result.
+NET: the robust law is penalty-free-survives vs PURE-penalty-reliably-dies; adding a discharge
+to a penalty does NOT reliably save it. Outcome-gating yields the most consistent survivor.
+This is what the paper's Figure (fig_ungameability_sweep, now n=3 with error bars) shows.
