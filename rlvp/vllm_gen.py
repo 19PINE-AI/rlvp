@@ -46,6 +46,8 @@ class VLLMGenServer:
             kw["quantization"] = quantization  # (omit for a pre-quantized FP8 ckpt)
         if enable_lora:
             kw["max_lora_rank"] = max_lora_rank
+            kw["max_loras"] = 1  # keep only the current adapter resident -> LRU evicts
+            kw["max_cpu_loras"] = 2  # bound the CPU-side cache too (prevents the leak)
         self.llm = LLM(**kw)
         self.sp = SamplingParams(temperature=temperature, top_p=top_p,
                                  max_tokens=max_new_tokens, stop_token_ids=[self.eot])
@@ -63,8 +65,21 @@ class VLLMGenServer:
             return
         from vllm.lora.request import LoRARequest
         # bump id each swap so vLLM reloads the adapter weights
-        i = (self._lora.lora_int_id + 1) if self._lora else 1
+        old = self._lora.lora_int_id if self._lora else None
+        i = (old + 1) if old else 1
         self._lora = LoRARequest(f"policy{i}", i, path)
+        # CRITICAL: free the PREVIOUS adapter, else accumulating swaps leak GPU
+        # memory and the engine OOM-dies mid-run (~iter 4-5). Evict the old id.
+        if old is not None:
+            eng = getattr(self.llm, "llm_engine", None)
+            for fn in (getattr(eng, "remove_lora", None),
+                       getattr(self.llm, "remove_lora", None)):
+                if fn:
+                    try:
+                        fn(old)
+                    except Exception:
+                        pass
+                    break
 
     def generate(self, ids: list) -> list:
         box, ev = {}, threading.Event()
