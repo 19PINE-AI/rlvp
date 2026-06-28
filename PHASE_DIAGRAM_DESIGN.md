@@ -1,7 +1,7 @@
 # Phase diagram: *when* do dense process rewards help?
 
 **Goal.** Turn the criterion from a yes/no checklist into a **quantitative phase boundary**,
-predicted by the variance proposition (`paper/theorem.tex`): the benefit of a dense process
+predicted by the variance identity (`paper/unifying_view.tex`): the benefit of a dense process
 reward should track the within-group variance of the potential, `Var_G(Phi)`, and the
 "helps" region should be bounded by *two* failure modes, not one.
 
@@ -16,7 +16,7 @@ So benefit is **non-monotone**: near-zero when easy (outcome-only already learns
 when hard-but-reachable, and **collapses** when so hard that Phi is unreachable. The figure
 is a 2-D region — *process rewards help in the upper band: sparse outcome AND reachable
 potential* — bounded below by "unneeded" and above by "vacuous". This is more thought-
-provoking than a single threshold and it is exactly what the proposition predicts.
+provoking than a single threshold and it is exactly what the identity predicts.
 
 ```
  reachability (Var_G Phi)  ^
@@ -41,10 +41,10 @@ Reuse `rlvp/envs/fileops.py::ChainPotentialEnv` + `scripts/chain_potential_exp.p
 
 ## The mechanistic predictor (the cheap probe, no training)
 Per cell, BEFORE training, run `G` base-policy rollouts on `N` tasks and measure
-`Var_G(Phi)` (Phi = #stages completed). The proposition says **benefit should be a function
+`Var_G(Phi)` (Phi = #stages completed). The identity says **benefit should be a function
 of probe `Var_G(Phi)` x sparsity**, with `Var_G(Phi)~0 => benefit~0` regardless of sparsity.
 Plotting `benefit` vs `probe Var_G(Phi)` should collapse the grid onto one rising curve that
-saturates — the law, not the grid. This is the figure that proves the theorem empirically.
+saturates — the law, not the grid. This is the figure that confirms the lens empirically.
 
 ## Real-domain anchors (already in hand — no new 30B runs needed)
 Place three measured 30B points on the same axes to show the controlled law holds in the wild:
@@ -60,8 +60,8 @@ Place three measured 30B points on the same axes to show the controlled law hold
    `grid` mode (dense-vs-outcome benefit per cell).
 2. Figure `paper/figures/fig_phase_diagram.pdf`: (a) 2-D heatmap benefit over
    sparsity x reachability with the three real 30B anchors overlaid; (b) benefit vs
-   probe-`Var_G(Phi)` collapse curve (the theorem confirmed).
-3. Paragraph in paper Sec "predictive law" tying the proposition -> phase boundary -> the
+   probe-`Var_G(Phi)` collapse curve (the lens confirmed).
+3. Paragraph in paper Sec "predictive law" tying the identity -> phase boundary -> the
    anchors, and a **prospective prediction**: pick one held-out cell, predict its verdict
    from the probe alone, then train and confirm.
 

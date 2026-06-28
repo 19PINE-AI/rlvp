@@ -1,8 +1,8 @@
 """Phase diagram of WHEN dense process rewards help (see PHASE_DIAGRAM_DESIGN.md).
 
 Two failure modes bound the "helps" region: low outcome-sparsity (process reward unneeded)
-and low reachability Var_G(Phi)=0 (process reward vacuous). The variance proposition
-(paper/theorem.tex) predicts benefit tracks the within-group potential variance.
+and low reachability Var_G(Phi)=0 (process reward vacuous). The variance identity
+(paper/unifying_view.tex) predicts benefit tracks the within-group potential variance.
 
 Grid: sparsity = n_stages x reachability = model size. Per cell:
   probe : G base rollouts -> within-group Var_G(Phi)  (Phi = #stages completed), NO training.
@@ -62,7 +62,7 @@ def _model_tok():
 
 def mode_probe():
     """Measure within-group Var_G(Phi) on the BASE policy (no training) -> the
-    proposition's predictor for whether a dense reward can help this cell."""
+    identity's predictor for whether a dense reward can help this cell."""
     import random
     m, tok = _model_tok(); m.eval()
     rng = random.Random(SEED)
