@@ -1,54 +1,56 @@
 % ---------------------------------------------------------------------------
-% Unifying LENS (empirical, not theory): one elementary variance identity
-% organises the five settings; each term is tied to the experiment that isolates
-% it; forward-links to the phase diagram as the lens's empirical test.
+% Unifying LENS (empirical, not theory). FORWARD-framed: it sits in the criterion
+% section, before the experiments, so it sets them up rather than summarising them.
+% One identity; each term isolated by an experiment AHEAD; robust to the method's
+% per-channel-normalisation and token-placement refinements.
 % ---------------------------------------------------------------------------
 \subsection{A unifying account: the three gates are one variance}
 \label{sec:unifying}
 
-The same three properties decided the outcome in every setting above, which invites a single
-explanation. There is one, and it is elementary; we present it not as a theorem but as the
-identity that lets a reader leave with one picture instead of five.
+We stated the criterion as three gates. They are not three independent rules but three terms
+of a single quantity, and the rest of the paper is in effect a tour of it---each experiment
+ahead isolating one term. We give the identity not as a theorem but as the picture to hold
+while reading the evidence.
 
 Group-relative methods learn from a group of $G$ rollouts only through how its rewards
-\emph{differ}: each reward is centred on the group mean, $A_i = R_i - \bar R$, so if the
-rewards are identical every advantage is zero and the group yields no update, whatever the
-rollouts did.\footnote{Standard GRPO additionally divides the advantages by the group
-standard deviation; this rescales the non-zero case but does not change \emph{when} the
-advantages vanish, so the reading here is unaffected.} Summarise each rollout by its outcome
-plus a weighted verifiable potential, $R_i = O_i + \beta\,\Phi_i$, with $O_i\in\{0,1\}$ and
-$\Phi_i$ a scalar score of the rollout's process (goals discharged, stages completed, tests
-passed). The differences the group exposes are then a variance of a sum:
+\emph{differ}: each reward is centred on the group mean, $A_i = R_i - \bar R$, so identical
+rewards make every advantage zero and the group yields no update, whatever the rollouts
+did.\footnote{Standard GRPO also divides the advantages by the group standard deviation; this
+rescales the non-zero case but not \emph{when} the advantages vanish.} Summarise a rollout by
+its outcome plus a weighted verifiable potential, $R_i = O_i + \beta\,\Phi_i$, with
+$O_i\in\{0,1\}$ and $\Phi_i$ a scalar process score (goals discharged, stages completed, tests
+passed). The spread the group exposes is then a variance of a sum:
 \[
   \operatorname{Var}_G(R)\;=\;\operatorname{Var}_G(O)\;+\;\beta^2\operatorname{Var}_G(\Phi)
   \;+\;2\beta\,\operatorname{Cov}_G(O,\Phi).
 \]
-The identity is trivial; what is not is that its three terms are the three gates, and that
-each is what a different experiment isolates:
+The identity is trivial; what is not is that its three terms are the three gates, each
+isolated by a different experiment ahead:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt,topsep=2pt]
-\item \textbf{Outcome term -- all-fail blindness.} When every rollout fails---the common case
-early in training on a hard task---$O_i\equiv 0$, so this term and the cross term drop out;
-with no potential ($\beta=0$) the group is silent. This is the gap the theorem-proving
-efficiency result fills (\S\ref{sec:efficiency}).
+\item \textbf{Outcome term -- all-fail blindness.} When every rollout fails---common early on
+a hard task---$O_i\equiv 0$, so this term and the cross term vanish; with no potential
+($\beta=0$) the group is silent. The theorem-proving efficiency result (\S\ref{sec:efficiency})
+lives in this regime.
 \item \textbf{Potential term -- finer and reachable.} The process channel adds signal only
-when $\operatorname{Var}_G(\Phi)>0$: $\Phi$ must take more than one value (finer than the
-binary outcome) \emph{and} the policy must reach those values. A potential equal to the
-outcome, or one never moved off zero, contributes nothing---the software-repair null
-(\S\ref{sec:law}), where $\Phi$ is $0$ on all $156$ rollouts.
+when $\operatorname{Var}_G(\Phi)>0$, which collapses two of the criterion's gates---finer and
+reachable---into one quantity: $\Phi$ must \emph{be able} to take more than one value (finer
+than the binary outcome) and the policy must \emph{actually reach} them. A potential equal to
+the outcome, or one never moved off zero, contributes nothing---the software-repair null
+(\S\ref{sec:law}), where $\Phi=0$ on all $156$ rollouts.
 \item \textbf{Cross term -- un-gameable.} A non-zero potential variance still need not point
 \emph{toward} success; the covariance is what says it does. A signal whose variation is
-uncorrelated with the outcome optimises something else---the compliance collapse a misaligned
-penalty falls into (\S\ref{sec:law}).
+uncorrelated with the outcome optimises something else---the compliance collapse of a
+misaligned penalty (\S\ref{sec:law}).
 \end{itemize}
 
-We claim no more for this than it earns. It is an identity, not a proof that a process reward
-helps; the cross-term reading in particular concerns training \emph{dynamics}, which only the
-experiments establish, and the \emph{per-token placement} of the signal---load-bearing in
-practice (\S\ref{sec:anatomy})---is invisible to this rollout-level summary, which speaks only
-to whether usable group signal exists, not where it should land. What the identity buys is a
-single sentence to carry into a new domain: \textbf{a useful dense process reward is the
-within-group variance the outcome cannot supply}---present when that variance is non-zero
-(finer, reachable) and useful when it is aligned (un-gameable). The phase diagram below puts
-the sentence to work: it measures $\operatorname{Var}_G(\Phi)$ on a handful of base rollouts
-and shows the benefit of a dense reward rising with exactly that quantity.
+We claim no more than the identity earns. It is not a proof that a process reward helps---the
+cross-term reading especially concerns training \emph{dynamics}, which only the experiments
+settle. And the method's two refinements, per-channel normalisation and per-token placement
+(\S\ref{sec:anatomy}), rescale and route this signal; reassuringly, they leave intact the only
+structure the lens depends on---which terms vanish, and the sign of the alignment. What the
+identity buys is a sentence to carry into a new domain---\textbf{a useful dense process reward
+is the within-group variance the outcome cannot supply: non-zero when finer and reachable,
+aligned when un-gameable}---and a quantity, $\operatorname{Var}_G(\Phi)$, cheap to measure on a
+handful of base rollouts before any training. The phase diagram below does exactly that, and
+finds the benefit of a dense reward rising with it.
