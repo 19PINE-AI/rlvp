@@ -44,63 +44,58 @@ def _last3_seeds(arm):
 # Figure: the criterion as a decision flow, settings as leaves
 # ---------------------------------------------------------------------------
 def fig_criterion_map():
-    fig, ax = plt.subplots(figsize=(11, 4.6))
-    ax.set_xlim(0, 12); ax.set_ylim(0, 5.2); ax.axis("off")
+    fig, ax = plt.subplots(figsize=(12, 5.4))
+    ax.set_xlim(0, 12.6); ax.set_ylim(-0.75, 6.15); ax.axis("off")
 
-    def box(x, y, w, h, fc, ec, text, fs=9, bold=False):
+    def box(x, y, w, h, fc, ec, text, fs=10, bold=False):
         ax.add_patch(mpatches.FancyBboxPatch((x, y), w, h,
-            boxstyle="round,pad=0.06", facecolor=fc, edgecolor=ec, linewidth=1.4))
+            boxstyle="round,pad=0.06", facecolor=fc, edgecolor=ec, linewidth=1.6))
         ax.text(x + w / 2, y + h / 2, text, ha="center", va="center",
-                fontsize=fs, fontweight="bold" if bold else "normal", color=DARK)
+                fontsize=fs, fontweight="bold" if bold else "normal", color="black")
 
     def arrow(x1, y1, x2, y2, label="", color=DARK, lx=0, ly=0):
         ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle="-|>",
-            mutation_scale=13, color=color, linewidth=1.3, shrinkA=2, shrinkB=2))
+            mutation_scale=16, color=color, linewidth=1.6, shrinkA=2, shrinkB=2))
         if label:
             ax.text((x1 + x2) / 2 + lx, (y1 + y2) / 2 + ly, label, ha="center",
-                    va="center", fontsize=8.5, color=color, fontweight="bold")
+                    va="center", fontsize=11, color="black", fontweight="bold")
 
-    # three gating questions, left to right
-    box(0.2, 2.2, 2.05, 1.4, "white", DARK,
-        "Domain", fs=11, bold=True)
-    q1 = (2.9, 2.0, 2.25, 1.8)
-    box(*q1, LBLUE, BLUE,
-        "Is there a\nVERIFIABLE potential\nfiner than the\noutcome?", fs=8.5)
-    q2 = (6.0, 2.0, 2.25, 1.8)
-    box(*q2, LBLUE, BLUE,
-        "Is it\nUN-GAMEABLE?\n(cheapest maximizer\nmust solve task)", fs=8.5)
-    q3 = (9.1, 2.0, 2.25, 1.8)
-    box(*q3, LBLUE, BLUE,
-        "Are intermediate\nvalues\nREACHABLE?\n(within-group var > 0)", fs=8.5)
+    # three gating questions, left to right (larger boxes + larger text)
+    box(0.15, 2.45, 2.0, 1.5, "white", DARK, "Domain", fs=13, bold=True)
+    q1 = (2.7, 2.15, 2.55, 2.05)
+    box(*q1, LBLUE, BLUE, "Is there a\nVERIFIABLE potential\nfiner than the\noutcome?", fs=10)
+    q2 = (6.05, 2.15, 2.55, 2.05)
+    box(*q2, LBLUE, BLUE, "Is it\nUN-GAMEABLE?\n(cheapest maximizer\nmust solve task)", fs=10)
+    q3 = (9.4, 2.15, 2.55, 2.05)
+    box(*q3, LBLUE, BLUE, "Are intermediate\nvalues REACHABLE?\n(within-group\nvariance > 0)", fs=10)
 
-    arrow(2.25, 2.9, 2.9, 2.9)
-    arrow(q1[0] + q1[2], 2.9, q2[0], 2.9, "yes", GREEN, ly=0.22)
-    arrow(q2[0] + q2[2], 2.9, q3[0], 2.9, "yes", GREEN, ly=0.22)
+    midy = q1[1] + q1[3] / 2
+    arrow(2.15, midy, q1[0], midy)
+    arrow(q1[0] + q1[2], midy, q2[0], midy, "yes", GREEN, ly=0.28)
+    arrow(q2[0] + q2[2], midy, q3[0], midy, "yes", GREEN, ly=0.28)
 
-    # NO branches drop down to failure leaves
-    box(2.9, 0.15, 2.25, 1.2, LORANGE, ORANGE,
-        "No usable signal:\noutcome-only ceiling\n(intent)", fs=8)
-    arrow(q1[0] + q1[2] / 2, 2.0, q1[0] + q1[2] / 2, 1.35, "no", ORANGE, lx=0.26)
-    box(6.0, 0.15, 2.25, 1.2, LRED, RED,
-        "COMPLIANCE\nCOLLAPSE\n(misaligned penalty)", fs=8)
-    arrow(q2[0] + q2[2] / 2, 2.0, q2[0] + q2[2] / 2, 1.35, "no", RED, lx=0.26)
-    box(9.1, 0.15, 2.25, 1.2, LRED, RED,
-        "VACUOUS signal:\nzero gradient\n(unreachable)", fs=8)
-    arrow(q3[0] + q3[2] / 2, 2.0, q3[0] + q3[2] / 2, 1.35, "no", RED, lx=0.26)
+    # NO branches drop to failure leaves
+    for (q, fc, ec, txt) in [
+        (q1, LORANGE, ORANGE, "No usable signal:\noutcome-only\nceiling (intent)"),
+        (q2, LRED, RED, "COMPLIANCE\nCOLLAPSE\n(misaligned penalty)"),
+        (q3, LRED, RED, "VACUOUS signal:\nzero gradient\n(unreachable)")]:
+        cx = q[0] + q[2] / 2
+        box(q[0], 0.05, q[2], 1.45, fc, ec, txt, fs=9.5)
+        arrow(cx, q[1], cx, 1.5, "no", ec, lx=0.32)
 
-    # YES terminal
-    box(9.1, 4.05, 2.7, 1.0, LGREEN, GREEN,
-        "DENSE GRADIENT\nfrom failed episodes\n+ harm bounded", fs=8.5, bold=True)
-    arrow(q3[0] + q3[2] / 2, q3[1] + q3[3], 10.45, 4.05, "yes", GREEN, lx=0.3)
+    # YES terminal box ABOVE gate 3 -> clean vertical arrow, no overlap
+    gx = q3[0] + q3[2] / 2
+    box(gx - 1.45, 4.55, 2.9, 1.1, LGREEN, GREEN,
+        "DENSE GRADIENT\nfrom failed episodes\n+ harm bounded", fs=10, bold=True)
+    arrow(gx, q3[1] + q3[3], gx, 4.55, "yes", GREEN, lx=0.34)
 
-    # setting labels under leaves
+    # setting labels (italic): failure leaves below their box, success leaf above its box
     def tag(x, y, t, c):
-        ax.text(x, y, t, ha="center", va="center", fontsize=7.4, style="italic",
-                color=c)
-    tag(4.02, -0.15, r"$\tau^2$ customer service", ORANGE)
-    tag(7.12, -0.15, "Lean penalty arms", RED)
-    tag(10.22, -0.15, "SWE software repair", RED)
-    tag(10.45, 3.78, "Lean progress; sysadmin harm", GREEN)
+        ax.text(x, y, t, ha="center", va="center", fontsize=9, style="italic", color="black")
+    tag(q1[0] + q1[2] / 2, -0.4, r"$\tau^2$ customer service", ORANGE)
+    tag(q2[0] + q2[2] / 2, -0.4, "Lean penalty arms", RED)
+    tag(q3[0] + q3[2] / 2, -0.4, "SWE software repair", RED)
+    tag(gx, 5.92, "Lean progress; sysadmin harm", GREEN)
     fig.savefig(os.path.join(os.path.dirname(__file__), "fig_criterion_map.pdf"))
     plt.close(fig)
 
