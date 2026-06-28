@@ -130,7 +130,10 @@ def mode_rollout():
     gen = VLLMGenServer(MODEL_GEN, tok, max_new_tokens=512, temperature=1.0,
                         gpu_mem=0.85, max_model_len=8192, max_batch=24, enforce_eager=True)
     rng = random.Random(SEED)
-    log = open(OUTD / "rollout.jsonl", "a")
+    import os as _os
+    outfile = _os.environ.get("EC_OUTFILE", "rollout.jsonl")
+    maxsteps = int(_os.environ.get("EC_MAXSTEPS", "16"))
+    log = open(OUTD / outfile, "a")
     G = ITERS
     for kind, inst in chosen:
         iid = inst["instance_id"]
@@ -138,7 +141,7 @@ def mode_rollout():
         phis = []
         for _ in range(G):
             ep = run_swe_episode(inst, gen.generate, tok, rule_mode="structural",
-                                 max_steps=16, oracle=True, measure_phi=True)
+                                 max_steps=maxsteps, oracle=True, measure_phi=True)
             if ep is None:
                 continue
             np_, tot = getattr(ep, "_swe_phi", (0, total))

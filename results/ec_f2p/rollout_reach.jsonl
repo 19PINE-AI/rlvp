@@ -1,0 +1,3 @@
+{"iid": "dask__dask-6608", "kind": "multi", "total_f2p": 3, "G": 8, "phi_vals": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "phi_mean": 0.0, "phi_var": 0.0, "n_partial": 0, "n_solved": 0}
+{"iid": "dask__dask-6682", "kind": "multi", "total_f2p": 2, "G": 8, "phi_vals": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "phi_mean": 0.0, "phi_var": 0.0, "n_partial": 0, "n_solved": 0}
+{"iid": "dask__dask-8462", "kind": "multi", "total_f2p": 3, "G": 8, "phi_vals": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "phi_mean": 0.0, "phi_var": 0.0, "n_partial": 0, "n_solved": 0}
