@@ -1,0 +1,1 @@
+{"model": "Qwen/Qwen3-0.6B", "n_stages": 4, "iters": 12, "seed": 7, "succ_dense": 0.0, "succ_outcome": 0.0, "benefit": 0.0}

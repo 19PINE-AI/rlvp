@@ -292,3 +292,59 @@ def fig_efficiency_at_scale():
     fig.tight_layout()
     fig.savefig(os.path.join(os.path.dirname(__file__), "fig_efficiency_at_scale.pdf"))
     plt.close(fig)
+
+
+def fig_phase_diagram():
+    """Reachability is cheap to measure (probe) and gates the dense-reward benefit (anchors)."""
+    import glob
+    pr = {}
+    for f in glob.glob(os.path.join(RES, "phase_diagram", "probe_*.json")):
+        d = json.load(open(f)); pr[(d["model"].split("/")[-1], d["n_stages"])] = d["mean_var_phi"]
+    models = ["Qwen3-0.6B", "Qwen3-1.7B", "Qwen3-4B"]; ns = [2, 4, 6, 8]
+    M = np.array([[pr.get((m, n), np.nan) for n in ns] for m in models])
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(11.5, 4.0),
+                                   gridspec_kw={"width_ratios": [1.05, 1.15]})
+    # (a) probe Var_G(Phi) heatmap
+    im = axA.imshow(M, cmap="viridis", aspect="auto", origin="lower")
+    axA.set_xticks(range(len(ns))); axA.set_xticklabels([f"n={n}" for n in ns])
+    axA.set_yticks(range(len(models))); axA.set_yticklabels(["0.6B", "1.7B", "4B"])
+    axA.set_xlabel("outcome sparsity (chain length)"); axA.set_ylabel("model capability")
+    for i in range(len(models)):
+        for j in range(len(ns)):
+            axA.text(j, i, f"{M[i,j]:.3f}", ha="center", va="center",
+                     color="white" if M[i, j] < 0.025 else "black", fontsize=9)
+    axA.add_patch(mpatches.Rectangle((1.5, 1.5), 2, 1, fill=False, edgecolor=RED, lw=2.2))
+    fig.colorbar(im, ax=axA, fraction=0.046, pad=0.04, label=r"base-rollout $\mathrm{Var}_G(\Phi)$")
+    axA.set_title("(a) Reachability map (red = sparse+reachable sweet-spot)", fontsize=10)
+
+    # (b) benefit vs reachability: floor (~0) + 4B reachable (E-A/E-B) + real anchors
+    axB.axhspan(-0.03, 0.05, color=RED, alpha=0.06)
+    # controlled chain floor: 0.6B/1.7B grid cells (benefit ~0)
+    try:
+        gr = [json.loads(l) for l in open(os.path.join(RES, "phase_diagram", "grid.jsonl"))]
+        fx = [pr.get((d["model"].split("/")[-1], d["n_stages"]), 0) for d in gr]
+        fy = [d["benefit"] for d in gr]
+        axB.scatter(fx, fy, s=40, color=GRAY, alpha=0.7, label="chain 0.6B/1.7B (too weak)", zorder=3)
+    except Exception:
+        pass
+    # 4B reachable sweet-spot: documented E-A/E-B (fine 0.34 vs outcome 0.01 at n6)
+    axB.scatter([0.042], [0.33], s=120, marker="*", color=GREEN, edgecolors="black",
+                linewidths=0.6, label="chain 4B, n6 (reachable)", zorder=5)
+    axB.annotate("dense 0.34\nvs outcome 0.01", (0.042, 0.33), xytext=(0.030, 0.55),
+                 fontsize=8.5, color=DARK, ha="center")
+    # real anchors
+    axB.scatter([0.0], [0.0], s=120, marker="X", color=RED, edgecolors="black",
+                linewidths=0.6, label="SWE-bench 30B ($\\Phi{=}0$)", zorder=5)
+    axB.annotate("unreachable\n$\\to$ no help", (0.0, 0.0), xytext=(0.006, 0.20),
+                 fontsize=8.5, color=RED)
+    axB.axvline(0.025, color=GRAY, ls=":", lw=1.2)
+    axB.text(0.057, 0.05, "miniF2F 30B (\\#1): reachable\n$\\to$ mastery in 5 iters vs 12",
+             fontsize=8.5, color=GREEN, ha="center", style="italic")
+    axB.set_xlabel(r"reachability  $\mathrm{Var}_G(\Phi)$ (base rollouts)")
+    axB.set_ylabel("dense-reward benefit\n(final success: dense $-$ outcome)")
+    axB.set_xlim(-0.004, 0.072); axB.set_ylim(-0.05, 0.7)
+    axB.set_title("(b) Benefit appears only past a reachability threshold", fontsize=10)
+    axB.legend(loc="upper left", fontsize=7.6, framealpha=0.92); axB.grid(alpha=0.2)
+    fig.tight_layout()
+    fig.savefig(os.path.join(os.path.dirname(__file__), "fig_phase_diagram.pdf"))
+    plt.close(fig)

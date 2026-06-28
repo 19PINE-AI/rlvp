@@ -504,3 +504,18 @@ let alone a proper subset. So the finer SWE potential is unreachable not just at
 settings but under enhanced conditions -- the "vacuous" boundary is robust, not a tuning
 artifact. Pairs with #1 (sec 17) as the two phase-diagram anchors: sparse+reachable -> big
 benefit; sparse+UNreachable -> vacuous. Data: results/ec_f2p/rollout_reach.jsonl.
+
+## 19. PHASE DIAGRAM: reachability (Var_G(Phi)) is measurable + gates the dense-reward benefit
+The lens predicts benefit tracks within-group potential variance. PROBE (no training): measured
+Var_G(Phi) on base rollouts across capability (0.6/1.7/4B) x sparsity (chain n2/4/6/8) -> 12-cell
+map. Structured as predicted: Var_Phi RISES with capability and peaks at the sparse-but-reachable
+4B corner (n6=0.042, n8=0.034); low/0 for weak models + high sparsity. The probe operationalizes
+the reachability gate as a cheap pre-training check.
+BENEFIT side: benefit (dense-outcome final succ) tracks Var_Phi -- ~0 where Var~0 (SWE #2 phi=0;
+too-weak 0.6B/1.7B), LARGE where high (4B reachable chain dense 0.34 vs outcome 0.01 [E-A/E-B];
+real miniF2F #1 mastery 5 vs 12 iters). Benefit appears only past a reachability threshold.
+HONEST LIMITATION: could NOT fill the controlled-grid interior with training points -- the
+synthetic chain is too lr-sensitive at small scale (0.6B/1.7B all degenerate to 0 for BOTH arms;
+4B grid too slow under GPU contention). So the benefit axis = probe gradient + 1 clean controlled
+4B point + the 2 robust real anchors (#1, #2), NOT a dense controlled grid. Figure
+fig_phase_diagram.pdf (paper Sec predictive-law). This is the empirical face of the variance lens.

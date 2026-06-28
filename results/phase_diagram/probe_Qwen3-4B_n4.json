@@ -1,0 +1,9 @@
+{
+  "model": "Qwen/Qwen3-4B",
+  "n_stages": 4,
+  "tasks": 8,
+  "G": 8,
+  "mean_var_phi": 0.0104,
+  "base_succ": 0.1094,
+  "sparsity": 0.8906
+}
