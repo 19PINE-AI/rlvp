@@ -494,3 +494,13 @@ has the most uniquely-available gradient. NB recovered from the vLLM LoRA-hot-sw
 free old adapter + max_loras=1). Figure fig_efficiency_at_scale.pdf; written into paper Sec
 "Sample-Efficiency in Theorem Proving". Doubles as the phase-diagram "sparse + reachable ->
 big benefit" anchor.
+
+## 18. #2 SWE reachability under BEST-SHOT: wall holds (strengthens the vacuous boundary)
+The original E-C rollout (sec 16) showed phi=0 at default settings; #2 gives reachability its
+best shot -- 24 steps (vs 16) + oracle hints, G=8 -- on 16 multi-F2P + 16 single-F2P instances.
+RESULT: 32/32 groups, 256 rollouts, ALL phi=0 (n_partial=0, n_solved=0 everywhere). Even with
+more steps and localization hints the 30B never makes a single hidden FAIL_TO_PASS test pass,
+let alone a proper subset. So the finer SWE potential is unreachable not just at default
+settings but under enhanced conditions -- the "vacuous" boundary is robust, not a tuning
+artifact. Pairs with #1 (sec 17) as the two phase-diagram anchors: sparse+reachable -> big
+benefit; sparse+UNreachable -> vacuous. Data: results/ec_f2p/rollout_reach.jsonl.
