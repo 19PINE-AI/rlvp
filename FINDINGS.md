@@ -478,3 +478,19 @@ REVISED (more honest) FINDINGS — the n=3 data refines the single-seed "penalty
 NET: the robust law is penalty-free-survives vs PURE-penalty-reliably-dies; adding a discharge
 to a penalty does NOT reliably save it. Outcome-gating yields the most consistent survivor.
 This is what the paper's Figure (fig_ungameability_sweep, now n=3 with error bars) shows.
+
+## 17. POSITIVE-AT-SCALE (#1): efficiency win at 30B on real hard theorems
+Closes the "all positive results are 4B/synthetic" gap. Aligned verifiable-progress potential
+(c3) vs outcome-only baseline, Qwen3-30B, HARD miniF2F (easy_only, NOT algebra-only -> harder,
+more all-fail), 16 iters, seed 7, identical optimizer (Muon lr 1e-3, only the credit differs).
+- aligned succ: [0.19,0.29,0.35,0.94,1.0,...x12] -> first reaches 1.0 at ITER 5, holds.
+- outcome succ: [0.17,0.23,0.02,0.02,0.04,0.48,0.27,0.65,0.75,0.88,0.79,1.0,0.98,1.0,1.0,1.0]
+  -> STALLS near 0 (iters 3-5, the all-fail dead-zone) then climbs, first 1.0 at ITER 12.
+FINDING: aligned reaches mastery >2x faster (5 vs 12 iters) AND skips the early all-fail stall.
+HONEST framing: both eventually saturate (the hard set IS learnable by 30B given budget), so
+the win is SPEED + dead-zone-avoidance, not final success. The criterion's YES at scale:
+hard-enough that all-fail dominates AND reachable (goal-count decreases occur) -> dense reward
+has the most uniquely-available gradient. NB recovered from the vLLM LoRA-hot-swap leak (fixed:
+free old adapter + max_loras=1). Figure fig_efficiency_at_scale.pdf; written into paper Sec
+"Sample-Efficiency in Theorem Proving". Doubles as the phase-diagram "sparse + reachable ->
+big benefit" anchor.

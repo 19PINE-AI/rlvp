@@ -256,3 +256,39 @@ def fig_verifier_bound():
 
 if __name__ == "__main__":
     fig_verifier_bound()
+
+
+def fig_efficiency_at_scale():
+    """#1: positive-at-scale. Aligned verifiable-progress potential vs outcome-only on
+    hard miniF2F at 30B -- aligned reaches mastery far faster and skips the all-fail stall."""
+    def load(arm):
+        p = os.path.join(RES, f"run_hard_{arm}", "train_log.jsonl")
+        return [json.loads(l)["succ"] for l in open(p)]
+    al, oc = load("aligned"), load("outcome")
+    def first1(s):
+        for i, v in enumerate(s, 1):
+            if v >= 0.999:
+                return i
+        return None
+    fa, fo = first1(al), first1(oc)
+    fig, ax = plt.subplots(figsize=(7.2, 4.0))
+    ax.axhspan(-0.03, 0.06, color=RED, alpha=0.06)
+    ax.text(4, 0.012, "outcome-only stalled (all-fail dead-zone)", color=RED,
+            fontsize=8, ha="center", style="italic")
+    ax.plot(range(1, len(al) + 1), al, "-o", color=GREEN, lw=2.2, ms=4.5,
+            label="aligned (verifiable progress potential)")
+    ax.plot(range(1, len(oc) + 1), oc, "-s", color=GRAY, lw=2.2, ms=4.5,
+            label="outcome-only")
+    for f, c, dx, dy in [(fa, GREEN, 0.25, -0.16), (fo, DARK, -2.4, -0.16)]:
+        ax.axvline(f, color=c, ls=":", lw=1.2, alpha=0.6)
+        ax.annotate(f"mastery\niter {f}", (f, 1.0), xytext=(f + dx, 1.0 + dy),
+                    color=c, fontsize=9.5, fontweight="bold", ha="center")
+    ax.set_xlabel("training iteration"); ax.set_ylabel("task success")
+    ax.set_ylim(-0.05, 1.08); ax.set_xlim(0.5, max(len(al), len(oc)) + 0.5)
+    ax.set_title("Efficiency at scale (Qwen3-30B, hard miniF2F):\n"
+                 f"the progress potential reaches mastery in {fa} iters vs. outcome-only's {fo}",
+                 fontsize=10.5)
+    ax.legend(loc="lower right", fontsize=9); ax.grid(alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(os.path.join(os.path.dirname(__file__), "fig_efficiency_at_scale.pdf"))
+    plt.close(fig)

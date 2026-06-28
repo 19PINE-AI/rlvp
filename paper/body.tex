@@ -115,6 +115,15 @@ When the verifiable signal \emph{is} the bottleneck to success---read before wri
 \label{fig:seeds}
 \end{figure}
 
+\paragraph{The gain holds at 30B on a real benchmark.} The chained tasks are synthetic and the policy is 4B; does the efficiency survive a capable model on a real task? We repeat the comparison on hard miniF2F theorems~\citep{minif2f} with Qwen3-30B---the aligned goal-progress potential against outcome-only, everything else fixed (Figure~\ref{fig:effscale}). The verifiable potential reaches full success in five iterations; outcome-only takes twelve, after stalling near zero through its first iterations---the all-fail dead-zone the potential skips. Both eventually saturate (the set is learnable given budget), so the claim is not that outcome-only fails but that the potential is more than twice as fast and avoids the early dead phase, exactly where the gradient gap bites. This is the criterion's \emph{yes} verdict at scale: a task hard enough that all-fail groups dominate, yet whose progress signal is \emph{reachable}---the regime where a dense reward has the most uniquely-available gradient to offer.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.74\textwidth]{figures/fig_efficiency_at_scale.pdf}
+\caption{\textbf{The efficiency gain holds at 30B on real theorems.} On hard miniF2F with Qwen3-30B, the aligned verifiable-progress potential reaches full success in five iterations; outcome-only takes twelve and stalls near zero for its first iterations (the all-fail dead-zone). Both saturate, so the gain is \emph{speed}---more than twice as few iterations to mastery, and avoidance of the early dead phase---not a difference in final success.}
+\label{fig:effscale}
+\end{figure}
+
 \section{An Anatomy of the Gain}
 \label{sec:anatomy}
 
