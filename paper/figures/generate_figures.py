@@ -25,66 +25,139 @@ def save(fig, name):
 # ----------------------------------------------------------------------------
 def fig_mechanism():
     from matplotlib.patches import FancyBboxPatch, Circle
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(9, 4))
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(13, 5.4))
     for ax in (axL, axR):
-        ax.set_xlim(0, 10); ax.set_ylim(0, 10); ax.axis('off')
+        ax.set_xlim(0, 10.4); ax.set_ylim(0, 10); ax.axis('off')
+
+    # A concrete all-fail group: 4 rollouts of an edit-a-config agent. Every
+    # rollout ends in task failure (outcome 0), but the trajectories differ in
+    # HOW they behaved, so a verifiable process potential separates them.
+    #   credit  (+1): a discharged precondition -- read the file before writing it
+    #   penalty (-1): an irreversible action    -- rm -rf before the task is done
+    # step kind in {'credit','task','penalty'}
+    trajs = [
+        ('$g_1$', [('read', 'credit'), ('write', 'task')], +1),
+        ('$g_2$', [('write', 'task')], 0),
+        ('$g_3$', [('read', 'credit'), ('diff', 'credit'), ('write', 'task')], +2),
+        ('$g_4$', [('rm -rf', 'penalty'), ('write', 'task')], -1),
+    ]
+    rows_y = [7.55, 6.25, 4.95, 3.65]
+    step_w, step_h, gap = 1.42, 0.72, 0.34
+    start_x = 1.15
+    col_O = 7.25   # outcome marker
+    col_S = 8.55   # score column (O on left panel, Phi on right)
+    col_A = 9.75   # advantage column
+
+    def draw_x(ax, xc, yc, r, color, lw=1.9, alpha=1.0):
+        ax.add_patch(Circle((xc, yc), r, facecolor=LIGHTRED, edgecolor=color,
+                            linewidth=1.5, alpha=alpha))
+        d = r * 0.5
+        ax.plot([xc - d, xc + d], [yc + d, yc - d], color=color, lw=lw, alpha=alpha)
+        ax.plot([xc - d, xc + d], [yc - d, yc + d], color=color, lw=lw, alpha=alpha)
 
     def panel(ax, title, title_color):
-        box = FancyBboxPatch((0.3, 0.4), 9.4, 9.2, boxstyle='round,pad=0.1,rounding_size=0.3',
+        box = FancyBboxPatch((0.25, 0.4), 9.9, 9.3, boxstyle='round,pad=0.1,rounding_size=0.3',
                              linewidth=1.4, edgecolor=DARKGRAY, facecolor='white')
         ax.add_patch(box)
-        ax.text(5, 9.05, title, ha='center', va='center', fontsize=12.5,
+        ax.text(5.2, 9.28, title, ha='center', va='center', fontsize=13,
                 fontweight='bold', color=title_color)
 
-    # 8 rollout positions: 2 rows x 4 cols
-    cols = [2.0, 4.0, 6.0, 8.0]
-    rows = [7.0, 5.0]
-    positions = [(c, r) for r in rows for c in cols]
+    def sgn(v):
+        return ('$+%g$' % v) if v > 0 else ('$%g$' % v) if v < 0 else '$0$'
 
-    # ---- Left: outcome-only GRPO ----
+    def acol(v):
+        return GREEN if v > 0 else RED if v < 0 else GRAY
+
+    def draw_row(ax, label, steps, y, process):
+        ax.text(0.62, y, label, ha='center', va='center', fontsize=11.5,
+                fontweight='bold', color=DARKGRAY)
+        for i, (name, kind) in enumerate(steps):
+            x0 = start_x + i * (step_w + gap)
+            xc = x0 + step_w / 2
+            if not process:
+                fc, ec, tc = '#F4F5F7', '#C9CDD4', '#9AA0A8'   # de-emphasised
+            elif kind == 'credit':
+                fc, ec, tc = LIGHTGREEN, GREEN, DARKGRAY
+            elif kind == 'penalty':
+                fc, ec, tc = LIGHTRED, RED, DARKGRAY
+            else:
+                fc, ec, tc = '#EEF2F8', DARKGRAY, DARKGRAY
+            ax.add_patch(FancyBboxPatch((x0, y - step_h / 2), step_w, step_h,
+                         boxstyle='round,pad=0.02,rounding_size=0.1',
+                         linewidth=1.3, edgecolor=ec, facecolor=fc))
+            ax.text(xc, y, name, ha='center', va='center', fontsize=9.5,
+                    color=tc, family='monospace')
+            if process and kind == 'credit':
+                ax.text(xc, y + step_h / 2 + 0.26, '$+1$', ha='center', va='center',
+                        fontsize=9.5, fontweight='bold', color=GREEN)
+            elif process and kind == 'penalty':
+                ax.text(xc, y + step_h / 2 + 0.26, '$-1$', ha='center', va='center',
+                        fontsize=9.5, fontweight='bold', color=RED)
+            if i < len(steps) - 1:
+                ax.annotate('', xy=(x0 + step_w + gap, y), xytext=(x0 + step_w, y),
+                            arrowprops=dict(arrowstyle='-|>', color='#B6BBC2', lw=1.1))
+        # trailing arrow to the outcome
+        xend = start_x + len(steps) * (step_w + gap) - gap
+        ax.annotate('', xy=(col_O - 0.55, y), xytext=(xend, y),
+                    arrowprops=dict(arrowstyle='-|>', color='#B6BBC2', lw=1.1))
+        draw_x(ax, col_O, y, 0.34, RED)   # task failed: outcome = 0 everywhere
+
+    # ===================== LEFT: outcome-only GRPO =====================
     panel(axL, 'Outcome-only GRPO', RED)
-    for (x, y) in positions:
-        axL.add_patch(Circle((x, y), 0.55, facecolor=LIGHTRED, edgecolor=RED, linewidth=1.6))
-        axL.plot([x - 0.22, x + 0.22], [y + 0.22, y - 0.22], color=RED, linewidth=1.8)
-        axL.plot([x - 0.22, x + 0.22], [y - 0.22, y + 0.22], color=RED, linewidth=1.8)
-    adv = FancyBboxPatch((1.2, 1.9), 7.6, 0.95, boxstyle='round,pad=0.05,rounding_size=0.2',
-                         linewidth=1.2, edgecolor=GRAY, facecolor='#F3F4F6')
-    axL.add_patch(adv)
-    axL.text(5, 2.37, 'all-fail group  $\\rightarrow$  advantage = 0', ha='center', va='center',
-             fontsize=10, color=DARKGRAY)
-    axL.text(5, 1.15, 'NO GRADIENT  (dead update)', ha='center', va='center',
-             fontsize=11.5, fontweight='bold', color=RED)
+    axL.text(col_O, 8.55, 'outcome', ha='center', fontsize=9, style='italic', color=DARKGRAY)
+    axL.text(col_S, 8.55, '$R_i$', ha='center', fontsize=10, color=DARKGRAY)
+    axL.text(col_A, 8.55, '$A_i$', ha='center', fontsize=10, color=DARKGRAY)
+    for (label, steps, _phi), y in zip(trajs, rows_y):
+        draw_row(axL, label, steps, y, process=False)
+        axL.text(col_S, y, '$0$', ha='center', va='center', fontsize=11, color=DARKGRAY)
+        axL.text(col_A, y, '$0$', ha='center', va='center', fontsize=11,
+                 fontweight='bold', color=GRAY)
+    axL.plot([col_S - 0.5, col_A + 0.5], [2.85, 2.85], color='#D5D8DD', lw=1.0)
+    axL.text((col_S + col_A) / 2, 2.5, r'$\bar R=0$', ha='center', fontsize=9.5, color=DARKGRAY)
+    band = FancyBboxPatch((0.7, 0.95), 9.0, 1.1, boxstyle='round,pad=0.05,rounding_size=0.2',
+                          linewidth=1.2, edgecolor='#D5D8DD', facecolor='#F4F5F7')
+    axL.add_patch(band)
+    axL.text(5.2, 1.72, r'rewards identical $\Rightarrow\ \mathrm{Var}_G(R)=0\ \Rightarrow\ A_i\equiv 0$',
+             ha='center', va='center', fontsize=10.5, color=DARKGRAY)
+    axL.text(5.2, 1.28, 'DEAD UPDATE — nothing to learn from the group',
+             ha='center', va='center', fontsize=11, fontweight='bold', color=RED)
 
-    # ---- Right: RLVP ----
-    panel(axR, 'RLVP', BLUE)
-    for (x, y) in positions:
-        axR.add_patch(Circle((x, y), 0.55, facecolor=LIGHTRED, edgecolor=RED, linewidth=1.6))
-        axR.plot([x - 0.22, x + 0.22], [y + 0.22, y - 0.22], color=RED, linewidth=1.4, alpha=0.7)
-        axR.plot([x - 0.22, x + 0.22], [y - 0.22, y + 0.22], color=RED, linewidth=1.4, alpha=0.7)
-        # green "+" discharge-credit mark (top-right)
-        gx, gy = x + 0.46, y + 0.46
-        axR.plot([gx - 0.16, gx + 0.16], [gy, gy], color=GREEN, linewidth=2.2)
-        axR.plot([gx, gx], [gy - 0.16, gy + 0.16], color=GREEN, linewidth=2.2)
-        # red "x" penalty mark (bottom-left)
-        rx, ry = x - 0.46, y - 0.46
-        axR.plot([rx - 0.13, rx + 0.13], [ry + 0.13, ry - 0.13], color=RED, linewidth=2.0)
-        axR.plot([rx - 0.13, rx + 0.13], [ry - 0.13, ry + 0.13], color=RED, linewidth=2.0)
-    adv2 = FancyBboxPatch((1.2, 1.9), 7.6, 0.95, boxstyle='round,pad=0.05,rounding_size=0.2',
-                          linewidth=1.2, edgecolor=GREEN, facecolor=LIGHTGREEN)
-    axR.add_patch(adv2)
-    axR.text(5, 2.37, 'process rewards  $\\rightarrow$  per-step credit', ha='center', va='center',
-             fontsize=10, color=DARKGRAY)
-    axR.text(5, 1.15, 'GRADIENT from failed episodes', ha='center', va='center',
-             fontsize=11.5, fontweight='bold', color=GREEN)
+    # ===================== RIGHT: RLVP (verifiable process potential) ====
+    panel(axR, r'RLVP  (process potential $\Phi$)', BLUE)
+    axR.text(col_O, 8.55, 'outcome', ha='center', fontsize=9, style='italic', color=DARKGRAY)
+    axR.text(col_S, 8.55, r'$\Phi_i$', ha='center', fontsize=10, color=DARKGRAY)
+    axR.text(col_A, 8.55, '$A_i$', ha='center', fontsize=10, color=DARKGRAY)
+    phis = [t[2] for t in trajs]
+    mean_phi = sum(phis) / len(phis)   # = 0.5
+    for (label, steps, phi), y in zip(trajs, rows_y):
+        draw_row(axR, label, steps, y, process=True)
+        axR.text(col_S, y, sgn(phi), ha='center', va='center', fontsize=11,
+                 fontweight='bold', color=acol(phi))
+        a = phi - mean_phi
+        axR.text(col_A, y, ('$+%.1f$' % a) if a > 0 else ('$%.1f$' % a),
+                 ha='center', va='center', fontsize=11, fontweight='bold', color=acol(a))
+    axR.plot([col_S - 0.5, col_A + 0.5], [2.85, 2.85], color='#D5D8DD', lw=1.0)
+    axR.text((col_S + col_A) / 2, 2.5, r'$\bar\Phi=0.5$', ha='center', fontsize=9.5, color=DARKGRAY)
+    # key: what credit / penalty mean (placed in the free band below the rows)
+    axR.add_patch(FancyBboxPatch((0.95, 2.78), 0.55, 0.34, boxstyle='round,pad=0.02,rounding_size=0.08',
+                  linewidth=1.1, edgecolor=GREEN, facecolor=LIGHTGREEN))
+    axR.text(1.225, 2.95, '$+1$', ha='center', va='center', fontsize=8.5, fontweight='bold', color=GREEN)
+    axR.text(1.65, 2.95, r'credit: precondition discharged (read before write)',
+             ha='left', va='center', fontsize=8.6, color=DARKGRAY)
+    axR.add_patch(FancyBboxPatch((0.95, 2.28), 0.55, 0.34, boxstyle='round,pad=0.02,rounding_size=0.08',
+                  linewidth=1.1, edgecolor=RED, facecolor=LIGHTRED))
+    axR.text(1.225, 2.45, '$-1$', ha='center', va='center', fontsize=8.5, fontweight='bold', color=RED)
+    axR.text(1.65, 2.45, r'penalty: irreversible action (rm -rf before the task is done)',
+             ha='left', va='center', fontsize=8.6, color=DARKGRAY)
+    band2 = FancyBboxPatch((0.7, 0.95), 9.0, 1.1, boxstyle='round,pad=0.05,rounding_size=0.2',
+                           linewidth=1.2, edgecolor=GREEN, facecolor=LIGHTGREEN)
+    axR.add_patch(band2)
+    axR.text(5.2, 1.72, r'$\Phi$ varies across failures $\Rightarrow\ \mathrm{Var}_G(\Phi)>0\ \Rightarrow\ A_i\neq 0$',
+             ha='center', va='center', fontsize=10.5, color=DARKGRAY)
+    axR.text(5.2, 1.28, r'GRADIENT — reinforce read/diff ($g_3$), suppress rm -rf ($g_4$)',
+             ha='center', va='center', fontsize=10.5, fontweight='bold', color=GREEN)
 
-    # legend for marks on right panel
-    axR.plot([], [], color=GREEN, marker='+', linestyle='none', markersize=9,
-             markeredgewidth=2.2, label='discharge credit')
-    axR.scatter([], [], marker='x', color=RED, s=55, linewidths=2.0, label='step penalty')
-    axR.legend(loc='center', bbox_to_anchor=(0.5, 0.37), ncol=2, frameon=False, fontsize=8.5,
-               handletextpad=0.3, columnspacing=1.4)
-
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0.06)
     save(fig, 'fig_mechanism')
 
 
@@ -173,22 +246,67 @@ def fig_seeds():
 # 4. fig_paired_dead : 2-bar dead-update comparison
 # ----------------------------------------------------------------------------
 def fig_paired_dead():
-    pd = D['paired_dead']
-    vals = [pd['outcome_dead_frac'] * 100, pd['rlvp_dead_frac'] * 100]
-    labels = ['GRPO', 'RLVP']
-    colors = [RED, BLUE]
-    fig, ax = plt.subplots(figsize=(6, 2.6))
-    y = np.arange(len(labels))[::-1]
-    ax.barh(y, vals, color=colors, edgecolor='white', linewidth=1.0, height=0.55)
-    ax.set_yticks(y); ax.set_yticklabels(labels, fontsize=12, fontweight='bold')
-    ax.set_xlabel('dead updates  (% of identical rollout batches)')
-    ax.set_xlim(0, 30)
-    ax.grid(True, axis='x', alpha=0.25, linewidth=0.6)
-    for yi, v in zip(y, vals):
-        ax.text(v + 0.6, yi, f'{v:.0f}%', va='center', ha='left',
-                fontsize=15, fontweight='bold', color=DARKGRAY)
-    ax.text(0.99, 0.04, f"n = {pd['n_batches']} batches, {pd['domain']}, {pd['model']}",
-            transform=ax.transAxes, ha='right', va='bottom', fontsize=7.5, color=GRAY)
+    # Dead-update RATE across two task families and three credit schemes.
+    # The point is generalisation across tasks -- and that on the compliance
+    # task even a process reward goes dead unless it is the admissible one.
+    s = D['seeds']; g = D['gated']
+    N4 = 60                       # chain4 iterations (matches fig_seeds)
+    Ng = g['base']['n']           # 80 iterations on the gated task
+    methods = ['GRPO', 'DAPO', 'RLVP']
+    colors = {'GRPO': RED, 'DAPO': ORANGE, 'RLVP': BLUE}
+    # (label, {method: (dead_fraction, oversample_x)})
+    tasks = [
+        ('chained task\n(bottleneck is reachable)', {
+            'GRPO': (s['GRPO']['dead_mean'] / N4, s['GRPO']['oversample_mean']),
+            'DAPO': (s['DAPO']['dead_mean'] / N4, s['DAPO']['oversample_mean']),
+            'RLVP': (s['RLVP']['dead_mean'] / N4, s['RLVP']['oversample_mean']),
+        }),
+        ('silent precondition gate\n(pivotal action never sampled)', {
+            'GRPO': (g['outcome']['dead'] / Ng, 1.0),
+            'DAPO': (g['dapo']['dead'] / Ng, g['dapo']['oversample']),
+            'RLVP': (g['clean_rlvp']['dead'] / Ng, 1.0),   # reward-only: behaviour unreachable
+        }),
+    ]
+
+    fig, ax = plt.subplots(figsize=(7.6, 4.0))
+    gw = 0.26                      # bar width
+    centers = [0.0, 1.2]           # group centers
+    offs = {'GRPO': -gw, 'DAPO': 0.0, 'RLVP': gw}
+    for c, (tlabel, md) in zip(centers, tasks):
+        for m in methods:
+            frac, ov = md[m]
+            x = c + offs[m]
+            # on the gate, the RLVP bar is reward-only (the behaviour is unreachable): hatch it
+            hatched = (tlabel.startswith('silent') and m == 'RLVP')
+            ax.bar(x, frac * 100, width=gw, color=colors[m], edgecolor='white',
+                   linewidth=0.8, hatch='//' if hatched else None)
+            ax.text(x, frac * 100 + 1.4, f'{frac*100:.0f}%', ha='center', va='bottom',
+                    fontsize=9, fontweight='bold', color=DARKGRAY)
+            if ov > 1.05:
+                ax.text(x, frac * 100 - 9, f'{ov:.1f}$\\times$\noversample', ha='center',
+                        va='top', fontsize=7.3, color='white', fontweight='bold')
+    # on the gate, no reward-only method escapes: only a demonstration seed breaks the wall
+    xr = centers[1] + offs['RLVP']
+    ax.text(xr + 0.17, 48, 'reward alone\nstays dead;\nonly a demo\nbreaks the wall',
+            ha='left', va='center', fontsize=8, color=GREEN, fontweight='bold')
+    ax.annotate('', xy=(xr + 0.15, 60), xytext=(xr + 0.05, 72),
+                arrowprops=dict(arrowstyle='-|>', color=GREEN, lw=1.5))
+
+    ax.set_xticks(centers)
+    ax.set_xticklabels([t[0] for t in tasks], fontsize=9.5)
+    ax.set_xlim(-0.5, centers[1] + 0.9)
+    ax.set_ylabel('dead updates  (\\% of training iterations)')
+    ax.set_ylim(0, 112)
+    ax.set_yticks([0, 25, 50, 75, 100])
+    ax.grid(True, axis='y', alpha=0.25, linewidth=0.6)
+    ax.axhline(100, color=DARKGRAY, linewidth=0.7, linestyle=':', alpha=0.6)
+
+    # legend
+    handles = [mpatches.Patch(color=colors[m], label=m) for m in methods]
+    handles.append(mpatches.Patch(facecolor=BLUE, hatch='//', edgecolor='white',
+                                  label='RLVP, reward-only'))
+    ax.legend(handles=handles, loc='upper center', ncol=4, frameon=False, fontsize=8,
+              handletextpad=0.4, columnspacing=1.0, bbox_to_anchor=(0.5, 1.10))
     fig.tight_layout()
     save(fig, 'fig_paired_dead')
 
