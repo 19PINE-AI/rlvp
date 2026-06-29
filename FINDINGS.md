@@ -567,3 +567,43 @@ dense potential keeps a maintaining gradient in both regimes. This EXTENDS all-f
     reachability-ALONE criterion is refuted (necessary not sufficient). At 8B-Lean there is a
     SUGGESTIVE (underpowered, n=4) stability benefit -- aligned sustains mastery where outcome
     drifts -- best framed via all-success-blindness, NOT as a speed claim.
+
+## 21. All-success "fix" GATE: FAILS in controlled harness -> deflationary framing locked
+
+Goal: bulletproof the all-success-blindness claim by cleanly showing, in a seedable 4B setting,
+that outcome-only drifts off a mastered task while a potential HOLDS it. Built an instrumented
+harness (scripts/chain_drift_exp.py) logging within-group var_O (outcome) and var_phi (potential).
+
+E0 (re-analysis of all existing runs): post-mastery drift is real and common in outcome arms
+(floors to 0.29/0.44/0.54 in lean_outcome6/minif2f_outcome/outcome_s12) and clean *_aligned runs
+mostly hold (floors 0.94-1.0) -- BUT old dense "rlvp" Lean runs also drift, and it is all
+confounded by the noisy unseeded vLLM Lean harness. INCONCLUSIVE.
+
+E1 (controlled gate, 4B chain, instrumented): THREE blocking facts.
+  (1) The policy never reaches clean mastery: n=1 collapses entropy to ~0 by it4 (frozen, var=0);
+      n=2 bounces 0-0.78 and never holds >=0.85 over 60 iters (both fine and coarse).
+  (2) var_O ~ 0 THROUGHOUT (homogeneous groups: a low-entropy 4B policy makes all 8 rollouts of a
+      task succeed-or-fail together), so GRPO has essentially no within-group signal; the dynamics
+      are chaotic sampling-driven bouncing, not clean variance-driven RL.
+  (3) The completion-potential SATURATES at success (var_phi -> 0 once a stage set is all done), so
+      it carries no top-variance and CANNOT hold a mastered task via the variance mechanism. The
+      fine arm's post-peak success (0.18) is NO BETTER than coarse/outcome (0.30).
+  => The "a potential HOLDS where outcome drifts" claim is NOT cleanly demonstrable in the
+     controlled harness. It was only ever SUGGESTIVE in the noisy 8B-Lean (sec 20), where Lean
+     proof-length gives genuine within-success variance.
+
+DECISION (gate FAILS for the fix): adopt the DEFLATIONARY framing.
+  - all-success blindness STANDS as a DIAGNOSTIC/mechanism: a GRPO advantage is a within-group
+    variance that vanishes on all-SUCCESS groups too, so outcome-only cannot hold a solved state.
+    EXTERNAL CORROBORATION: DAPO's dynamic sampling explicitly DROPS all-correct groups (acc=1) as
+    well as all-wrong ones -- the field already recognizes the top-end vacuum; we name it and note
+    it as a *prediction* of the variance lens, with the 8B-Lean drift as suggestive support.
+  - It is NOT a "process rewards fix all-success drift" headline (the controlled fix doesn't hold;
+    a holding potential would need within-success variance, which completion-potentials lack).
+  - Holds requires WITHIN-SUCCESS variance (open: a clean synthetic task with optional verifiable
+    sub-goals so correct solutions differ in Phi -- not built; deemed not worth the env eng).
+
+KEEP (robust, being re-firmed): the all-FAIL rescue is the clean positive -- at n_stages=4 the
+fine potential has var_phi=0.29 on an all-fail group (var_O=0), the measured dead-iteration-
+elimination mechanism. E4 (in progress) re-firms it at n=5 seeds (n4, fine vs coarse, dead/all-
+fail iter counts).
