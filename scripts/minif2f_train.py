@@ -44,7 +44,7 @@ from mathlib_repl_wrapper import MathlibREPL    # noqa: E402
 
 # ---- args ----
 ITERS = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 40
-CREDIT, ANNEAL, OUT_NAME, SEED, ALGEBRA = "c3", 0, "run_minif2f", 7, False
+CREDIT, ANNEAL, OUT_NAME, SEED, ALGEBRA, HARD = "c3", 0, "run_minif2f", 7, False, False
 MUON, LR, RULE_MODE_ARG = False, None, "structural"
 for _i, _a in enumerate(sys.argv):
     if _a == "--credit": CREDIT = sys.argv[_i + 1]
@@ -52,6 +52,7 @@ for _i, _a in enumerate(sys.argv):
     if _a == "--out": OUT_NAME = sys.argv[_i + 1]
     if _a == "--seed": SEED = int(sys.argv[_i + 1])
     if _a == "--algebra": ALGEBRA = True
+    if _a == "--hard": HARD = True
     if _a == "--muon": MUON = True
     if _a == "--lr": LR = float(sys.argv[_i + 1])
     if _a == "--rule-mode": RULE_MODE_ARG = sys.argv[_i + 1]
@@ -139,8 +140,15 @@ def main():
     cfg.micro_token_budget = 2048   # smaller microbatches bound the 30B backward peak
     sched = get_constant_schedule_with_warmup(opt, num_warmup_steps=cfg.warmup)
 
-    thms = load_minif2f(split="Valid", easy_only=True, algebra_only=ALGEBRA)
-    print(f"{len(thms)} miniF2F theorems (algebra_only={ALGEBRA}); credit={CREDIT} "
+    if HARD:
+        # held-out hard slice = full Valid minus the easy set (never trained); see
+        # PROSPECTIVE_PREDICTION.md
+        _easy = {t["name"] for t in load_minif2f(split="Valid", easy_only=True)}
+        thms = [t for t in load_minif2f(split="Valid", easy_only=False)
+                if t["name"] not in _easy]
+    else:
+        thms = load_minif2f(split="Valid", easy_only=True, algebra_only=ALGEBRA)
+    print(f"{len(thms)} miniF2F theorems (hard={HARD} algebra_only={ALGEBRA}); credit={CREDIT} "
           f"G={G} iters={ITERS} seed={SEED}", flush=True)
 
     adapter_dir = OUT / "adapter_cur"
