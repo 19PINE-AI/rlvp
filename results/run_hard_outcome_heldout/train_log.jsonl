@@ -1,0 +1,14 @@
+{"iter": 1, "succ": 0.021, "reward": 0.021, "viol_per_ep": 3.77, "disch_per_ep": 0.04, "n_eps": 48, "loss": 0.034066188149154186, "entropy": 0.29048453711475114, "grad_norm": 0.03296086564660072, "wall_s": 140.3}
+{"iter": 2, "succ": 0.125, "reward": 0.125, "viol_per_ep": 2.98, "disch_per_ep": 0.15, "n_eps": 48, "loss": 0.06531720981001854, "entropy": 0.25916867507131475, "grad_norm": 0.09922108054161072, "wall_s": 104.3}
+{"iter": 3, "succ": 0.646, "reward": 0.646, "viol_per_ep": 1.88, "disch_per_ep": 0.65, "n_eps": 48, "loss": 0.16200132376980036, "entropy": 0.23980238618585034, "grad_norm": 0.3743581175804138, "wall_s": 530.2}
+{"iter": 4, "succ": 0.958, "reward": 0.958, "viol_per_ep": 1.08, "disch_per_ep": 0.96, "n_eps": 48, "loss": 0.09029349032789469, "entropy": 0.15077751972636239, "grad_norm": 0.1432075798511505, "wall_s": 202.6}
+{"iter": 5, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.15, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 8.4}
+{"iter": 6, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.08, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 22.5}
+{"iter": 7, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.17, "disch_per_ep": 1.0, "n_eps": 40, "loss": 0.0, "entropy": 0.0, "wall_s": 10.3}
+{"iter": 8, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.15, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 41.0}
+{"iter": 9, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.04, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 16.7}
+{"iter": 10, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.0, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 7.2}
+{"iter": 11, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.06, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 22.8}
+{"iter": 12, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.0, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 8.1}
+{"iter": 13, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.04, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 12.0}
+{"iter": 14, "succ": 1.0, "reward": 1.0, "viol_per_ep": 0.0, "disch_per_ep": 1.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 11.3}

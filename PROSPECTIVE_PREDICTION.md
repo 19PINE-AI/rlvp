@@ -63,5 +63,22 @@ Check whether the measured aligned-vs-outcome gap matches the pre-registered bra
   pre-registered *final-3 succ* metric. Data preserved: results/run_hard_aligned_heldout_v1diverged.
 - **DEVIATION (logged, fair)**: lower Muon lr 5e-3 -> **2e-3 for BOTH arms** (the only change,
   applied symmetrically; prediction and metric unchanged). Re-running aligned vs outcome.
-- training run v2 result: <pending -- two arms at lr 2e-3>
-- verdict (confirmed / refuted / inconclusive): <pending>
+- **training run v2 result (Muon lr=2e-3, both arms, 14 iters, seed 7)** -- clean, no divergence:
+    - aligned c3 succ: 0, .12, .73, 1.0, 1.0, ... (first succ it2; mastery>=0.9 it4; final-3 1.000)
+    - outcome    succ: .02, .12, .65, .96, 1.0, ... (first succ it1; mastery>=0.9 it4; final-3 1.000)
+    - The two arms are statistically indistinguishable; outcome-only reached first success ONE
+      ITER EARLIER. By the pre-registered rule (aligned >=1 iter earlier OR higher final-3),
+      NEITHER holds.
+- **verdict: REFUTED.** The reachability-only rule gave a FALSE POSITIVE.
+- **why (mechanistic, important):** of the 24 probed held-out theorems, 16/24 (67%) are all-fail
+  at base, but 8/24 (33%) have >=1 base success. That learnable core is enough for outcome-only
+  to bootstrap and, via LoRA generalization across theorems, master the all-fail ones too by it4
+  -- WITHOUT any dense signal. So reachability of Phi (Var_G(Phi)>0) is NECESSARY but NOT
+  SUFFICIENT. The dense reward helps only when outcome-only has NO learnable foothold anywhere
+  in the task distribution (Var_G(O)~0 across the WHOLE set, not merely on the hard groups).
+- **implication for the paper:** this qualifies the all-fail-group-blindness motivation. In a
+  MULTI-TASK setting with generalization, per-group all-fail blindness is rescued by cross-task
+  transfer from an easier subset -- so dense process rewards are far less necessary than the
+  single-group argument implies. The cheap probe must measure BOTH Var_G(Phi) (reachability) AND
+  the absence of a learnable outcome foothold; reachability alone over-predicts. This is the
+  phase diagram's "unneeded" boundary, now shown PROSPECTIVELY by a falsified prediction.
