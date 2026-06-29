@@ -61,8 +61,9 @@ for _i, _a in enumerate(sys.argv):
 if LR is None:
     LR = 5e-3 if MUON else 3e-5
 
-MODEL_GEN = "Qwen/Qwen3-30B-A3B-FP8"   # vLLM rollouts
-MODEL_HF = "Qwen/Qwen3-30B-A3B"        # 4-bit QLoRA backward (bf16 ckpt)
+MODEL_GEN = os.environ.get("RLVP_GEN", "Qwen/Qwen3-30B-A3B-FP8")   # vLLM rollouts
+MODEL_HF = os.environ.get("RLVP_HF", "Qwen/Qwen3-30B-A3B")         # 4-bit QLoRA backward
+GPUMEM = float(os.environ.get("RLVP_GPUMEM", "0.48"))             # vLLM mem fraction
 G = 8
 TASKS_PER_ITER = 6
 MAX_STEPS = 8
@@ -107,7 +108,7 @@ def main():
     # seed (which inits CUDA RNG) and the HF model load MUST come after. ---
     print("starting vLLM fp8 generator ...", flush=True)
     gen_srv = VLLMGenServer(MODEL_GEN, tok, max_new_tokens=200, temperature=1.0,
-                            gpu_mem=0.48, max_model_len=4096, max_batch=32,
+                            gpu_mem=GPUMEM, max_model_len=4096, max_batch=32,
                             enable_lora=True, max_lora_rank=32, enforce_eager=True)
 
     torch.manual_seed(SEED)   # now safe: vLLM's EngineCore already forked

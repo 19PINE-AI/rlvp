@@ -1,0 +1,22 @@
+{"iter": 1, "succ": 0.125, "reward": 0.125, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.3149853777140379, "entropy": 0.06752034183466259, "grad_norm": 0.07816455513238907, "wall_s": 56.6}
+{"iter": 2, "succ": 0.062, "reward": 0.062, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.06731328135356307, "entropy": 0.20197248644402055, "grad_norm": 0.05715973302721977, "wall_s": 22.6}
+{"iter": 3, "succ": 0.312, "reward": 0.312, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.5499417779501528, "entropy": 0.035771753798559465, "grad_norm": 0.15948137640953064, "wall_s": 31.3}
+{"iter": 4, "succ": 0.354, "reward": 0.354, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.11010873783379793, "entropy": 0.12062067246054584, "grad_norm": 0.03886038064956665, "wall_s": 27.5}
+{"iter": 5, "succ": 0.146, "reward": 0.146, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.04170945938676596, "entropy": 0.12085003079430201, "grad_norm": 0.1910320669412613, "wall_s": 37.5}
+{"iter": 6, "succ": 0.333, "reward": 0.333, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.09042737679556012, "entropy": 0.1413788975173188, "grad_norm": 0.13603095710277557, "wall_s": 50.9}
+{"iter": 7, "succ": 0.396, "reward": 0.396, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.023217418929561973, "entropy": 0.10379559754642169, "grad_norm": 0.33856964111328125, "wall_s": 43.9}
+{"iter": 8, "succ": 0.042, "reward": 0.042, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.01426113722845912, "entropy": 0.07944016765665125, "grad_norm": 0.07134091854095459, "wall_s": 51.2}
+{"iter": 9, "succ": 0.312, "reward": 0.312, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.057224617805331945, "entropy": 0.09214209721278256, "grad_norm": 0.2956593632698059, "wall_s": 50.2}
+{"iter": 10, "succ": 0.417, "reward": 0.417, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.548015468288213, "entropy": 0.1159092423575265, "grad_norm": 132.85580444335938, "wall_s": 63.7}
+{"iter": 11, "succ": 0.771, "reward": 0.771, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.24378886772319674, "entropy": 0.05923938396255077, "grad_norm": 0.23569181561470032, "wall_s": 84.4}
+{"iter": 12, "succ": 0.667, "reward": 0.667, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.12151166884905251, "entropy": 0.018121936196859843, "grad_norm": 1.1016461849212646, "wall_s": 111.2}
+{"iter": 13, "succ": 0.854, "reward": 0.854, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.03426376164861722, "entropy": 0.01068132912016397, "grad_norm": 0.1938491314649582, "wall_s": 92.4}
+{"iter": 14, "succ": 0.833, "reward": 0.833, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 1.5047747963108122, "entropy": 0.01325833803866521, "grad_norm": 2.2436344623565674, "wall_s": 101.9}
+{"iter": 15, "succ": 0.729, "reward": 0.729, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 203.06445505232296, "entropy": 0.017301425572218747, "grad_norm": 178333.296875, "wall_s": 83.1}
+{"iter": 16, "succ": 0.729, "reward": 0.729, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.14645735546946526, "entropy": 0.006882722500347182, "grad_norm": 3.457167863845825, "wall_s": 94.6}
+{"iter": 17, "succ": 0.75, "reward": 0.75, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.05500031867995858, "entropy": 0.01319982631570477, "grad_norm": 0.2571944296360016, "wall_s": 85.1}
+{"iter": 18, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 90.1}
+{"iter": 19, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 95.1}
+{"iter": 20, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 92.1}
+{"iter": 21, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 92.2}
+{"iter": 22, "succ": 0.0, "reward": 0.0, "viol_per_ep": 0.0, "disch_per_ep": 0.0, "n_eps": 48, "loss": 0.0, "entropy": 0.0, "wall_s": 92.8}

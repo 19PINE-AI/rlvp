@@ -519,3 +519,51 @@ synthetic chain is too lr-sensitive at small scale (0.6B/1.7B all degenerate to 
 4B grid too slow under GPU contention). So the benefit axis = probe gradient + 1 clean controlled
 4B point + the 2 robust real anchors (#1, #2), NOT a dense controlled grid. Figure
 fig_phase_diagram.pdf (paper Sec predictive-law). This is the empirical face of the variance lens.
+
+## 20. Prospective prediction REFUTED + real-task efficiency does NOT replicate (the big correction)
+
+A pre-registered prospective test (PROSPECTIVE_PREDICTION.md) and a multi-seed firming sweep
+together force a major, honest correction to the efficiency story.
+
+**(a) Prospective prediction refuted.** Held-out *hard* miniF2F (104 IMO/AIME theorems, never
+trained). Probe said REACHABLE (frac_groups_reachable=0.42, Var_G(Phi)=0.11) -> committed rule
+predicted aligned BEATS outcome. Training (lr 2e-3): aligned and outcome are statistically
+identical (both master @it4, final-3 both 1.0; outcome reached first success ONE ITER EARLIER).
+**Falsified.** Cause: 67% of held-out theorems all-fail at base, but a 33% learnable core lets
+outcome-only bootstrap + generalize -- the dense signal is redundant. **Reachability of Phi is
+NECESSARY but NOT SUFFICIENT**; benefit also needs the outcome to have no learnable foothold.
+Qualifies the all-fail motivation: cross-task generalization rescues all-fail groups WITHOUT a
+dense reward.
+
+**(b) #1's "positive at scale" does NOT reproduce.** Re-running #1's exact config (30B easy,
+lr 1e-3, c3 vs outcome) FLIPPED SIGN: in #1 aligned mastered @it4 vs outcome @it12; in the
+re-run outcome BEAT aligned (final-3 0.86 vs 0.51, aligned never mastered). vLLM rollouts are
+unseeded (EngineCore is forked; torch.manual_seed doesn't reach it), so "seeds" are i.i.d.
+draws; 30B-MoE training is bimodal (master vs stuck). #1 was the lucky mode. Not gaming
+(disch tracks succ exactly).
+
+**(c) 8B-dense on real Lean, n=4 (per user, to escape MoE chaos).** Qwen3-8B, easy miniF2F,
+aligned vs outcome, seeds {7,17,23,29}, lr 1e-3, 25 iters:
+  - PEAK success ~equal: aligned peak-mean 0.66 vs outcome 0.59 (both arms can REACH ~0.5-1.0).
+  - FINAL-3 success: aligned 0.41 (mastered+held 1/4: s23 hits 1.0 @it8 and HOLDS to it25) vs
+    outcome 0.09 (0/4: s29 climbs to 0.85 @it13 then COLLAPSES to 0 by it18).
+  - So speed/efficiency does NOT robustly separate, but END-STABILITY does (suggestively, n=4).
+
+**The unifying mechanism (variance lens, strengthened).** A GRPO advantage is a within-group
+variance; it vanishes on BOTH all-FAIL (early) and all-SUCCESS (late) groups -- GRPO goes blind
+at both ends. Outcome-only therefore cannot HOLD a solved state (all-success -> zero variance ->
+no gradient -> drift), which is the recurrent outcome-arm COLLAPSE seen across the corpus
+(30B #1 outcome crashed it3-5; 30B-fs outcome wandered; 8B outcome s29 collapsed it18-20). The
+dense potential keeps a maintaining gradient in both regimes. This EXTENDS all-fail-blindness to
+**all-success-blindness** -- a new, falsifiable prediction the lens makes.
+
+**Net correction for the paper.**
+  STANDS (robust): the zero-variance mechanism (now BOTH ends); 4B 3-seed dead-iteration
+    elimination (controlled synthetic, all-fail structure guaranteed); 4B 3-seed harm reduction
+    (~4x at equal success); SWE reachability wall (Var_G(Phi)=0, 156+256 rollouts); the
+    variance identity.
+  SCOPED/REFUTED: the clean "process rewards make real-task RL FASTER at scale" (#1) does NOT
+    replicate -- DROP it; efficiency-via-speed is a controlled-synthetic result only. The
+    reachability-ALONE criterion is refuted (necessary not sufficient). At 8B-Lean there is a
+    SUGGESTIVE (underpowered, n=4) stability benefit -- aligned sustains mastery where outcome
+    drifts -- best framed via all-success-blindness, NOT as a speed claim.
