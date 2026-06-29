@@ -46,7 +46,13 @@ Two arms on the held-out hard set, identical except credit:
 Check whether the measured aligned-vs-outcome gap matches the pre-registered branch.
 
 ## Outcome log (filled in AFTER, append-only)
-- probe result: <pending>
-- pre-registered branch: <derived from rule once probe lands>
-- training result: <pending>
+- **probe result** (commit a4bf2a3 ruleset, run 2026-06-29 ~01:21Z, 24 held-out theorems,
+  G=8): `frac_groups_reachable=0.417`, `mean_var_phi=0.1107`, `base_succ=0.078`,
+  `max_phi_seen=3`. The hard slice is hard-but-REACHABLE (unlike the SWE/E-C Phi=0 null):
+  ~40% of theorem-groups admit partial goal progress though only 7.8% close.
+- **pre-registered branch** (mechanical from rule): R=0.417>=0.30 AND V=0.1107>0.02
+  => **REACHABLE => PREDICT aligned `c3` HELPS** (faster to first success / higher final-3
+  than outcome-only). NB: this contradicts the naive "harder => unreachable" guess; the
+  criterion predicts from the *probe*, not the difficulty.
+- training result: <pending -- two arms launching>
 - verdict (confirmed / refuted / inconclusive): <pending>

@@ -1,0 +1,12 @@
+{
+  "held_out": "miniF2F hard (easy_only=False minus easy)",
+  "n_theorems": 24,
+  "G": 8,
+  "max_steps": 8,
+  "seed": 7,
+  "mean_var_phi": 0.1107,
+  "frac_groups_reachable": 0.417,
+  "mean_phi": 0.104,
+  "base_succ": 0.0781,
+  "max_phi_seen": 3
+}
