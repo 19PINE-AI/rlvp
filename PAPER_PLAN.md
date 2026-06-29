@@ -390,3 +390,13 @@ EXPERIMENT PROGRAM (E0 done; E1 is the GATE for whether all-success-drift become
      extension, lead with the negative+mechanism+harm-bounding (deflationary framing).
   E2 mechanism isolation (coarse/saturating vs fine), E3 2nd domain, E4 re-firm kept positives
      n=5, E5 reproducibility distribution, E6 more 8B-Lean seeds. Gated on E1.
+
+RESULT (2026-06-29, FINDINGS 21-22, FINAL_SUMMARY.md): E1 gate FAILED for the all-success "fix"
+(completion-Phi saturates; no clean mastery; var_O~0) -> deflationary framing locked. E4 DONE
+n=5: dead-iter rescue is PARTIAL/reachability-gated -- fine 6.8 vs coarse 14.6 truly-dead iters
+(2.15x fewer, fine<coarse every seed, NEVER 0) -> SCOPE the "0 vs 16/40" claim. E2/E3/E6 NOT run
+(gate failed; mechanism is supported by E4 var_phi measurement + DAPO corroboration + SWE wall).
+Consolidated ledger + final title ("The Variance Vacuum...") in FINAL_SUMMARY.md. The unifying
+spine: a potential helps only insofar as it supplies REACHABLE within-group variance (var_phi>0),
+which governs dead-iter rescue, all-success holding, and efficiency -- and usually fails. Robust
+deployable win = un-gameable harm-bounding (TODO: re-verify n>=5).

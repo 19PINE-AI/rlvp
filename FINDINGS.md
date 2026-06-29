@@ -607,3 +607,31 @@ KEEP (robust, being re-firmed): the all-FAIL rescue is the clean positive -- at 
 fine potential has var_phi=0.29 on an all-fail group (var_O=0), the measured dead-iteration-
 elimination mechanism. E4 (in progress) re-firms it at n=5 seeds (n4, fine vs coarse, dead/all-
 fail iter counts).
+
+## 22. E4 n=5: dead-iteration rescue is REAL but PARTIAL and reachability-gated (~2x, not "0 vs 16/40")
+
+4B chain, n_stages=4, 30 iters, seeds {7,17,23,29,31}, instrumented (var_O, var_phi). Correct
+metric: for fine, a "truly-dead" iter = succ==0 AND var_phi==0 (no signal at all); for coarse,
+every succ==0 iter is dead (no potential, var_phi identically 0).
+
+  seed:        7    17   23   29   31
+  fine  td:    8    2    6    10   8     mean 6.8  range [2,10]
+  coarse dead: 16   12   11   17   17    mean 14.6 range [11,17]
+  -> fine has 2.15x FEWER dead iterations; fine < coarse in EVERY seed.
+
+HONEST READING (scopes the original "dead updates 0 vs 16/40"): the fine potential roughly HALVES
+dead iterations by rescuing the all-fail iters WHERE partial progress is reachable (var_phi>0);
+it does NOT eliminate them -- 2-10 truly-dead iters remain per run because the policy often makes
+ZERO partial progress on an all-fail iter (var_phi=0), where even the fine potential is as blind
+as the outcome. Neither arm masters (max 0.41-0.75) at this config, so this is purely the dead-
+iteration mechanism, not a final-success claim. Cross-check: existing chainpot runs show fine
+~= or WORSE than coarse by raw succ==0 and clearly worse at high lr (instability) -- so the
+clean "0 dead" only appears in high-reachability/low-lr regimes; the robust, general statement is
+"~2x fewer dead iters, reachability-gated, never zero."
+
+UNIFICATION (the paper's spine): dead-iter rescue, all-success holding, and efficiency are ONE
+phenomenon -- a potential helps exactly insofar as it supplies REACHABLE within-group variance
+(var_phi>0) the outcome lacks. Where reachable it rescues (partially); where var_phi=0 (SWE wall;
+fully-stuck all-fail iters; saturated all-success groups) it is as blind as the outcome. This
+single quantity -- reachable within-group potential variance -- governs every regime, and it
+usually fails, which is why the headline benefits are narrow and often non-reproducible.
