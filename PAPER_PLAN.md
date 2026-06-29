@@ -338,3 +338,55 @@ EXPERIMENTS — STATUS (FINDINGS.md sec 15):
      instances?]
 
 ## VERIFIABLE-POTENTIAL CLAIM (central, see FINDINGS.md sec 11): RLVP helps iff domain has a verifiable Phi strictly finer than outcome. Formalize via potential-based shaping (Ng 1999). Experiments E-A granularity / E-B sparsity-phase-diagram / E-C SWE multi-vs-single-F2P-test. Validate or refute before paper.
+
+## 2026-06-29 FRAMING PIVOT (supersedes the "criterion that always works" framing; see FINDINGS sec 20)
+
+The prospective-prediction refutation + multi-seed firming + 8B-Lean replacement force a pivot
+from a PRESCRIPTIVE criterion to a MECHANISM + honest-negative paper.
+
+NEW THESIS (one line): a group-relative advantage IS a within-group variance, which collapses
+to zero at BOTH ends of the success rate -- on all-fail groups (early) AND all-success groups
+(late). A dense verifiable potential helps iff it supplies variance in one of these vacuums and
+its intermediate values are reachable. Everywhere else it is redundant -- and on real multi-task
+distributions, "everywhere else" is most of training, which is why headline efficiency gains
+do not replicate.
+
+NEW TITLE (candidate): "The Variance Vacuum: What Dense Process Rewards Actually Do for Agentic
+RL (and Why the Speed-ups Don't Replicate)."
+
+STANDS (robust, keep): variance identity / mechanism (now BOTH ends); 4B 3-seed dead-iteration
+elimination SCOPED to controlled synthetic (all-fail rescue, re-confirmed: var_phi>0 while
+var_O=0); 4B 3-seed harm reduction ~4x at equal success; SWE reachability wall (Var_G(Phi)=0);
+the un-gameability sweep (compliance attractor); intent-ceiling / learned-critic / discovery wall.
+SCOPED/REFUTED (correct, do not overclaim): real-task efficiency-as-SPEED (#1) does NOT replicate
+-- DROP it; reachability-ALONE is necessary not sufficient (a learnable foothold lets outcome
+bootstrap); 30B/8B-Lean efficiency is noise-dominated (sign-flips under re-seeding).
+
+FOUR DEFENSIBLE CONTRIBUTIONS (the related-work survey 2026-06-29 shows the naive "process
+rewards help" and "progress=advantage" are NOT novel -- position carefully):
+  1. the VERIFIABLE / un-gameable instantiation (vs Setlur progress=advantage, which uses a
+     learned hackable prover; vs DeepSeek-R1 abandoning PRMs for hacking).
+  2. the BOTH-ENDS unification: all-success blindness, not just all-fail (DAPO's dynamic
+     sampling drops all-correct groups too -> external corroboration; we SUPPLY vs DROP).
+  3. a rigorous HONEST-NEGATIVE + REPRODUCIBILITY result for AGENTIC process rewards (sign-flip
+     under re-seeding) -- the agentic instance of the Sober-Look / Spurious-Rewards crisis;
+     ours is sharper (sign, not magnitude). cf. Practitioner's-Guide: dense accelerates but
+     final perf depends on estimator.
+  4. per-tool-call VERIFIABLE potentials as penalty-based shaping = genuine whitespace.
+
+FIGURES: CUT fig_efficiency_at_scale (#1, invalidated). REDESIGN fig_criterion_map -> a
+variance-vacuum schematic (Var_G(O)->0 at both ends of success rate). ADD: all-success drift
+figure (aligned holds vs outcome drifts) + reproducibility panel (sign-flip / 8B n=4 spread).
+KEEP: ungameability_sweep, ec_reachability, verifier_bound, phase_diagram (w/ necessary-not-
+sufficient caveat). Related work REWRITTEN (body.tex, 5 paras) + ~23 verified bib entries added.
+
+EXPERIMENT PROGRAM (E0 done; E1 is the GATE for whether all-success-drift becomes a headline):
+  E0 re-analysis: drift real+common in outcome but confounded by noisy vLLM Lean (DONE, inconcl).
+  E1 KEYSTONE (running): controlled all-success drift, 4B chain, instrumented (var_O, var_phi),
+     n-seeds, past mastery. CRITICAL SUBTLETY: completion-Phi SATURATES at success (var_phi->0
+     at top) so it drifts like outcome; a HOLDING potential needs WITHIN-SUCCESS variance (as
+     Lean proof-length naturally has). If E1 shows outcome drifts when var_O->0 AND a within-
+     success-varying potential holds -> headline. If not -> all-success stays a suggestive
+     extension, lead with the negative+mechanism+harm-bounding (deflationary framing).
+  E2 mechanism isolation (coarse/saturating vs fine), E3 2nd domain, E4 re-firm kept positives
+     n=5, E5 reproducibility distribution, E6 more 8B-Lean seeds. Gated on E1.
