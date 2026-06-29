@@ -54,5 +54,14 @@ Check whether the measured aligned-vs-outcome gap matches the pre-registered bra
   => **REACHABLE => PREDICT aligned `c3` HELPS** (faster to first success / higher final-3
   than outcome-only). NB: this contradicts the naive "harder => unreachable" guess; the
   criterion predicts from the *probe*, not the difficulty.
-- training result: <pending -- two arms launching>
+- **training run v1 (Muon lr=5e-3, pre-registered default)**: aligned `c3` learned fast
+  on the held-out hard set -- succ 0.0 -> 0.10 (it2) -> 0.90 (it3) -> 0.96 (it5) -- then the
+  Muon update **diverged** at it6 (entropy 0.12->0.90, grad_norm 110+, succ collapse to 0.0).
+  An optimization artifact (Muon orthogonalizes the gradient, so grpo's grad-clip=1.0 cannot
+  bound its step; lr 5e-3 is too hot once Var_G(Phi) sharpens the landscape at the success
+  jump). The early trajectory already supports HELPS, but the late collapse corrupts the
+  pre-registered *final-3 succ* metric. Data preserved: results/run_hard_aligned_heldout_v1diverged.
+- **DEVIATION (logged, fair)**: lower Muon lr 5e-3 -> **2e-3 for BOTH arms** (the only change,
+  applied symmetrically; prediction and metric unchanged). Re-running aligned vs outcome.
+- training run v2 result: <pending -- two arms at lr 2e-3>
 - verdict (confirmed / refuted / inconclusive): <pending>
