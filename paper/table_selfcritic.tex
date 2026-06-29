@@ -1,6 +1,6 @@
 \begin{table}[tbp]
 \centering
-\caption{\textbf{A deterministic rule beats a same-model self-critic as a dense reward}, in the all-fail regime (consumer-service domain, 1.7B, three seeds; late-training mean $\pm$ std). Rule and critics share the identical penalty-only credit structure; the critic additionally has \emph{perfect recall} against the rule oracle. The rule is decisive every seed; the critics are inert. The \emph{frozen} (stationary) critic fails like the live one, isolating the cause as the critic's $\sim$6\% false-positive imprecision rather than non-stationarity.}
+\caption{\textbf{A deterministic rule beats a same-model self-critic as a dense reward}, in the all-fail regime (consumer-service domain, 1.7B, three seeds, late-training mean $\pm$ std). Rule and critics share the identical penalty-only credit structure, and the critic additionally has \emph{perfect recall} against the rule oracle. The rule is decisive every seed, while the critics are inert. The \emph{frozen} (stationary) critic fails like the live one, isolating the cause as the critic's $\sim$6\% false-positive imprecision rather than non-stationarity.}
 \label{tab:sc-train}
 \small
 \begin{tabular}{lccc}
@@ -15,7 +15,7 @@ self-critic, frozen (stationary) & $0.94/1.00$ & $0.93 \pm 0.02$ & $0.00$ \\
 
 \vspace{0.8em}
 
-\caption{\textbf{Self-critique is a usable intent \emph{detector} but a failed intent \emph{reward}} ($\tau$-bench airline, Qwen3-4B). \emph{Left:} as a failure predictor on rule-clean (intent) failures the self-critic far exceeds the verifiable semantic rules (3 rollout seeds). \emph{Right:} as the dense training reward the same self-critique collapses, while outcome-only and the rules both learn (training reward, early$\to$late; 20 iterations).}
+\caption{\textbf{Self-critique is a usable intent \emph{detector} but a failed intent \emph{reward}} ($\tau$-bench airline, Qwen3-4B). \emph{Left:} as a failure predictor on rule-clean (intent) failures the self-critic far exceeds the verifiable semantic rules (3 rollout seeds). \emph{Right:} as the dense training reward the same self-critique collapses, while outcome-only and the rules both learn (training reward, early$\to$late, 20 iterations).}
 \label{tab:sc-tau2}
 \small
 \begin{tabular}{lc@{\hskip 2.5em}lc}
