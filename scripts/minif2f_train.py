@@ -198,7 +198,9 @@ def main():
         log.write(json.dumps(rec) + "\n"); log.flush()
         print(json.dumps(rec), flush=True)
         ent = float(m.get("entropy", 0.0) or 0.0); gn = float(m.get("grad_norm", 0.0) or 0.0)
-        collapse = collapse + 1 if ent < 1e-4 else 0
+        # entropy->0 is a COLLAPSE only when stuck at low success; at high success it is
+        # healthy convergence to a deterministic correct policy -- do NOT abort that.
+        collapse = collapse + 1 if (ent < 1e-4 and succ < 0.5) else 0
         explode = explode + 1 if (gn > 50 or not math.isfinite(gn)) else 0
         if collapse >= 3 or explode >= 2:
             reason = "entropy_collapse" if collapse >= 3 else "grad_explosion"
