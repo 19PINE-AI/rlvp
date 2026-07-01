@@ -658,3 +658,17 @@ positive -- an un-gameable penalty whose cheapest maximizer IS the desired behav
 no within-group reachability (its target is always reachable). This is the deployable use of a
 dense process reward; everything else (efficiency, dead-iter, all-success) is reachability-gated
 and narrow (secs 20-22).
+
+## 24. Aligned-potential recipe, multi-seed Lean (30B algebra, Muon) — STABILITY, not raw speed
+- ALIGNED potential (c3 --rule-mode aligned, Muon 1e-3): STABLE on 5/5 seeds, thr@4-7, final 1.0,
+  AUC 0.84-0.91. The recipe works and holds without annealing. (structural rule-mode degrades -> ablation.)
+- OUTCOME-only (Muon 1e-3): grad_explosion (->~25k) on 3/4 seeds (s7 DIV@16, s11 DIV@17, s12 DIV);
+  1/4 STABLE (s13: thr@8, final1.0, AUC0.843).
+- KEY NUANCE (honest): on the ONE seed where outcome trained stably (s13), aligned thr@7 vs outcome
+  thr@8 is ~TIED. The large apparent efficiency gaps on other seeds are outcome DIVERGING -- i.e. the
+  dense aligned signal's benefit here is TRAINING STABILITY (reliable convergence where outcome blows
+  up), NOT a big raw speed-up.
+- => Claim to make: aligned potential's primary benefit under an aggressive optimizer is stability;
+  the raw sample-efficiency (speed-to-mastery) gain vs a STABLE outcome is MODEST and must be measured
+  against the AdamW-outcome baseline (P0). Muon-outcome divergence is partly under-tuning (aggressive
+  lr on sparse gradient); AdamW-outcome is the fair speed reference.
