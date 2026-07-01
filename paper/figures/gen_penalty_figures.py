@@ -284,7 +284,75 @@ def fig_penalty_ablation():
     print("fig_penalty_ablation OK: " + " | ".join(f"{l}: succ {s['success'][0]:.2f} clean {s['clean'][0]:.2f} (n={s['n']})" for l, s in stats))
 
 
+def _curve(arm, gen_batch=48):
+    """Per-iter (episodes, success mean/std, clean mean/std) aggregated over landed seeds."""
+    import collections
+    succ = collections.defaultdict(list); clean = collections.defaultdict(list)
+    for d in sorted(glob.glob(os.path.join(RESULTS, f"run_rvp_{arm}_s*"))):
+        log = os.path.join(d, "train_log.jsonl")
+        if not os.path.exists(log):
+            continue
+        for ln in open(log):
+            try:
+                r = json.loads(ln)
+            except Exception:
+                continue
+            if not (isinstance(r, dict) and r.get("eval") and r.get("iter")):
+                continue
+            e = r["eval"]; doms = [k for k in ("fileops", "csops") if k in e]
+            if not doms:
+                continue
+            succ[r["iter"]].append(_st.mean(e[k]["success"] for k in doms))
+            clean[r["iter"]].append(_st.mean(e[k]["clean"] for k in doms))
+    iters = sorted(succ)
+    ep = [i * gen_batch for i in iters]
+    sm = [_st.mean(succ[i]) for i in iters]; ss = [_st.pstdev(succ[i]) for i in iters]
+    cm = [_st.mean(clean[i]) for i in iters]; cs = [_st.pstdev(clean[i]) for i in iters]
+    n = max((len(succ[i]) for i in iters), default=0)
+    return ep, sm, ss, cm, cs, n
+
+
+# ---------------------------------------------------------------- Fig 0 (headline / teaser)
+def fig_headline():
+    """Page-1 teaser: vs the GRPO/outcome-only baseline, RLVP keeps task success while
+    reaching violation-free behavior the baseline never does. Two training curves + harm callout."""
+    ep_o, so, so_e, co, co_e, no = _curve("outcome")
+    ep_r, sr, sr_e, cr, cr_e, nr = _curve("recipe")
+    if not (ep_o and ep_r):
+        print("fig_headline: SKIP (need outcome+recipe curves)"); return
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 2.75))
+    npo = np.array
+    for ax, (ym_o, ye_o, ym_r, ye_r, title, note) in (
+        (axL, (so, so_e, sr, sr_e, "Task success", "no task cost")),
+        (axR, (co, co_e, cr, cr_e, "Violation-free episodes",
+               "the deployable behavior GRPO never reaches")),
+    ):
+        ax.plot(ep_o, ym_o, "-o", color=GRAY, lw=2.2, ms=5, label="GRPO (outcome-only)", zorder=3)
+        ax.fill_between(ep_o, npo(ym_o) - npo(ye_o), npo(ym_o) + npo(ye_o), color=GRAY, alpha=0.15)
+        ax.plot(ep_r, ym_r, "-o", color=GREEN, lw=2.4, ms=5, label="RLVP (penalize the path)", zorder=4)
+        ax.fill_between(ep_r, npo(ym_r) - npo(ye_r), npo(ym_r) + npo(ye_r), color=GREEN, alpha=0.18)
+        ax.set_ylim(-0.04, 1.08); ax.set_xlim(left=0)
+        ax.set_xlabel("episodes generated"); ax.set_title(title, fontweight="bold", fontsize=12)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.axhline(1.0, ls=":", lw=0.8, color=GRAY, zorder=0)
+        ax.text(0.5, 0.06, note, transform=ax.transAxes, ha="center", fontsize=9.2,
+                style="italic", color=DARK)
+    axL.set_ylabel("success rate"); axR.set_ylabel("violation-free rate")
+    axL.legend(frameon=False, loc="lower right", fontsize=9)
+    # baseline-floor marker on the right panel
+    axR.annotate("GRPO stuck near 0\nat any budget", xy=(ep_o[-1], co[-1]),
+                 xytext=(ep_o[len(ep_o) // 2], 0.42), fontsize=8.5, color=GRAY,
+                 arrowprops=dict(arrowstyle="->", color=GRAY, lw=1.1))
+    fig.suptitle("Reward the outcome, penalize the path: RLVP reaches deployable behavior "
+                 "GRPO cannot, at no task cost", fontsize=11.5, fontweight="bold", y=1.02)
+    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    fig.savefig(os.path.join(HERE, "fig_headline.pdf"))
+    plt.close(fig)
+    print(f"fig_headline OK (outcome n={no}, recipe n={nr})")
+
+
 if __name__ == "__main__":
+    fig_headline()
     fig_two_channel(); print("fig_two_channel OK")
     fig_variance_vacuum(); print("fig_variance_vacuum OK")
     fig_penalty_design(); print("fig_penalty_design OK")

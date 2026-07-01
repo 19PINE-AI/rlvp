@@ -7,6 +7,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{float}
 \usepackage{booktabs}
 \usepackage{listings}
 \usepackage{subcaption}
@@ -84,6 +85,13 @@ Website: \url{https://01.me/research/rlvp}
 \vspace{-0.6em}
 
 \vspace{-0.4em}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_headline.pdf}
+\caption{\textbf{A verifiable penalty reaches a deployable axis that outcome-only RL cannot.} On diverse held-out tasks, RLVP (reward the outcome, penalize the path) matches the task success of outcome-only GRPO (\emph{left}) while driving violation-free episodes from near zero to $\approx$100\% (\emph{right})---a constraint the outcome reward is structurally blind to, so GRPO never reaches it at any budget. On real TerminalBench the same mechanism commits $\approx$5.6$\times$ fewer harmful actions at \emph{equal} success (\S\ref{sec:path}). The robust gain is this constraint axis, not a task speed-up over GRPO, which we find fragile (\S\ref{sec:potentials}). Mean over seeds; bands one standard deviation.}
+\label{fig:headline}
+\end{figure}
 
 \input{body}
 
