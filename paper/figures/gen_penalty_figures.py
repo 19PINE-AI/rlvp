@@ -40,10 +40,8 @@ def arrow(ax, x1, y1, x2, y2, color=DARK, lw=1.6, style="-|>", ms=14):
 
 # ---------------------------------------------------------------- Fig 1
 def fig_two_channel():
-    fig, ax = plt.subplots(figsize=(12, 4.6))
-    ax.set_xlim(0, 12); ax.set_ylim(0, 5.2); ax.axis("off")
-    ax.text(6, 5.0, "Reward the outcome.  Penalize the path.",
-            ha="center", fontsize=15, fontweight="bold", color=DARK)
+    fig, ax = plt.subplots(figsize=(12, 3.9))
+    ax.set_xlim(0, 12); ax.set_ylim(1.05, 4.95); ax.axis("off")
 
     # trajectory of actions
     xs = [1.4, 3.2, 5.0, 6.8, 8.6]
@@ -68,7 +66,6 @@ def fig_two_channel():
     arrow(ax, 5.0, 2.72, 5.0, 1.95, color=RED, lw=1.6)
     box(ax, 6.8, 1.55, 1.9, 0.72, r"$+\beta$  tested first", LGREEN, GREEN, fs=9, bold=True, tc=GREEN)
     arrow(ax, 6.8, 2.72, 6.8, 1.95, color=GREEN, lw=1.6)
-    box(ax, 2.9, 0.5, 3.5, 0.7, "Path channel: verifiable penalties  (teaches the outcome-neutral\nconstraints the outcome cannot see)", "white", DARK, fs=9, bold=True, tc=DARK)
 
     ax.text(4.7, 4.35, "verifier asymmetry:  a bad move is a one-line check;  progress is the whole problem",
             ha="center", fontsize=8.6, color=GRAY, style="italic")
