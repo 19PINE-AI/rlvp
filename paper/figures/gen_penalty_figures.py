@@ -182,9 +182,118 @@ def fig_potential_fragility():
     plt.close(fig)
 
 
+# ---------------------------------------------------------------- data helpers
+import json, glob, statistics as _st
+RESULTS = os.path.join(HERE, "..", "..", "results")
+
+
+def _final_eval(run_dir):
+    """Last train-log iter carrying an eval; returns fileops+csops-averaged metrics or None."""
+    log = os.path.join(run_dir, "train_log.jsonl")
+    if not os.path.exists(log):
+        return None
+    last = None
+    for ln in open(log):
+        try:
+            r = json.loads(ln)
+        except Exception:
+            continue
+        if isinstance(r, dict) and r.get("eval"):
+            last = r
+    if not last:
+        return None
+    e = last["eval"]
+    doms = [k for k in ("fileops", "csops") if k in e]
+    if not doms:
+        return None
+    m = lambda key: _st.mean(e[k][key] for k in doms)
+    return {"success": m("success"), "clean": m("clean"),
+            "viol": m("viol_per_episode"), "calls": m("calls_per_ep"),
+            "iter": last.get("iter")}
+
+
+def _arm_stats(arm):
+    """Mean+-std across all landed seeds for an arm; None if no seed has an eval yet."""
+    rows = [_final_eval(d) for d in sorted(glob.glob(os.path.join(RESULTS, f"run_rvp_{arm}_s*")))]
+    rows = [r for r in rows if r]
+    if not rows:
+        return None
+    out = {"n": len(rows)}
+    for key in ("success", "clean", "viol", "calls"):
+        vals = [r[key] for r in rows]
+        out[key] = (_st.mean(vals), _st.pstdev(vals) if len(vals) > 1 else 0.0)
+    return out
+
+
+# ---------------------------------------------------------------- Fig 3
+def fig_recipe_positive():
+    """recipe vs outcome: both keep success high; recipe drives clean ~0 -> ~1."""
+    outc, rec = _arm_stats("outcome"), _arm_stats("recipe")
+    if not (outc and rec):
+        print("fig_recipe_positive: SKIP (need outcome+recipe evals)"); return
+    fig, ax = plt.subplots(1, 2, figsize=(9.2, 3.4))
+    labels = ["Outcome-only", "Reward outcome,\npenalize path"]
+    cols = [GRAY, GREEN]
+    for a, metric, title, ylab in (
+            (ax[0], "success", "Task success", "success rate"),
+            (ax[1], "clean", "Violation-free episodes", "clean rate")):
+        means = [outc[metric][0], rec[metric][0]]
+        errs = [outc[metric][1], rec[metric][1]]
+        bars = a.bar(labels, means, yerr=errs, capsize=5, color=cols,
+                     edgecolor=DARK, linewidth=1.1, width=0.62, error_kw=dict(lw=1.2))
+        a.set_ylim(0, 1.08); a.set_ylabel(ylab); a.set_title(title, fontweight="bold")
+        a.spines[["top", "right"]].set_visible(False)
+        a.axhline(1.0, ls=":", lw=0.8, color=GRAY, zorder=0)
+        for b, mn in zip(bars, means):
+            a.text(b.get_x() + b.get_width() / 2, mn + 0.03, f"{mn:.2f}",
+                   ha="center", va="bottom", fontsize=10, fontweight="bold")
+    n = min(outc["n"], rec["n"])
+    fig.suptitle(f"Reward the outcome, penalize the path: task attained AND constraints kept "
+                 f"(n={n} seeds)", fontsize=11.5, fontweight="bold", y=1.02)
+    fig.tight_layout()
+    fig.savefig(os.path.join(HERE, "fig_recipe_positive.pdf"))
+    plt.close(fig)
+    print(f"fig_recipe_positive OK (outcome n={outc['n']} it={ '/'.join(str(_final_eval(d)['iter']) for d in sorted(glob.glob(os.path.join(RESULTS,'run_rvp_outcome_s*'))) if _final_eval(d)) }, "
+          f"recipe n={rec['n']}) succ {outc['success'][0]:.2f}->{rec['success'][0]:.2f} clean {outc['clean'][0]:.2f}->{rec['clean'][0]:.2f}")
+
+
+# ---------------------------------------------------------------- Fig 6
+def fig_penalty_ablation():
+    """Walk outcome -> penalty_only -> recipe; success + clean per arm."""
+    arms = [("outcome", "Outcome\nonly"), ("penonly", "+ penalty\n(no discharge/seed)"),
+            ("recipe", "Full recipe")]
+    stats = [(lbl, _arm_stats(a)) for a, lbl in arms]
+    stats = [(lbl, s) for lbl, s in stats if s]
+    if len(stats) < 2:
+        print("fig_penalty_ablation: SKIP (need >=2 arms)"); return
+    labels = [lbl for lbl, _ in stats]
+    x = np.arange(len(labels)); w = 0.36
+    fig, ax = plt.subplots(figsize=(8.4, 3.6))
+    succ = [s["success"][0] for _, s in stats]; succ_e = [s["success"][1] for _, s in stats]
+    clean = [s["clean"][0] for _, s in stats]; clean_e = [s["clean"][1] for _, s in stats]
+    ax.bar(x - w / 2, succ, w, yerr=succ_e, capsize=4, color=BLUE, edgecolor=DARK,
+           linewidth=1.0, label="task success", error_kw=dict(lw=1.1))
+    ax.bar(x + w / 2, clean, w, yerr=clean_e, capsize=4, color=GREEN, edgecolor=DARK,
+           linewidth=1.0, label="violation-free", error_kw=dict(lw=1.1))
+    ax.set_xticks(x); ax.set_xticklabels(labels)
+    ax.set_ylim(0, 1.12); ax.set_ylabel("rate"); ax.legend(frameon=False, ncol=2, loc="upper center")
+    ax.set_title("Each design element earns its place", fontweight="bold")
+    ax.spines[["top", "right"]].set_visible(False)
+    for xi, v in zip(x - w / 2, succ):
+        ax.text(xi, v + 0.02, f"{v:.2f}", ha="center", va="bottom", fontsize=8.5)
+    for xi, v in zip(x + w / 2, clean):
+        ax.text(xi, v + 0.02, f"{v:.2f}", ha="center", va="bottom", fontsize=8.5)
+    fig.tight_layout()
+    fig.savefig(os.path.join(HERE, "fig_penalty_ablation.pdf"))
+    plt.close(fig)
+    print("fig_penalty_ablation OK: " + " | ".join(f"{l}: succ {s['success'][0]:.2f} clean {s['clean'][0]:.2f} (n={s['n']})" for l, s in stats))
+
+
 if __name__ == "__main__":
     fig_two_channel(); print("fig_two_channel OK")
     fig_variance_vacuum(); print("fig_variance_vacuum OK")
     fig_penalty_design(); print("fig_penalty_design OK")
     fig_potential_fragility(); print("fig_potential_fragility OK")
+    fig_recipe_positive()
+    fig_penalty_ablation()
     print("ALL FIGURES DONE")
