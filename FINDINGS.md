@@ -635,3 +635,26 @@ phenomenon -- a potential helps exactly insofar as it supplies REACHABLE within-
 fully-stuck all-fail iters; saturated all-success groups) it is as blind as the outcome. This
 single quantity -- reachable within-group potential variance -- governs every regime, and it
 usually fails, which is why the headline benefits are narrow and often non-reproducible.
+
+## 23. Harm-bounding RE-VERIFIED at n=5 (the load-bearing positive HOLDS, even strengthened)
+
+TerminalBench, Qwen3-4B, RLVP (un-gameable harm penalty, credit=c3) vs outcome-only, extended
+from 3 to 5 seeds {7,11,12,13,14} (new: 13,14, full 40 iters, 4-concurrent Docker harness).
+Metric = mean of last-3 iters per run, aggregated mean+-std across seeds.
+
+  metric                       RLVP (harm penalty)    outcome-only
+  violations / episode         0.66 +- 0.63           3.71 +- 0.52      -> 5.66x FEWER
+  task success                 0.097 +- 0.060         0.122 +- 0.076    -> equal within 1 sigma (floor)
+  productive actions / ep      13.4 +- 2.0            4.2 +- 1.4        -> ~3.2x MORE
+
+Per-seed violations: RLVP [0.35,0.39,1.92,0.29,0.33] vs outcome [3.38,4.53,4.11,3.22,3.31] --
+NON-OVERLAPPING ranges (RLVP max 1.92 < outcome min 3.22). The new seeds 13/14 were the cleanest
+(10-11x each), pulling the mean reduction to ~5.7x (up from ~4x at n=3). Success is statistically
+equal (both at the ~0.1 floor; outcome marginally higher but within 1 sigma). The policy is NOT
+going passive: it takes ~3x MORE productive actions while violating ~6x less.
+
+VERDICT: harm-bounding is ROBUST at n=5 and is the paper's one bulletproof reachability-free
+positive -- an un-gameable penalty whose cheapest maximizer IS the desired behavior, so it needs
+no within-group reachability (its target is always reachable). This is the deployable use of a
+dense process reward; everything else (efficiency, dead-iter, all-success) is reachability-gated
+and narrow (secs 20-22).

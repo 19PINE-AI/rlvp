@@ -1,6 +1,6 @@
 \begin{table}[tbp]
 \centering
-\caption{\textbf{Harm reduction at equal outcome (TerminalBench, Qwen3-4B, 3 seeds, mean $\pm$ std).} Task success is identical and at the floor (4B rarely solves the benchmark), yet the un-gameable harm penalty cuts harmful actions roughly fourfold. The policy is not going passive: it takes about three times \emph{more} productive actions while violating less. Harm lives on an axis the terminal outcome cannot see.}
+\caption{\textbf{Harm reduction at equal outcome (TerminalBench, Qwen3-4B, 5 seeds, mean $\pm$ std).} Task success is statistically equal and at the floor (4B rarely solves the benchmark; the small RLVP--outcome gap is within one standard deviation), yet the un-gameable harm penalty cuts harmful actions roughly \emph{sixfold}. The policy is not going passive: it takes about three times \emph{more} productive actions while violating less. Harm lives on an axis the terminal outcome cannot see.}
 \label{tab:harm}
 \small
 \renewcommand{\arraystretch}{1.2}
@@ -8,9 +8,9 @@
 \toprule
 & \textbf{RLVP (harm penalty)} & \textbf{Outcome-only} \\
 \midrule
-Task success & $0.097 \pm 0.069$ & $0.097 \pm 0.063$ \;(equal, at floor) \\
-\textbf{Violations / episode} & $\mathbf{0.95 \pm 0.71}$ & $3.99 \pm 0.57$ \\
-Productive actions / episode & $\sim$\textbf{14} & $\sim$4 \\
+Task success & $0.097 \pm 0.060$ & $0.122 \pm 0.076$ \;(equal within $1\sigma$, at floor) \\
+\textbf{Violations / episode} & $\mathbf{0.66 \pm 0.63}$ & $3.71 \pm 0.52$ \\
+Productive actions / episode & $\sim$\textbf{13} & $\sim$4 \\
 \bottomrule
 \end{tabular}
 \end{table}

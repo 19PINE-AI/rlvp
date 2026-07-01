@@ -48,11 +48,13 @@ This is a *mechanism + honest-negative* paper, not a "here is a method that help
    Guide (dense accelerates but final perf depends on the estimator). Our instance is sharper:
    even the *sign* of the benefit is not reproducible. (FINDINGS 20.)
 
-4. **Harm-bounding is the one robust positive (reachability-free).** An un-gameable penalty cut
-   destructive actions ~4x at equal task success (Terminal, 4B, 3 seeds). It needs no reachability
-   because its target ("do not do the bad thing") is always reachable and the cheapest maximizer
-   *is* the desired behavior. CAVEAT / TODO: re-verify at n>=5 with the same rigor applied to the
-   others, since it is now the load-bearing positive.
+4. **Harm-bounding is the one robust positive (reachability-free) -- RE-VERIFIED at n=5.** An
+   un-gameable penalty cut destructive actions ~5.7x (violations 0.66+-0.63 vs 3.71+-0.52,
+   non-overlapping ranges) at statistically-equal task success (0.097 vs 0.122, within 1 sigma,
+   both at floor), while taking ~3x MORE productive actions (13.4 vs 4.2). TerminalBench, 4B,
+   5 seeds {7,11,12,13,14}. It needs no reachability because its target ("do not do the bad
+   thing") is always reachable and the cheapest maximizer *is* the desired behavior. This is the
+   paper's bulletproof, deployable positive (FINDINGS sec 23).
 
 5. **Reproducibility as a contribution.** The sign-flip under re-seeding (plus unseeded vLLM
    rollouts) is a clean, literature-aligned cautionary result for the agentic-process-reward
@@ -108,7 +110,8 @@ narrow the wins really are, with external literature support at every step.
   necessary-not-sufficient caveat).
 
 ## Open items for the user to decide
-1. Re-verify harm-bounding at n>=5 (now the load-bearing positive).
+1. ~~Re-verify harm-bounding at n>=5~~ DONE (2026-06-30, n=5): ROBUST, ~5.7x fewer violations at
+   equal success (FINDINGS sec 23; table_harm.tex updated to 5 seeds).
 2. Decide whether to keep the τ²/learned-critic/discovery-wall "no" sections or trim to the
    variance-vacuum spine.
 3. Optional: a clean within-success-variance synthetic task to *positively* demonstrate the
