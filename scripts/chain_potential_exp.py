@@ -32,7 +32,7 @@ OUT = sys.argv[4] if len(sys.argv) > 4 else f"chainpot_{GRAN}_n{NSTAGES}"
 SEED = int(sys.argv[5]) if len(sys.argv) > 5 else 7
 LR = float(sys.argv[6]) if len(sys.argv) > 6 else 1e-5
 OPT = sys.argv[7] if len(sys.argv) > 7 else "adamw"   # adamw | muon (bounded updates)
-MODEL = "Qwen/Qwen3-4B"
+MODEL = sys.argv[8] if len(sys.argv) > 8 else "Qwen/Qwen3-4B"
 G, TASKS_PER_ITER = 8, 4
 OUTD = ROOT / "results" / f"run_{OUT}"
 OUTD.mkdir(parents=True, exist_ok=True)
@@ -79,11 +79,22 @@ def main():
                      max_new_tokens=160, max_episode_tokens=cfg.max_episode_tokens)
         succ = sum(e.env.success for e in eps) / len(eps)
         disc = sum(len(e.env.discharges) for e in eps) / len(eps)
+        # dead-group fraction: a group whose scalar reward (outcome + beta*discharge -
+        # lam*viol) has ZERO within-group spread produces no GRPO gradient. This is the
+        # sample-efficiency mechanism: the fine potential keeps groups alive where the
+        # binary outcome is uniformly zero.
+        n_dead = 0
+        for grp in groups:
+            rw = [e.env.outcome_reward() + cfg.beta * len(e.env.discharges)
+                  - cfg.lam * len(e.env.violations) for e in grp]
+            if max(rw) - min(rw) < 1e-9:
+                n_dead += 1
+        dead_frac = round(n_dead / len(groups), 3)
         adv = build_advantages(groups, cfg)
         model.config.use_cache = False
         m = update_policy(model, tok, adv, cfg, opt, sched)
         rec = {"iter": it, "succ": round(succ, 3), "disch_per_ep": round(disc, 2),
-               "n_eps": len(eps), **{k: v for k, v in m.items()},
+               "dead_frac": dead_frac, "n_eps": len(eps), **{k: v for k, v in m.items()},
                "wall_s": round(time.time() - t0, 1)}
         log.write(json.dumps(rec) + "\n"); log.flush()
         print(json.dumps(rec), flush=True)
