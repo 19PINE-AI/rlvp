@@ -151,27 +151,23 @@ def fig_potential_fragility():
     axL.text(0.5, 0.03, "all rollouts pinned at zero", ha="center", va="bottom",
              fontsize=8.2, color=GRAY, style="italic")
 
-    # right: sign-flip of the "efficiency win" across identical-config runs
-    labels = ["run A", "run B\n(re-seeded)"]
-    aligned = [4, 25]      # iters-to-mastery (25 = did not master within budget)
-    outcome = [12, 4]
-    x = np.arange(2); w = 0.36
-    axR.bar(x - w / 2, aligned, w, color=BLUE, label="dense potential", alpha=0.9)
-    axR.bar(x + w / 2, outcome, w, color=DARK, label="outcome-only", alpha=0.9)
-    for xi, a, o in zip(x, aligned, outcome):
-        axR.text(xi - w / 2, a + 0.5, "master@4" if a == 4 else "no master",
-                 ha="center", fontsize=8, color=BLUE, fontweight="bold")
-        axR.text(xi + w / 2, o + 0.5, f"master@{o}", ha="center", fontsize=8,
-                 color=DARK, fontweight="bold")
-    axR.set_xticks(x); axR.set_xticklabels(labels)
-    axR.set_ylabel("iterations to mastery  (lower = faster)")
-    axR.set_title("The speed-up sign-flips under re-seeding", fontsize=11)
-    axR.set_ylim(0, 30)
-    axR.annotate("winner flips", xy=(1, 6), xytext=(0.35, 22), fontsize=9,
-                 color=RED, fontweight="bold",
-                 arrowprops=dict(arrowstyle="->", color=RED, lw=1.4))
-    axR.legend(frameon=False, fontsize=8.6, loc="upper left")
-    fig.suptitle("Dense potentials are reachability-gated and fragile", fontsize=12.5,
+    # right: where reachable, the potential removes dead all-fail updates (3 seeds, Lean)
+    out_dead = [16, 14, 18]     # dead iters / 40, outcome-only
+    pot_dead = [0, 0, 0]        # dense potential
+    labels = ["outcome-only", "dense\npotential"]
+    means = [np.mean(out_dead), np.mean(pot_dead)]
+    errs = [np.std(out_dead), np.std(pot_dead)]
+    bars = axR.bar(labels, means, yerr=errs, capsize=5, color=[DARK, GREEN],
+                   edgecolor="black", linewidth=1.0, width=0.6, error_kw=dict(lw=1.2))
+    for b, m, e in zip(bars, means, errs):
+        axR.text(b.get_x() + b.get_width() / 2, m + e + 0.7, f"{m:.0f}", ha="center",
+                 va="bottom", fontsize=11, fontweight="bold")
+    axR.set_ylabel("dead (all-fail) iterations / 40")
+    axR.set_title("Where reachable: dead updates eliminated", fontsize=11)
+    axR.set_ylim(0, 22); axR.spines[["top", "right"]].set_visible(False)
+    axR.text(0.5, 0.90, "3 seeds; every seed", transform=axR.transAxes, ha="center",
+             fontsize=8.5, color=GRAY, style="italic")
+    fig.suptitle("Dense potentials are reachability-gated", fontsize=12.5,
                  fontweight="bold", y=1.03)
     fig.savefig(os.path.join(HERE, "fig_potential_fragility.pdf"))
     plt.close(fig)
