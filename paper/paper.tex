@@ -54,7 +54,7 @@
 }
 \lstset{style=pythonstyle}
 
-\title{RLVP: Agentic Reinforcement Learning with Verifiable Penalties\\[2pt]
+\title{RLVP: Agentic RL with Verifiable Penalties\\[2pt]
 \large Penalize the Path, Reward the Outcome}
 
 \author{%
@@ -65,19 +65,17 @@
 }
 
 \date{}
-\runningtitle{When Do Dense Process Rewards Help Agentic RL? A Verifiable-Potential Criterion}
+\runningtitle{RLVP: Agentic RL with Verifiable Penalties}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Reinforcement learning from verifiable rewards (RLVR) trains language agents on the one signal an environment checks cheaply: whether the final task succeeded. The natural way to go denser is to reward the \emph{process}---to score partial progress at each step---and a large literature builds learned or hand-designed progress rewards to do so. We argue this reaches for the wrong signal. Agentic environments are asymmetric verifiers: they cheaply and reliably confirm that an agent did something \emph{bad} (ran a destructive command, called a tool before its precondition, broke a protocol), but not that it made genuine \emph{progress}. The dense reward practitioners want lies on the hard-to-verify side; the easy-to-verify side is a \emph{penalty}.
+Reinforcement learning from verifiable rewards (RLVR) trains agents on the one signal an environment checks cheaply: whether the task succeeded. The instinct to go denser is to reward the \emph{process}, but this reaches for the wrong signal. Agentic environments are asymmetric verifiers: they cheaply confirm an agent did something \emph{bad} (a destructive command, a call before its precondition) but not that it made \emph{progress}. The dense reward practitioners want is on the hard-to-verify side; the easy side is a \emph{penalty}.
 
-We make the consequence precise with a within-group-variance account of group-relative RL. A group-relative advantage is, by definition, a within-group variance, and it vanishes on both the all-failing groups that dominate early training and the all-succeeding groups that dominate late. A dense process signal helps only insofar as it supplies within-group variance the outcome lacks, and only where the policy actually reaches the intermediate values that carry it. A verifiable penalty on the path meets this by construction---bad behavior is easy to sample and to check, so its signal is always reachable and un-gameable. A dense progress potential does not: on hard tasks the policy rarely reaches partial success, so the potential's variance is absent and its advertised speed-ups do not survive re-seeding.
+We make this precise with a within-group-variance account. A group-relative advantage is, by definition, a within-group variance, and it vanishes on all-failing groups early in training and all-succeeding groups late. A dense signal helps only where it supplies the variance the outcome lacks, and only where the policy reaches the states that carry it. A verifiable penalty meets this by construction---bad behavior is easy to sample and check---while a dense potential does not, and its speed-ups do not survive re-seeding.
 
-This yields a simple recipe---\textbf{penalize the path, reward the outcome}---in which the outcome reward drives the task while a per-action verifiable penalty teaches the outcome-neutral constraints (do no harm, follow the protocol) that decide whether an agent is deployable. Across diverse tasks and model scales the recipe attains the task with near-zero violations where outcome-only training succeeds but violates on every episode, and on a real agentic benchmark it cuts harmful actions several-fold at \emph{equal} success while taking \emph{more} productive actions, not fewer.
-
-We give four practical rules for designing the penalty, each validated by ablation: penalize verifiable \emph{actions}, not lack of progress; keep the outcome reward as the task driver and never optimize a penalty alone (a lone penalty's cheapest maximizer is to stop acting---the \emph{inaction trap}); pair the penalty with a discharge that rewards the compliant action; and make the compliant behavior reachable and its target un-gameable. We then show the mirror image: dense progress potentials, the signal the field reaches for, are fragile exactly where the variance account predicts. The contribution is a practical, mechanistic account of \emph{when and how} to spend a verifier on process signal in agentic RL---on penalties that bound the path, not potentials that promise speed.
+This yields a simple recipe---\textbf{penalize the path, reward the outcome}---where the outcome reward drives the task while a per-action verifiable penalty teaches the outcome-neutral constraints that decide whether an agent is deployable. Across tasks and scales it attains the task with near-zero violations where outcome-only training violates every episode, and cuts harmful actions several-fold at \emph{equal} success on a real benchmark. We give four rules for the penalty---including that a lone penalty stalls in an \emph{inaction trap}---and show the mirror image: dense potentials are fragile where the account predicts.
 \end{abstract}
 \begin{center}
 \small
