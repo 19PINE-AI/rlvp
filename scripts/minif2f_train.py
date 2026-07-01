@@ -157,6 +157,8 @@ def main():
     import random
     rng = random.Random(SEED)
     ex = ThreadPoolExecutor(max_workers=G)
+    import math
+    collapse = explode = 0     # divergence guard (untested lr on smaller models)
     for it in range(1, ITERS + 1):
         t0 = time.time()
         # sync the current LoRA into vLLM (iter 1: zero-init LoRA == base model)
@@ -195,6 +197,14 @@ def main():
                "wall_s": round(time.time() - t0, 1)}
         log.write(json.dumps(rec) + "\n"); log.flush()
         print(json.dumps(rec), flush=True)
+        ent = float(m.get("entropy", 0.0) or 0.0); gn = float(m.get("grad_norm", 0.0) or 0.0)
+        collapse = collapse + 1 if ent < 1e-4 else 0
+        explode = explode + 1 if (gn > 50 or not math.isfinite(gn)) else 0
+        if collapse >= 3 or explode >= 2:
+            reason = "entropy_collapse" if collapse >= 3 else "grad_explosion"
+            log.write(json.dumps({"iter": it, "DIVERGED": True, "reason": reason}) + "\n"); log.flush()
+            print(f"DIVERGED at iter {it}: {reason} (aborting)", flush=True)
+            break
 
     ex.shutdown(wait=True)
     for r in _ALL_REPLS:
