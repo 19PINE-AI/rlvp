@@ -109,8 +109,8 @@ def fig_variance_vacuum():
 
 # ---------------------------------------------------------------- Fig 5
 def fig_penalty_design():
-    fig, ax = plt.subplots(figsize=(9.6, 5.0))
-    ax.set_xlim(0, 10); ax.set_ylim(0, 5.4); ax.axis("off")
+    fig, ax = plt.subplots(figsize=(9.6, 4.4))
+    ax.set_xlim(0, 10); ax.set_ylim(0.45, 5.4); ax.axis("off")
     ax.text(3.4, 5.15, "Designing a verifiable penalty", ha="center", fontsize=13.5,
             fontweight="bold", color=DARK)
     rules = [
@@ -128,8 +128,6 @@ def fig_penalty_design():
         ax.text(6.35, y, warn, ha="left", va="center", fontsize=8.4, color=RED, style="italic")
     for y0, y1 in [(4.25, 3.15), (3.15, 2.05), (2.05, 0.95)]:
         arrow(ax, 3.4, y0 - 0.43, 3.4, y1 + 0.43, color=BLUE, lw=1.6)
-    box(ax, 3.4, 0.02, 6.6, 0.56, "a penalty that bounds the path without stalling the task",
-        LGREEN, GREEN, fs=9.2, bold=True, tc=GREEN)
     fig.savefig(os.path.join(HERE, "fig_penalty_design.pdf"))
     plt.close(fig)
 
