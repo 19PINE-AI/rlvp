@@ -63,8 +63,22 @@ def main():
     sched = get_constant_schedule_with_warmup(opt, num_warmup_steps=cfg.warmup)
     print(f"granularity={GRAN} n_stages={NSTAGES} iters={ITERS} seed={SEED}", flush=True)
     log = open(OUTD / "train_log.jsonl", "a")
-    import random
+    import random, math
     rng = random.Random(SEED)
+    EVAL_EVERY, EVAL_K, EVAL_SEED0 = 5, 24, 900001   # fixed held-out task set (Fix B)
+
+    def held_out_eval():
+        """Success on a FIXED set of held-out task instances -> low-variance
+        efficiency curve (the per-iter training succ on 4 random tasks is too noisy)."""
+        model.config.use_cache = True
+        ev = [start_episode(tok, make_chain_potential_env(EVAL_SEED0 + i, NSTAGES, granularity=GRAN))
+              for i in range(EVAL_K)]
+        run_episodes(model, tok, ev, temperature=1.0, top_p=1.0, gen_batch=32,
+                     max_new_tokens=160, max_episode_tokens=cfg.max_episode_tokens)
+        model.config.use_cache = False
+        return round(sum(e.env.success for e in ev) / len(ev), 3)
+
+    collapse = explode = 0     # divergence counters (Fix A)
     for it in range(1, ITERS + 1):
         t0 = time.time()
         groups, eps = [], []
@@ -93,11 +107,25 @@ def main():
         adv = build_advantages(groups, cfg)
         model.config.use_cache = False
         m = update_policy(model, tok, adv, cfg, opt, sched)
+        ent = float(m.get("entropy", 0.0) or 0.0)
+        gnorm = float(m.get("grad_norm", 0.0) or 0.0)
         rec = {"iter": it, "succ": round(succ, 3), "disch_per_ep": round(disc, 2),
                "dead_frac": dead_frac, "n_eps": len(eps), **{k: v for k, v in m.items()},
                "wall_s": round(time.time() - t0, 1)}
+        if it == 1 or it % EVAL_EVERY == 0 or it == ITERS:
+            rec["eval_succ"] = held_out_eval()
+        # divergence guards: entropy->0 mode collapse, or grad explosion
+        collapse = collapse + 1 if ent < 1e-4 else 0
+        explode = explode + 1 if (gnorm > 50 or not math.isfinite(gnorm)) else 0
+        rec["collapse"], rec["explode"] = collapse, explode
         log.write(json.dumps(rec) + "\n"); log.flush()
         print(json.dumps(rec), flush=True)
+        if collapse >= 3 or explode >= 2:
+            reason = "entropy_collapse" if collapse >= 3 else "grad_explosion"
+            log.write(json.dumps({"iter": it, "DIVERGED": True, "reason": reason}) + "\n")
+            log.flush()
+            print(f"DIVERGED at iter {it}: {reason} (optimizer artifact, aborting)", flush=True)
+            break
     print("CHAINPOT DONE", flush=True)
 
 
