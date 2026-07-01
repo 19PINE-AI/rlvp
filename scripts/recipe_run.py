@@ -19,7 +19,12 @@ elif arm == "nomix":                    # rule 4 test: penalty+discharge, NO rea
     cfg = TrainConfig(credit="c3", lam=0.5, beta=0.5, mix_scripted=False,
                       script_scalar=False, anneal_at=40,
                       out_dir=f"results/run_rvp_nomix_s{seed}", **common)
-elif arm == "recipe":                   # full: penalty + discharge + mixing + anneal
+elif arm == "omission":                 # E3 rule-1 test: penalize STEPS (lack of progress),
+                                        # not a specific bad action -> should drive to inaction
+    cfg = TrainConfig(credit="c3", lam=0.0, beta=0.0, step_cost=0.15, mix_scripted=True,
+                      script_scalar=False, anneal_at=40,
+                      out_dir=f"results/run_rvp_omission_s{seed}", **common)
+elif arm == "recipe":                   # full: penalty + discharge + mixing + anneal (=commission)
     cfg = TrainConfig(credit="c3", lam=0.5, beta=0.5, mix_scripted=True,
                       script_scalar=False, anneal_at=40,
                       out_dir=f"results/run_rvp_recipe_s{seed}", **common)

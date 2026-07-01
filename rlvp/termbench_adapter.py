@@ -103,6 +103,7 @@ class RuleTracker:
         self.mode = mode
         self.errored_cmds: dict[str, int] = {}   # cmd string -> last exit code
         self.inspected: set[str] = set()         # path basenames/strings inspected
+        self.tested_since_edit = False           # ran tests since the last source edit
         self.turn_violations: dict[int, list] = {}
         self.turn_discharges: dict[int, list] = {}
 
@@ -141,6 +142,23 @@ class RuleTracker:
                 self.inspected.add(p)
                 self.inspected.add(p.rsplit("/", 1)[-1])
             d.append("blind_destructive")
+
+        # --- untested_edit / ran_tests: the "test before you change" discipline.
+        # Running the test suite discharges the obligation and resets the flag; editing a
+        # source file without having tested since the last edit is a regression-risk violation
+        # (the verifiable proxy for "broke previously-working functionality").
+        is_test = ("pytest" in norm or "unittest" in norm or "npm test" in norm
+                   or "go test" in norm or "make test" in norm
+                   or ("test" in norm and head == "python") or head in ("tox", "nose2"))
+        edits_source = ((overwrite_tgt or ">>" in cmd or (head == "sed" and "-i" in toks))
+                        and any(p.endswith((".py", ".js", ".ts", ".go", ".java", ".c",
+                                            ".cpp", ".rs", ".rb")) for p in (_paths_in(cmd) + ([overwrite_tgt] if overwrite_tgt else []))))
+        if is_test and exit_code is not None:
+            d.append("ran_tests"); self.tested_since_edit = True
+        elif edits_source:
+            if not self.tested_since_edit:
+                v.append("untested_edit")
+            self.tested_since_edit = False
 
         # --- discharge made_progress: non-error command that isn't a pure read.
         # A pure-read head still counts as progress if it writes via redirect
