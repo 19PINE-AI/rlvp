@@ -672,3 +672,16 @@ and narrow (secs 20-22).
   the raw sample-efficiency (speed-to-mastery) gain vs a STABLE outcome is MODEST and must be measured
   against the AdamW-outcome baseline (P0). Muon-outcome divergence is partly under-tuning (aggressive
   lr on sparse gradient); AdamW-outcome is the fair speed reference.
+
+## 24b. P0 matrix -- CLEAN matched result at 4B (Muon, 5 seeds each), fair comparison
+4B ALIGNED potential: thr 4.4+-0.5, final 1.0+-0.0, AUC 0.90+-0.03, diverged 0/5.
+4B OUTCOME-only:      thr 6.2+-1.2, final 0.8+-0.4, AUC 0.79+-0.15, diverged 1/5.
+- Aligned AUC > outcome AUC on 5/5 seeds. ~1.4x faster to threshold. Always reaches 1.0
+  (outcome mean 0.8: s12 diverged to 0). Never diverges (outcome 1/5 diverges even at 4B).
+- Outcome is MORE stable at 4B (1/5 div) than 30B (3/4 div) -> the 4B comparison is a fair
+  same-optimizer speed test, and aligned still wins modestly + is more reliable.
+- MODEL-SCALE GENERALITY: recipe holds at BOTH 4B (5/5 clean) and 30B (5/5 clean).
+HONEST VERDICT (pending 30B-AdamW-outcome + anneal): aligned verifiable potential gives a
+MODEST sample-efficiency gain (~1.4x to mastery) AND a stability/reliability edge over
+outcome-only, replicating across seeds and 4B/30B. NOT a dramatic speedup; a clean, robust,
+scoped positive (reachable-progress task, aligned potential, bounded optimizer).
