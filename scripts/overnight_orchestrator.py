@@ -20,8 +20,11 @@ from pathlib import Path
 
 ROOT = Path("/home/ubuntu/rlvp")
 ET_DIR = Path("/home/ubuntu/benchmarks/endless-terminals")
-NEED_MIB = 60000          # wait behind any 30B job (p0 AdamW ~55G, probe_tb30b ~45G)
-                          # so our 8B Docker-heavy runs never contend with them
+import os as _os
+# 30G by default so ET arms launch ALONGSIDE the SWE + WebArena tracks (each ~21-27G;
+# 3-way peak ~78G < 96G). Was 60G (to serialize behind 30B p0 jobs), but p0 is long done
+# and 60G now starves ET because SWE+WA occupy the card. Override via ORCH_NEED_MIB.
+NEED_MIB = int(_os.environ.get("ORCH_NEED_MIB", "30000"))
 PROBE_JSON = ET_DIR / "results" / "capability_Qwen3-8B.json"
 LOG = open("/tmp/rlvp_overnight.log", "a")
 
