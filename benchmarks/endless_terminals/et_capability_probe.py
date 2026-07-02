@@ -121,8 +121,14 @@ def rollout(task_dir, gen, tok, max_steps, temperature):
     viol_destructive = viol_repeat = n_cmds = 0
     try:
         for _step in range(max_steps):
-            ids = tok.apply_chat_template(msgs, add_generation_prompt=True,
-                                          tokenize=True)
+            # Qwen3 defaults to thinking mode, which burns the token budget before
+            # the Action: line -> disable it to match the training path (rollout.TEMPLATE).
+            try:
+                ids = tok.apply_chat_template(msgs, add_generation_prompt=True,
+                                              tokenize=True, enable_thinking=False)
+            except TypeError:
+                ids = tok.apply_chat_template(msgs, add_generation_prompt=True,
+                                              tokenize=True)
             out_ids = gen(ids)
             reply = tok.decode(out_ids, skip_special_tokens=True)
             msgs.append({"role": "assistant", "content": reply})
