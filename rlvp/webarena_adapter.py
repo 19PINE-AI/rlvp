@@ -130,12 +130,50 @@ class WebArenaRuleTracker:
 # --------------------------------------------------------------------------
 
 
+import threading as _threading
+_PW_TLS = _threading.local()
+_PW_PATCHED = False
+
+
+def _install_threadlocal_playwright():
+    """BrowserGym caches ONE global sync_playwright (module singleton), whose
+    greenlet is bound to the creating thread -> concurrent ThreadPoolExecutor
+    rollouts crash with 'greenlet: cannot switch to a different thread'. Replace
+    the global getter with a THREAD-LOCAL one so each worker thread owns its own
+    Playwright instance (created and used only in that thread). Called once."""
+    global _PW_PATCHED
+    if _PW_PATCHED:
+        return
+    import sys
+    import playwright.sync_api as _pw
+    import browsergym.stwebagentbench  # noqa: F401  (ensure forks are imported)
+
+    def _get():
+        pw = getattr(_PW_TLS, "pw", None)
+        if pw is None:
+            pw = _pw.sync_playwright().start()
+            _PW_TLS.pw = pw
+        return pw
+
+    # Patch EVERY module that imported the global getter -- including the
+    # ST-WebAgentBench fork (stwebagentbench.browser_env.custom_env), which has
+    # its own reference. Missing one leaves a shared-global path -> greenlet /
+    # asyncio-loop conflicts across threads.
+    n = 0
+    for _name, _mod in list(sys.modules.items()):
+        if _mod is not None and getattr(_mod, "_get_global_playwright", None) is not None:
+            _mod._get_global_playwright = _get
+            n += 1
+    _PW_PATCHED = True
+
+
 def make_env(task_id, headless=True, timeout_ms=15000):
     """Create a BrowserGym ST-WebAgentBench env. `task_id` is an int or the full
     gym id 'browsergym/STWebAgentBenchEnv.<n>'. Lazy-imports browsergym."""
     import gymnasium as gym
     import browsergym.stwebagentbench  # noqa: F401  (registers the envs)
     from browsergym.core.action.highlevel import HighLevelActionSet
+    _install_threadlocal_playwright()
 
     def _answer(message):
         """Call when the task is complete (optionally reporting the answer).
@@ -162,14 +200,9 @@ def run_webarena_episode(task_id, gen, tok, rule_mode="structural", max_steps=15
     = ST-WebAgentBench policy violations (info['safety_report'])."""
     from .rollout import TEMPLATE, Episode, _ids  # lazy (torch)
     from .termbench_adapter import ShimEnv         # lazy (torch)
-    # Playwright's sync API needs an event loop in the CURRENT thread; worker
-    # threads (ThreadPoolExecutor) have none by default -> "no running event
-    # loop". Give this thread its own loop before creating the browser env.
-    import asyncio
-    try:
-        asyncio.get_event_loop()
-    except RuntimeError:
-        asyncio.set_event_loop(asyncio.new_event_loop())
+    # Concurrency is handled by _install_threadlocal_playwright() (each thread
+    # owns its Playwright). Do NOT set an asyncio loop here -- Playwright's sync
+    # API refuses to run if the thread has an event loop.
     env = make_env(task_id, headless=headless)
     tracker = WebArenaRuleTracker(mode=rule_mode)
     calls = []

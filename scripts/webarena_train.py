@@ -91,22 +91,23 @@ def main():
         t0 = time.time()
         batch = rng.sample(TASK_IDS, min(TASKS_PER_ITER, len(TASK_IDS)))
         groups = []
-        # NOTE: episodes run SEQUENTIALLY. Playwright's sync API is thread-affine
-        # ("greenlet: cannot switch to a different thread"), so ThreadPoolExecutor
-        # rollouts (as in endless/swesmith) do NOT work here. Concurrency would
-        # require an async-Playwright rewrite or a subprocess rollout layer. This
-        # is correct but slow -- WebArena training is deferred pending that work.
-        for tid in batch:
-            grp = []
-            for _ in range(G):
-                try:
-                    grp.append(run_webarena_episode(tid, gen_srv.generate, tok,
-                                                    "structural", MAX_STEPS, True, False))
-                except Exception as exc:
-                    print(f"episode error (task {tid}):", str(exc)[:120], flush=True)
-            grp = [e for e in grp if e is not None]
-            if len(grp) >= 2:
-                groups.append(grp)
+        # Concurrent browser rollouts: works because the adapter makes BrowserGym's
+        # Playwright singleton THREAD-LOCAL (each worker thread owns its instance).
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=G) as ex:
+            futs = {tid: [ex.submit(run_webarena_episode, tid, gen_srv.generate, tok,
+                                    "structural", MAX_STEPS, True, False)
+                          for _ in range(G)] for tid in batch}
+            for tid, fs in futs.items():
+                grp = []
+                for f in fs:
+                    try:
+                        grp.append(f.result())
+                    except Exception as exc:
+                        print(f"episode error (task {tid}):", str(exc)[:120], flush=True)
+                grp = [e for e in grp if e is not None]
+                if len(grp) >= 2:
+                    groups.append(grp)
         eps = [e for g in groups for e in g]
         if not eps:
             print("no episodes this iter", flush=True); continue
