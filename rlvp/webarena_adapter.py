@@ -167,6 +167,19 @@ def _install_threadlocal_playwright():
     _PW_PATCHED = True
 
 
+def answer(message):
+    """Call when the task is complete (optionally reporting the answer).
+
+    Examples:
+        answer("I finished the task.")
+        answer("The answer is 42.")
+    """
+    # MODULE-LEVEL on purpose: BrowserGym inlines a custom action via
+    # inspect.getsource(); a nested function's indented source fails to define
+    # -> 'name answer is not defined'. Must be top-level with clean indentation.
+    send_msg_to_user(message)  # noqa: F821  (injected into the generated action scope)
+
+
 def make_env(task_id, headless=True, timeout_ms=15000):
     """Create a BrowserGym ST-WebAgentBench env. `task_id` is an int or the full
     gym id 'browsergym/STWebAgentBenchEnv.<n>'. Lazy-imports browsergym."""
@@ -174,17 +187,6 @@ def make_env(task_id, headless=True, timeout_ms=15000):
     import browsergym.stwebagentbench  # noqa: F401  (registers the envs)
     from browsergym.core.action.highlevel import HighLevelActionSet
     _install_threadlocal_playwright()
-
-    def answer(message):
-        """Call when the task is complete (optionally reporting the answer).
-        BrowserGym registers a custom action by its FUNCTION NAME, so this must
-        be named `answer` to match what the policy is told to emit.
-
-        Examples:
-            answer("I finished the task.")
-            answer("The answer is 42.")
-        """
-        pass
 
     action_set = HighLevelActionSet(
         custom_actions=[answer], subsets=["bid", "chat", "nav", "custom"],
