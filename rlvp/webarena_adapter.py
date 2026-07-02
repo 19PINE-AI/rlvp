@@ -175,8 +175,10 @@ def make_env(task_id, headless=True, timeout_ms=15000):
     from browsergym.core.action.highlevel import HighLevelActionSet
     _install_threadlocal_playwright()
 
-    def _answer(message):
+    def answer(message):
         """Call when the task is complete (optionally reporting the answer).
+        BrowserGym registers a custom action by its FUNCTION NAME, so this must
+        be named `answer` to match what the policy is told to emit.
 
         Examples:
             answer("I finished the task.")
@@ -185,7 +187,7 @@ def make_env(task_id, headless=True, timeout_ms=15000):
         pass
 
     action_set = HighLevelActionSet(
-        custom_actions=[_answer], subsets=["bid", "chat", "nav", "custom"],
+        custom_actions=[answer], subsets=["bid", "chat", "nav", "custom"],
         strict=False, multiaction=False, demo_mode="off")
     gym_id = (task_id if isinstance(task_id, str)
               else f"browsergym/STWebAgentBenchEnv.{task_id}")
