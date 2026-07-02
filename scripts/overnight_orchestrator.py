@@ -20,7 +20,8 @@ from pathlib import Path
 
 ROOT = Path("/home/ubuntu/rlvp")
 ET_DIR = Path("/home/ubuntu/benchmarks/endless-terminals")
-NEED_MIB = 40000          # 8B LoRA train + vLLM headroom
+NEED_MIB = 60000          # wait behind any 30B job (p0 AdamW ~55G, probe_tb30b ~45G)
+                          # so our 8B Docker-heavy runs never contend with them
 PROBE_JSON = ET_DIR / "results" / "capability_Qwen3-8B.json"
 LOG = open("/tmp/rlvp_overnight.log", "a")
 
