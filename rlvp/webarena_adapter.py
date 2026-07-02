@@ -162,6 +162,14 @@ def run_webarena_episode(task_id, gen, tok, rule_mode="structural", max_steps=15
     = ST-WebAgentBench policy violations (info['safety_report'])."""
     from .rollout import TEMPLATE, Episode, _ids  # lazy (torch)
     from .termbench_adapter import ShimEnv         # lazy (torch)
+    # Playwright's sync API needs an event loop in the CURRENT thread; worker
+    # threads (ThreadPoolExecutor) have none by default -> "no running event
+    # loop". Give this thread its own loop before creating the browser env.
+    import asyncio
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
     env = make_env(task_id, headless=headless)
     tracker = WebArenaRuleTracker(mode=rule_mode)
     calls = []
