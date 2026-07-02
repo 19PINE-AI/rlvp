@@ -25,9 +25,11 @@ from __future__ import annotations
 
 import re
 
-from .rollout import TEMPLATE, Episode, _ids
-from .tau2_adapter import GenServer  # noqa: F401  (re-exported for trainers)
-from .termbench_adapter import ShimEnv  # noqa: F401  (reused verbatim)
+# NOTE: rollout/tau2_adapter/termbench_adapter import torch. They are imported
+# LAZILY inside run_webarena_episode so that make_env / extract_action /
+# _flatten_axtree / WebArenaRuleTracker are usable in a torch-free browsergym
+# venv (e.g. for benchmarks/webarena/validate_env.py). Trainers import GenServer
+# from rlvp.tau2_adapter directly.
 
 OBS_TRUNC = 4000          # AXTree text can be large; bound episode tokens
 MAX_EPISODE_TOKENS = 6144
@@ -136,7 +138,12 @@ def make_env(task_id, headless=True, timeout_ms=15000):
     from browsergym.core.action.highlevel import HighLevelActionSet
 
     def _answer(message):
-        """Call when the task is complete (optionally with the answer)."""
+        """Call when the task is complete (optionally reporting the answer).
+
+        Examples:
+            answer("I finished the task.")
+            answer("The answer is 42.")
+        """
         pass
 
     action_set = HighLevelActionSet(
@@ -153,6 +160,8 @@ def run_webarena_episode(task_id, gen, tok, rule_mode="structural", max_steps=15
     """Drive one ST-WebAgentBench task as an RL episode; return a trainer-ready
     Episode (with .env = ShimEnv). Outcome reward = task oracle; penalty channel
     = ST-WebAgentBench policy violations (info['safety_report'])."""
+    from .rollout import TEMPLATE, Episode, _ids  # lazy (torch)
+    from .termbench_adapter import ShimEnv         # lazy (torch)
     env = make_env(task_id, headless=headless)
     tracker = WebArenaRuleTracker(mode=rule_mode)
     calls = []

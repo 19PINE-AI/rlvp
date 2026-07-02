@@ -38,7 +38,8 @@ from transformers import (AutoModelForCausalLM, AutoTokenizer,
 
 from rlvp.grpo import TrainConfig, build_advantages, update_policy
 from rlvp.rollout import set_template
-from rlvp.webarena_adapter import GenServer, run_webarena_episode
+from rlvp.tau2_adapter import GenServer
+from rlvp.webarena_adapter import run_webarena_episode
 
 ITERS = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 20
 CREDIT, OUT_NAME, SEED, MODEL = "c3", "run_webarena", 7, "Qwen/Qwen3-8B"

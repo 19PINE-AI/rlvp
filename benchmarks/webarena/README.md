@@ -6,14 +6,17 @@ Working tree: `/home/ubuntu/benchmarks/webarena/{webarena,BrowserGym,ST-WebAgent
   reward = task oracle; penalty channel = ST-WebAgentBench per-step
   `info['safety_report']` (9 non-LLM policy evaluators). browsergym is LAZILY
   imported so the module is safe to import without Playwright/gymnasium.
-  OFFLINE-VALIDATED against the real env source (step signature, safety_report,
-  AXTree, HighLevelActionSet, extract_action). Live env loop NOT yet exercised.
+  LIVE-VALIDATED end-to-end (2026-07-02): logged into Magento admin, reset()
+  returned the AXTree, step() returned reward + 10-policy safety_report, benign
+  actions -> no violations + made_progress discharges. shopping_admin booted.
 - `scripts/webarena_train.py` — trainer (mirror of endless_train). Needs
   `--task-ids`.
 - `benchmarks/webarena/validate_env.py` — turnkey LIVE smoke test (no GPU): run
   after booting a site + installing browsergym, asserts reset/step/safety_report.
 
-## Status: GATED OFF in the overnight orchestrator (Phase D not enabled)
+## Status: env LIVE-VALIDATED; training gated on a combined torch+browsergym env
+Validation venv (browsergym+playwright, no torch): /home/ubuntu/benchmarks/webarena/wa_venv
+Working env vars: source benchmarks/webarena/env.sh. shopping_admin (7780) booted+configured.
 Bringing up the full RL loop is a deliberate, non-trivial step and was NOT
 auto-run overnight (would risk the concurrently-running training jobs and needs
 a ~45-min GitLab bringup). To enable:
