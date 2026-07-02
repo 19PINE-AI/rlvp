@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path("/home/ubuntu/rlvp")
 VENV_PY = "/home/ubuntu/benchmarks/webarena/wa_venv/bin/python"
-NEED_MIB = 60000
+NEED_MIB = 30000 if os.environ.get("WA_PARALLEL") else 60000  # parallel: sit beside ET+SWE
 LOG = open("/tmp/webarena_orch.log", "a")
 
 # Site env vars confirmed working in the live validation (see benchmarks/webarena/env.sh).
@@ -68,8 +68,11 @@ def main():
     if not Path("/tmp/webarena_ready").exists():
         log("no /tmp/webarena_ready (combined env unverified) -> exit")
         return
-    log("waiting for main overnight run to finish (rlvp_overnight.alldone) ...")
-    wait(lambda: Path("/tmp/rlvp_overnight.alldone").exists())
+    if os.environ.get("WA_PARALLEL"):
+        log("WA_PARALLEL set -> running in parallel with the ET/SWE tracks")
+    else:
+        log("waiting for main overnight run to finish (rlvp_overnight.alldone) ...")
+        wait(lambda: Path("/tmp/rlvp_overnight.alldone").exists())
     env = {**os.environ, **SITE_ENV}
     task_ids = select_task_ids()
     if not task_ids:
