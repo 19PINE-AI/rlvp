@@ -109,12 +109,31 @@ def main():
         succ = sum(e.env.success for e in eps) / len(eps)
         viol = sum(len(e.env.violations) for e in eps) / len(eps)
         disch = sum(len(e.env.discharges) for e in eps) / len(eps)
+        # partial-progress Phi (fraction of F2P passing) -- the trajectory-quality
+        # signal that matters in the all-fail regime (succ==0 for both arms).
+        phi = sum(getattr(e.env, "phi", 0.0) for e in eps) / len(eps)
+        # per-rule-type breakdown: are bad-practice violations falling and
+        # productive actions rising? (the "process reward improves the trajectory
+        # even without outcome success" argument).
+        from collections import Counter
+        vc, dc = Counter(), Counter()
+        steps = 0
+        for e in eps:
+            for _, r in e.env.violations:
+                vc[r] += 1
+            for _, r in e.env.discharges:
+                dc[r] += 1
+            steps += len(e.env.calls)
+        n = len(eps)
+        brk = {f"v_{k}": round(v / n, 2) for k, v in vc.items()}
+        brk.update({f"d_{k}": round(v / n, 2) for k, v in dc.items()})
         adv = build_advantages(groups, cfg)
         model.config.use_cache = False
         m = update_policy(model, tok, adv, cfg, opt, sched)
         model.config.use_cache = True
-        rec = {"iter": it, "succ": succ, "reward": succ, "viol_per_ep": viol,
-               "disch_per_ep": disch, "n_eps": len(eps), **m,
+        rec = {"iter": it, "succ": succ, "reward": succ, "phi": round(phi, 3),
+               "viol_per_ep": viol, "disch_per_ep": disch,
+               "steps_per_ep": round(steps / n, 1), "n_eps": n, **brk, **m,
                "wall_s": round(time.time() - t0, 1)}
         log.write(json.dumps(rec) + "\n"); log.flush()
         print(json.dumps(rec), flush=True)

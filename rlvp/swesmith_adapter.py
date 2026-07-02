@@ -141,22 +141,42 @@ class SweSmithContainer:
     def exec(self, cmd: str, timeout=120):
         return self._x(cmd, timeout=timeout)
 
-    def score(self) -> float:
-        # restore the removed F2P test files from HEAD~1 without touching the
-        # agent's source edits, then run F2P (+ sampled P2P) via the login shell.
+    @staticmethod
+    def _counts(out):
+        f = sum(int(m) for m in re.findall(r"(\d+) failed", out))
+        e = sum(int(m) for m in re.findall(r"(\d+) error", out))
+        p = sum(int(m) for m in re.findall(r"(\d+) passed", out))
+        return p, f, e
+
+    def score(self):
+        """Return (reward, phi). reward = all F2P pass AND P2P not regressed.
+        phi = FRACTION of FAIL_TO_PASS tests passing -- a partial-progress signal
+        that is meaningful even when reward is 0 (the all-fail regime): it tracks
+        how close the agent got to a fix. Run F2P and P2P separately so phi is
+        F2P-specific."""
+        # restore removed F2P test files from HEAD~1 (preserve the agent's edits)
         for f in self.test_files:
             self._x(f"git checkout HEAD~1 -- {shlex.quote(f)}")
-        p2p = self.p2p
-        if len(p2p) > P2P_SAMPLE:
-            p2p = random.Random(0).sample(p2p, P2P_SAMPLE)
-        nodes = " ".join(shlex.quote(n) for n in (self.f2p + p2p))
-        out, _, _ = self._x(f"python -m pytest -p no:cacheprovider -q {nodes}", timeout=600)
-        # resolved iff no failures/errors reported by pytest
-        n_fail = sum(int(m) for m in re.findall(r"(\d+) failed", out))
-        n_err = sum(int(m) for m in re.findall(r"(\d+) error", out))
-        n_pass = sum(int(m) for m in re.findall(r"(\d+) passed", out))
-        self._log("[oracle]", out.splitlines()[-1] if out.strip() else "(no output)")
-        return 1.0 if (n_fail == 0 and n_err == 0 and n_pass > 0) else 0.0
+        f2p_nodes = " ".join(shlex.quote(n) for n in self.f2p)
+        out_f, _, _ = self._x(f"python -m pytest -p no:cacheprovider -q {f2p_nodes}", timeout=600)
+        pf, ff, ef = self._counts(out_f)
+        n_f2p = max(len(self.f2p), 1)
+        phi = pf / n_f2p
+        f2p_ok = (ff == 0 and ef == 0 and pf > 0)
+        # P2P regression guard (sampled) only matters if F2P already all-pass
+        p2p_ok = True
+        if f2p_ok:
+            p2p = self.p2p
+            if len(p2p) > P2P_SAMPLE:
+                p2p = random.Random(0).sample(p2p, P2P_SAMPLE)
+            if p2p:
+                out_p, _, _ = self._x(
+                    f"python -m pytest -p no:cacheprovider -q "
+                    + " ".join(shlex.quote(n) for n in p2p), timeout=600)
+                _, fp, ep = self._counts(out_p)
+                p2p_ok = (fp == 0 and ep == 0)
+        self._log(f"[oracle] F2P {pf}/{n_f2p} pass (phi={phi:.2f}) reward={int(f2p_ok and p2p_ok)}")
+        return (1.0 if (f2p_ok and p2p_ok) else 0.0), phi
 
     def close(self):
         if self.started:
@@ -202,6 +222,7 @@ def run_swesmith_episode(instance, gen, tok, rule_mode="structural", max_steps=2
     ctr = SweSmithContainer(instance, verbose=verbose)
     calls = []
     reward = 0.0
+    phi = 0.0
     try:
         ctr.start()
         first_obs = "Repo checked out at /testbed. Investigate and fix the bug. Begin."
@@ -239,11 +260,12 @@ def run_swesmith_episode(instance, gen, tok, rule_mode="structural", max_steps=2
             if len(episode.ids) > MAX_EPISODE_TOKENS - 220:
                 break
             episode.ids.extend(_ids(tok, TEMPLATE.cont(_obs(stdout, stderr, code))))
-        reward = ctr.score()
+        reward, phi = ctr.score()
     finally:
         ctr.close()
     episode.turn_violations = tracker.turn_violations
     episode.turn_discharges = tracker.turn_discharges
     episode.env = ShimEnv(reward, tracker, calls)
+    episode.env.phi = phi   # partial-progress: fraction of F2P tests passing
     episode.done = True
     return episode
