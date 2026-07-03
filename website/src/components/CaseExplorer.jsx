@@ -52,12 +52,12 @@ function CaseDetail({ c }) {
 
       <div className="note" style={{ marginTop: 16 }}>
         {c.violations.length > 0 ? (
-          <>Outcome-only training is blind to these violations — the reward only checks whether the
-          task was solved. The verifiable penalty channel fires <b>−λ</b> at the flagged step, teaching
-          the agent to avoid it while an outcome reward keeps it solving the task.</>
+          <>Result-only training is blind to these violations — it only checks whether the task was
+          solved. Grading the path puts a <b>penalty</b> on the flagged step, teaching the agent to
+          avoid it while it is still pushed to solve the task.</>
         ) : (
-          <>A clean trajectory: the required preconditions were met before acting. This is the behavior
-          the penalty channel makes reliable.</>
+          <>A clean run: the agent did the required checks before acting. This is the behavior that
+          grading the path makes reliable.</>
         )}
       </div>
     </div>
@@ -76,8 +76,8 @@ export default function CaseExplorer() {
         <div className="eyebrow">Interactive</div>
         <h2>Navigate the real evaluation cases</h2>
         <p className="section-lead">
-          These are actual rollouts from the evaluation dumps — the agent's real actions, the tool
-          results it saw, and the exact turns where a deterministic rule was broken.
+          These are actual runs from the evaluation — the agent's real actions, the tool results it
+          saw, and the exact steps where a rule was broken.
         </p>
 
         <div className="tabs" style={{ margin: '22px 0' }}>

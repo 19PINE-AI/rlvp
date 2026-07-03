@@ -34,19 +34,19 @@ function Constraints() {
     <div>
       <Setting items={[
         ['Domain', 'Sysadmin + customer-service tasks'],
-        ['Held-out tasks', '30 per domain, k=8, temp 0.7'],
-        ['Policy', 'Qwen3-4B · 5 seeds'],
-        ['Baseline', 'Outcome-only GRPO (rules in prompt)'],
-        ['Ours', 'Reward outcome + penalize path'],
-        ['Metric', 'clean rate = violation-free episodes'],
+        ['Held-out tasks', '30 per domain, 8 tries each'],
+        ['Model', 'Qwen3-4B · 5 training seeds'],
+        ['Baseline', 'Result-only training (rules in the prompt)'],
+        ['Ours', 'Reward the result + grade the path'],
+        ['Metric', 'violation-free rate = episodes that broke no rule'],
       ]} />
       <div className="cmp">
         <div className="col base">
-          <div style={{ marginBottom: 10 }}><span className="tag base">BASELINE · outcome-only</span></div>
+          <div style={{ marginBottom: 10 }}><span className="tag base">RESULT-ONLY · baseline</span></div>
           {rows.map(([name, d]) => (
             <div key={name} style={{ marginBottom: 14 }}>
               <div className="metric-line" style={{ borderBottom: 'none', paddingBottom: 2 }}>
-                <span>{name} · clean rate</span><span className="v r">{Math.round(d.baseline.clean * 100)}%</span>
+                <span>{name} · violation-free</span><span className="v r">{Math.round(d.baseline.clean * 100)}%</span>
               </div>
               <Bar pct={d.baseline.clean * 100} color="var(--gray)" />
               <div className="kicker">{d.baseline.violPer100} violations / 100 calls
@@ -56,11 +56,11 @@ function Constraints() {
           ))}
         </div>
         <div className="col ours">
-          <div style={{ marginBottom: 10 }}><span className="tag ours">OURS · penalize the path</span></div>
+          <div style={{ marginBottom: 10 }}><span className="tag ours">GRADE THE PATH · ours</span></div>
           {rows.map(([name, d]) => (
             <div key={name} style={{ marginBottom: 14 }}>
               <div className="metric-line" style={{ borderBottom: 'none', paddingBottom: 2 }}>
-                <span>{name} · clean rate</span><span className="v g">{Math.round(d.ours.clean * 100)}%</span>
+                <span>{name} · violation-free</span><span className="v g">{Math.round(d.ours.clean * 100)}%</span>
               </div>
               <Bar pct={d.ours.clean * 100} color="var(--green)" />
               <div className="kicker">{d.ours.violPer100} violations / 100 calls · task success held at {Math.round(d.ours.pass * 100)}%</div>
@@ -69,8 +69,8 @@ function Constraints() {
         </div>
       </div>
       <p className="kicker" style={{ marginTop: 16 }}>
-        The penalty drives violation-free episodes from near-baseline to ~100% at no cost to task
-        success — a deployability constraint outcome-only GRPO never reaches at any budget.
+        Grading the path drives violation-free episodes to ~100% with no drop in task success —
+        something result-only training never reaches, no matter how long it trains.
       </p>
     </div>
   )
@@ -82,11 +82,11 @@ function Harm() {
     <div>
       <Setting items={[
         ['Benchmark', 'TerminalBench (real shell containers)'],
-        ['Policy', 'Qwen3-4B · 5 seeds'],
-        ['Signal', 'penalty on destructive actions'],
-        ['Task success', 'at the floor (isolates the harm axis)'],
-        ['Baseline', 'Outcome-only GRPO'],
-        ['Metric', 'destructive actions per episode'],
+        ['Model', 'Qwen3-4B · 5 training seeds'],
+        ['Signal', 'penalty on destructive commands'],
+        ['Task success', 'at the floor (isolates the harm question)'],
+        ['Baseline', 'Result-only training'],
+        ['Metric', 'destructive commands per episode'],
       ]} />
       <div className="grid three">
         <div className="stat card">
@@ -130,22 +130,22 @@ function Lean() {
     <div>
       <Setting items={[
         ['Task', 'miniF2F algebra theorem proving'],
-        ['Scales', '4B and 30B (Qwen3-30B-A3B)'],
-        ['Seeds', '5 per arm'],
-        ['Ours', 'aligned potential (falling goal count)'],
-        ['Metric', 'iterations to 0.9 success · divergences'],
+        ['Model sizes', '4B and 30B'],
+        ['Seeds', '5 training runs per method'],
+        ['Ours', 'progress reward toward the proof'],
+        ['Metric', 'training rounds to master the task · failed runs'],
         ['Optimizers', 'Muon (fast) / AdamW (stable)'],
       ]} />
       <div className="card" style={{ padding: 6, overflowX: 'auto' }}>
         <table className="tbl">
           <thead><tr>
-            <th>scale</th><th>arm</th><th>iters → 0.9</th><th>AUC</th><th>final</th><th>diverged</th>
+            <th>size</th><th>method</th><th>rounds to master</th><th>learning curve (AUC)</th><th>final success</th><th>failed runs</th>
           </tr></thead>
           <tbody>
             {M.lean.map((r, i) => (
               <tr key={i} className={r.ours ? 'ours' : ''}>
                 <td>{r.scale}</td>
-                <td>{r.arm}{r.ours && ' ✓'}</td>
+                <td>{r.arm.replace('aligned potential', 'progress reward').replace('outcome-only', 'result-only')}{r.ours && ' ✓'}</td>
                 <td className="num">{r.iters} ± {r.std}</td>
                 <td className="num">{r.auc.toFixed(2)}</td>
                 <td className="num">{r.final.toFixed(2)}</td>
@@ -155,15 +155,18 @@ function Lean() {
           </tbody>
         </table>
       </div>
-      <div className="grid three" style={{ marginTop: 18 }}>
-        <div className="stat card"><div className="num r">{dd.outcome}%</div><div className="lbl">dead updates · outcome-only</div></div>
-        <div className="stat card"><div className="num" style={{ color: 'var(--gray)' }}>{dd.dapo}%</div><div className="lbl">dead updates · DAPO <span className="kicker">(5.6× sampling)</span></div></div>
-        <div className="stat card" style={{ background: '#f2fbf5', border: '1px solid #bfe6cd' }}><div className="num g">{dd.potential}%</div><div className="lbl">dead updates · aligned potential</div></div>
+      <div style={{ marginTop: 20, fontWeight: 700 }}>Wasted training rounds
+        <span className="kicker" style={{ fontWeight: 500 }}> — rounds where every attempt failed, so nothing was learned</span>
+      </div>
+      <div className="grid three" style={{ marginTop: 10 }}>
+        <div className="stat card"><div className="num r">{dd.outcome}%</div><div className="lbl">result-only training</div></div>
+        <div className="stat card"><div className="num" style={{ color: 'var(--gray)' }}>{dd.dapo}%</div><div className="lbl">DAPO <span className="kicker">(at 5.6× the sampling cost)</span></div></div>
+        <div className="stat card" style={{ background: '#f2fbf5', border: '1px solid #bfe6cd' }}><div className="num g">{dd.potential}%</div><div className="lbl">progress reward (ours)</div></div>
       </div>
       <p className="kicker" style={{ marginTop: 16 }}>
-        The aligned potential is the only arm simultaneously fast and reliable at both scales:
-        ~1.4–1.6× faster to mastery under a matched optimizer, and 0/5 divergences where outcome-only
-        loses 1–3 seeds.
+        The progress reward is the only method that is both fast and reliable at both sizes:
+        ~1.4–1.6× faster to master the task, and 0 of 5 runs failed — where result-only training
+        loses 1–3 runs to instability.
       </p>
     </div>
   )
@@ -177,7 +180,7 @@ const SUBSECTIONS = [
     'A real shell benchmark — the harm penalty cuts destructive actions roughly sixfold at equal task success.',
     Harm],
   ['results-lean', 'Sample efficiency (Lean)',
-    'miniF2F theorem proving — the aligned potential reaches mastery faster and never diverges.',
+    'miniF2F theorem proving — the progress reward masters the task faster and never destabilizes.',
     Lean],
 ]
 
@@ -204,8 +207,8 @@ export default function Results() {
         <h2>Main results — baseline vs. ours</h2>
         <p className="section-lead">
           Three experiments, all shown below. Every number is from the paper's real result dumps —
-          each subsection gives the evaluation setting and how outcome-only training compares to the
-          two-channel recipe.
+          each one gives the setup and how the usual result-only training compares to grading the
+          path.
         </p>
         {SUBSECTIONS.map(([id, title, blurb, Body], idx) => (
           <div key={id} id={id} style={{ marginTop: idx === 0 ? 40 : 56, scrollMarginTop: 72 }}>

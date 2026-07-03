@@ -1,26 +1,27 @@
 import React, { useState } from 'react'
 
-// Four rollouts of ONE bug-fix task; all fail the hidden test (outcome = 0 each).
-// With the path channel ON, they score differently -> within-group variance -> gradient.
+// Four attempts at ONE bug-fix task; all fail the hidden test (result = 0 each).
+// With step-grading ON, they score differently -> the group can still learn.
 const ROLLOUTS = [
-  { desc: 'read files, run the tests', path: +2.0, chip: '+β ran tests', kind: 'dis' },
-  { desc: 'edit, then rm -rf build/', path: -2.0, chip: '−λ destructive', kind: 'pen' },
-  { desc: 'localize the bug + edit the fix', path: +1.0, chip: '+β progress', kind: 'dis' },
-  { desc: 'overwrite the failing test', path: -1.5, chip: '−λ edited test', kind: 'pen' },
+  { desc: 'read the files, then run the tests', path: +2.0, chip: '✓ ran the tests', kind: 'dis' },
+  { desc: 'edit, then delete the build folder', path: -2.0, chip: '✕ destructive command', kind: 'pen' },
+  { desc: 'find the bug and edit the fix', path: +1.0, chip: '✓ real progress', kind: 'dis' },
+  { desc: 'overwrite the failing test', path: -1.5, chip: '✕ gamed the test', kind: 'pen' },
 ]
 
 export default function GroupRollout() {
   const [on, setOn] = useState(true)
   const mean = ROLLOUTS.reduce((s, r) => s + r.path, 0) / ROLLOUTS.length
-  const SC = 34 // px per unit advantage
+  const SC = 34 // px per unit of score difference
+  const sansChip = { fontFamily: 'var(--sans)' }
   return (
     <div>
       <div className="toggle-row">
         <label className="switch" onClick={() => setOn(v => !v)}>
           <span className={`track ${on ? 'on' : ''}`}><span className="knob" /></span>
-          Verifiable path channel {on ? 'ON' : 'OFF'}
+          Grade each step of the path: {on ? 'ON' : 'OFF'}
         </label>
-        <span className="kicker">Outcome is <strong>0</strong> for all four rollouts (the hidden test fails).</span>
+        <span className="kicker">All four attempts fail the hidden test — the result is a <strong>0</strong> for every one.</span>
       </div>
 
       <div className="rollout">
@@ -31,13 +32,13 @@ export default function GroupRollout() {
           return (
             <React.Fragment key={i}>
               <div className="desc">
-                <div><span className="path">$ </span>{r.desc}</div>
+                <div><span className="path">attempt {i + 1}: </span>{r.desc}</div>
                 <div style={{ marginTop: 4 }}>
-                  <span className="tag base">outcome 0</span>{' '}
-                  {on && <span className={`chip ${r.kind}`}>{r.chip}</span>}
+                  <span className="tag base">failed</span>{' '}
+                  {on && <span className={`chip ${r.kind}`} style={sansChip}>{r.chip}</span>}
                 </div>
               </div>
-              <div className="barwrap" title={`advantage = ${adv.toFixed(2)}`}>
+              <div className="barwrap" title={`score vs. group average = ${adv.toFixed(2)}`}>
                 <div className="zero" />
                 <div
                   className="bar"
@@ -54,25 +55,23 @@ export default function GroupRollout() {
         })}
       </div>
 
-      <div style={{ marginTop: 18, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ marginTop: 18 }}>
         <div className="legend">
-          <span className="sw"><span className="dot" style={{ background: 'var(--green)' }} />positive advantage</span>
-          <span className="sw"><span className="dot" style={{ background: 'var(--red)' }} />negative advantage</span>
-          <span className="sw"><span className="dot" style={{ background: 'var(--gray)' }} />zero (no gradient)</span>
+          <span className="sw"><span className="dot" style={{ background: 'var(--green)' }} />helps — a good move</span>
+          <span className="sw"><span className="dot" style={{ background: 'var(--red)' }} />hurts — a bad move</span>
+          <span className="sw"><span className="dot" style={{ background: 'var(--gray)' }} />no signal</span>
         </div>
       </div>
 
       <div className="note" style={{ marginTop: 18 }}>
         {on ? (
-          <><b>Path scores differ → within-group variance → gradient at 0% task success.</b> The
-          advantage is each rollout's path score minus the group mean, so the group learns to
-          repeat what earned <span style={{ color: 'var(--green)', fontWeight: 700 }}>+β</span> and
-          avoid what earned <span style={{ color: 'var(--red)', fontWeight: 700 }}>−λ</span> — even
-          though none of them solved the task.</>
+          <><b>Good moves score higher, bad moves lower — so the group still improves,</b> even though
+          none of the four solved the task. The agent learns to repeat what helped (running the tests,
+          making progress) and avoid what hurt (destructive commands, gaming the test). The bars show
+          each attempt's step-score minus the group average.</>
         ) : (
-          <><b>All-fail group → every advantage is 0 → dead update.</b> With only the outcome reward,
-          all four rewards equal the group mean, so GRPO produces no gradient and the expensive
-          rollouts are wasted.</>
+          <><b>With only a success-or-fail score, all four are tied at 0.</b> No differences means no
+          signal — the four expensive attempts teach the agent nothing, and the update is wasted.</>
         )}
       </div>
     </div>

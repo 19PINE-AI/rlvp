@@ -1,5 +1,6 @@
 import React from 'react'
 import data from './data/paperData.json'
+import HeroScene from './components/HeroScene.jsx'
 import GroupRollout from './components/GroupRollout.jsx'
 import PenaltyFlow from './components/PenaltyFlow.jsx'
 import PotentialFlow from './components/PotentialFlow.jsx'
@@ -30,20 +31,28 @@ function Nav() {
 function Hero() {
   return (
     <header className="hero" id="top">
-      <div className="wrap">
-        <div className="eyebrow">Reinforcement Learning from Verifiable Penalties</div>
-        <h1>Penalize the Path,<br />Reward the Outcome</h1>
-        <div className="authors">{data.meta.authors.join('  ·  ')}</div>
-        <p className="thesis">{data.meta.tagline}</p>
-        <div className="pill-row">
-          <span className="pill green">−λ&nbsp; penalty on a verified bad move</span>
-          <span className="pill green">+β&nbsp; credit for verified progress</span>
-          <span className="pill blue">one channel, two uses</span>
+      <div className="wrap hero-grid">
+        <div>
+          <div className="eyebrow">Teaching real-world AI agents to act well</div>
+          <h1>Penalize the Path,<br />Reward the Outcome</h1>
+          <div className="authors">{data.meta.authors.join('  ·  ')}</div>
+          <p className="thesis">
+            An AI agent that places phone calls or resolves support tickets can't just get the final
+            result right — it has to behave correctly at <em>every step</em>. RLVP grades the{' '}
+            <strong>path</strong> the agent takes, not only the outcome, so it learns faster and stays
+            safe to deploy.
+          </p>
+          <div className="pill-row">
+            <span className="pill green">Grade every step, not just the result</span>
+            <span className="pill blue">Learns faster — even from failed tries</span>
+            <span className="pill green">Safer to deploy — respects the rules</span>
+          </div>
+          <div className="pill-row">
+            <a className="btn primary" href="#mechanism">See how it works</a>
+            <a className="btn" href="#cases">Explore real evaluation cases</a>
+          </div>
         </div>
-        <div className="pill-row">
-          <a className="btn primary" href="#mechanism">See how it works</a>
-          <a className="btn" href="#cases">Explore real evaluation cases</a>
-        </div>
+        <HeroScene />
       </div>
     </header>
   )
@@ -54,12 +63,16 @@ function MechanismIntro() {
     <section className="section" id="mechanism">
       <div className="wrap">
         <div className="eyebrow">The core idea</div>
-        <h2>Why a per-action path signal creates gradient the outcome cannot</h2>
+        <h2>How the agent learns — even when every try fails</h2>
         <p className="section-lead">
-          Group-relative RL (GRPO) turns a group of rollouts into gradient only through their
-          reward <em>variance</em>. When every rollout in a group fails, that variance is zero and the
-          update is dead. A verifiable signal attached to each <em>action</em> restores it. Toggle the
-          channel below to see the effect.
+          Today's method trains an agent from one number: did it succeed? When several attempts at a
+          task <em>all</em> fail, they all score the same — zero — so nothing is learned from them.
+          Grading each <em>step</em> breaks the tie: some failed attempts still did good things,
+          others did bad things. Flip the switch to see the effect.
+        </p>
+        <p className="kicker" style={{ maxWidth: 660, marginTop: -4 }}>
+          <em>For RL readers:</em> a group-relative advantage is a within-group reward variance, which
+          is zero on an all-fail group; a per-action signal restores it.
         </p>
         <div className="card" style={{ padding: 26, marginTop: 26 }}>
           <GroupRollout />
@@ -78,13 +91,14 @@ function App() {
 
       <section className="section" id="penalty">
         <div className="wrap">
-          <div className="eyebrow">Use #1 · Deployability</div>
+          <div className="eyebrow">Use #1 · Behaving safely</div>
           <h2>Penalize the path</h2>
           <p className="section-lead">
-            A deterministic rule engine checks every action. A <strong>violation</strong> attaches a
-            penalty <span style={{ color: 'var(--red)', fontWeight: 700 }}>−λ</span>; performing the
-            required precondition attaches a discharge <span style={{ color: 'var(--green)', fontWeight: 700 }}>+β</span>.
-            The penalty teaches outcome-neutral constraints the reward is blind to.
+            A simple rule-checker watches every action. Break a rule — call too soon, act without
+            authorization — and that step gets a{' '}
+            <strong style={{ color: 'var(--red)' }}>penalty</strong>; do the required thing first and
+            it gets a <strong style={{ color: 'var(--green)' }}>reward</strong>. This teaches the
+            do's and don'ts that a plain success-or-fail score can't see.
           </p>
           <div className="card" style={{ padding: 26, marginTop: 24 }}>
             <PenaltyFlow />
@@ -94,13 +108,14 @@ function App() {
 
       <section className="section" id="potential">
         <div className="wrap">
-          <div className="eyebrow">Use #2 · Sample efficiency</div>
-          <h2>Reward verified progress</h2>
+          <div className="eyebrow">Use #2 · Learning faster</div>
+          <h2>Reward real progress</h2>
           <p className="section-lead">
-            The <em>same</em> +β credit, paid for verifiable progress instead of compliance, becomes a
-            dense <strong>potential</strong>. On a real miniF2F proof the kernel verifies each tactic and
-            the remaining obligations fall — every drop pays +β, densifying a reward the outcome leaves
-            silent until the very end.
+            The same idea has a second use. Instead of only flagging bad steps, give a small{' '}
+            <strong style={{ color: 'var(--green)' }}>reward each time the agent gets closer</strong>{' '}
+            to the goal. On a real math-proof task, every verified step toward the finish earns a
+            little reward — so the agent gets useful feedback long before it ever completes a proof,
+            and learns from far fewer tries.
           </p>
           <div className="card" style={{ padding: 26, marginTop: 24 }}>
             <PotentialFlow />
