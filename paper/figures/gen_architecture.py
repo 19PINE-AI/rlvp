@@ -50,12 +50,12 @@ def draw_panel(ax, rlvp):
             fc, ec = LGREEN, GREEN
         else:
             fc, ec = LBLUE, BLUE
-        box(ax, x, 4.55, 2.05, 1.15, t, fc, ec, fs=12)
+        box(ax, x, 4.55, 2.1, 1.15, t, fc, ec, fs=11)
     ax.text(0.4, 4.55, "start", ha="center", va="center", fontsize=11, color=GRAY, style="italic")
     arrow(ax, 0.85, 4.55, XS[0]-1.05, 4.55, color=GRAY, lw=1.5)
     for i in range(len(XS)-1):
         arrow(ax, XS[i]+1.05, 4.55, XS[i+1]-1.05, 4.55, color=GRAY, lw=1.5)
-    box(ax, 9.9, 4.55, 1.75, 1.15, "dispute\nresolved ✓", LGREEN, GREEN, fs=12, bold=True)
+    box(ax, 9.9, 4.55, 2.15, 1.15, "dispute\nresolved ✓", LGREEN, GREEN, fs=10.5, bold=True)
     arrow(ax, XS[-1]+1.05, 4.55, 9.9-0.9, 4.55, color=GRAY, lw=1.5)
 
     # outcome channel (both)
@@ -69,9 +69,9 @@ def draw_panel(ax, rlvp):
         ax.text(4.5, 1.9, "the path is invisible to the reward:\nover-calling and acting without"
                 " authentication\nare never penalized", ha="center", fontsize=12, color=GRAY, style="italic")
     else:
-        box(ax, XS[VIOL], 2.45, 1.75, 1.05, "$-\\lambda$\nover-call", LRED, RED, fs=12.5, bold=True, tc=RED)
+        box(ax, XS[VIOL], 2.45, 2.05, 1.05, "$-\\lambda$\nover-call", LRED, RED, fs=11, bold=True, tc=RED)
         arrow(ax, XS[VIOL], 3.95, XS[VIOL], 3.0, color=RED, lw=2.0)
-        box(ax, XS[DISC], 2.45, 1.9, 1.05, "$+\\beta$\nprecond. met", LGREEN, GREEN, fs=12.5, bold=True, tc=GREEN)
+        box(ax, XS[DISC], 2.45, 2.25, 1.05, "$+\\beta$\nprecond. met", LGREEN, GREEN, fs=11, bold=True, tc=GREEN)
         arrow(ax, XS[DISC], 3.95, XS[DISC], 3.0, color=GREEN, lw=2.0)
         box(ax, 5.5, 1.0, 4.7, 1.1, "verifiable rule engine\n(per-action, deterministic)",
             LGRAY, DARK, fs=11.5, bold=True, tc=DARK)

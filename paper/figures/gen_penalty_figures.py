@@ -119,17 +119,17 @@ def fig_penalty_design():
             fontweight="bold", color=DARK)
     rules = [
         ("1.  Penalize a verifiable ACTION,\n     not lack of progress",
-         "penalizing omission rewards doing nothing", 4.25),
+         r"e.g.  $-\lambda$ for 'rm -rf build/',"  "\n"  "not for 'no progress this turn'", 4.25),
         ("2.  Keep the outcome reward as the driver;\n     never optimize a penalty alone",
-         "a lone penalty stalls: the inaction trap", 3.15),
+         r"e.g.  keep the 'ticket resolved' reward;"  "\n"  r"$-\lambda$ over-call alone just stalls", 3.15),
         ("3.  Pair the penalty with a DISCHARGE\n     (reward the compliant action)",
-         "pull toward doing it right, not just away", 2.05),
+         r"e.g.  $+\beta$ when it authenticates"  "\n"  "before placing the call", 2.05),
         ("4.  Make the compliant path reachable\n     and its target un-gameable",
-         "seed a demo; avoid a learned proxy", 0.95),
+         "e.g.  seed one 'read the access-"  "\n"  "control file first' demonstration", 0.95),
     ]
-    for txt, warn, y in rules:
+    for txt, example, y in rules:
         box(ax, 3.4, y, 5.3, 0.86, txt, LBLUE, BLUE, fs=10.2, bold=True, tc=DARK)
-        ax.text(6.35, y, warn, ha="left", va="center", fontsize=8.4, color=RED, style="italic")
+        ax.text(6.4, y, example, ha="left", va="center", fontsize=9.0, color=DARK)
     for y0, y1 in [(4.25, 3.15), (3.15, 2.05), (2.05, 0.95)]:
         arrow(ax, 3.4, y0 - 0.43, 3.4, y1 + 0.43, color=BLUE, lw=1.6)
     fig.savefig(os.path.join(HERE, "fig_penalty_design.pdf"))
