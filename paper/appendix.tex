@@ -106,6 +106,22 @@ Sample efficiency is speed to a ceiling the chained tasks eventually reach. To a
 \label{fig:gated}
 \end{figure}
 
+\subsection{Learning where the outcome is dead: real bug-fixing at zero success}
+\label{app:deadcoding}
+
+The variance account predicts that when a group is all-failing---outcome variance zero, outcome gradient dead---a process signal is the \emph{only} thing that can move the policy. We check this directly on real software repair, where an 8B agent is far below the task's reach. We train on SWE-smith~\citep{swesmith} instances (a repo container, a hidden \texttt{FAIL\_TO\_PASS} test as the oracle), with the agent issuing bash commands to find and fix the bug; the process channel is the coding-discipline signal of \S\ref{sec:path} (a discharge for running tests and making a verifiable edit, a penalty for re-running a failed command or editing without testing). At this scale the agent solves essentially \emph{zero} instances under either signal, so outcome-only RL trains on an all-fail distribution throughout---the cleanest possible test of the dead-gradient regime.
+
+The result is a sharp dissociation (Figure~\ref{fig:swetraj}, two seeds). Outcome-only leaves the trajectory \emph{flat}: productive actions per episode sit at $\approx\!1.5$ from the first iteration to the last, essentially identical across seeds ($1.5$ and $1.5$)---the dead gradient changes nothing. The process reward instead drives a steadily \emph{rising} trajectory: productive actions climb over training to $6.5$ and $11.4$ (final-3, the two seeds) and test-runs to $7.6$ and $12.9$, a four-to-tenfold increase, while the penalized behaviors fall (repeat-errors and untested edits toward zero). The agent learns to investigate, test, and edit like a disciplined engineer---from a signal available on every failed episode---exactly where the outcome reward is inert.
+
+Two honest caveats scope the claim. First, the discharge \emph{rewards} test-running and productive edits, so part of their rise is by construction; the non-circular evidence is that the \emph{penalized} behaviors (which the discharge does not touch) also fall, and that the outcome baseline is perfectly flat---the effect is the process gradient, not the task. Second, this improved discipline did \emph{not} convert to task success in our budget (both arms remain at zero): 8B is simply too weak to close these bugs. The claim is therefore mechanistic and behavioral---the process channel produces learning, and better verifiable engineering discipline, precisely in the all-fail regime where outcome-only RL has no gradient at all---and a plausible precursor to success at capability, not a demonstration of success itself.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_swesmith_traj.pdf}
+\caption{\textbf{The process reward learns where the outcome is dead (SWE-smith, 8B, $\approx$0\% solve).} \emph{(a)} Productive actions per episode over training, two seeds: outcome-only is flat (the all-fail gradient is dead), while the process reward rises steadily. \emph{(b)} Final-3 trajectory quality (mean of two seeds): productive edits and test-runs increase several-fold under the process reward, while penalized behaviors (repeat-errors, untested edits) fall. Task success is zero for both arms throughout---this is a behavioral/mechanistic result, not a success result.}
+\label{fig:swetraj}
+\end{figure}
+
 
 \section{Boundaries: When the Penalized Target Is Not Verifiable}
 \label{app:boundaries}
