@@ -41,7 +41,7 @@ ax.text(6.5, 6.35, "miniF2F  mathd_algebra_109:   "
         r"$(3a+2b=12),\ (a=4)\ \vdash\ b=0$",
         ha="center", fontsize=13.5, fontweight="bold", color=DARK)
 
-# proof states (goals remaining) + tactics between them
+# proof states (obligations remaining) + tactics between them
 XS = [1.55, 5.0, 8.45, 11.5]
 STATES = ["3a+2b=12\na=4\n⊢ b=0", "12+2b=12\n⊢ b=0", "2b=0\n⊢ b=0", "∎  proved"]
 GOALS = [3, 2, 1, 0]                         # remaining obligations (the potential Phi)
@@ -52,7 +52,7 @@ for i, (x, s, g) in enumerate(zip(XS, STATES, GOALS)):
     box(ax, x, YS, 2.35 if not last else 1.9, 1.25,
         s, LGREEN if last else LBLUE, GREEN if last else BLUE,
         fs=11.5, bold=last, tc=(GREEN if last else DARK), mono=not last)
-    ax.text(x, YS - 1.02, f"goals remaining: {g}", ha="center", fontsize=10.5,
+    ax.text(x, YS - 1.02, f"obligations remaining: {g}", ha="center", fontsize=10.0,
             color=(GREEN if g == 0 else GRAY), fontweight="bold" if g == 0 else "normal")
 
 # tactic arrows + dense +beta discharge for each verified goal-count drop
@@ -74,7 +74,7 @@ arrow(ax, 12.0, YS + 1.67, 11.6, YS + 0.68, color=GREEN, lw=1.6)
 
 # bottom takeaway (plain text; matplotlib does not render LaTeX macros)
 ax.text(6.5, 1.55, "Outcome is sparse — it pays once, at ∎.  The aligned potential is dense: "
-        "every kernel-verified drop in goals pays $+\\beta$.", ha="center", fontsize=11.5,
+        "every kernel-verified drop in obligations pays $+\\beta$.", ha="center", fontsize=11.5,
         color=DARK)
 ax.text(6.5, 1.05, "So failing early rollouts that get further score higher — within-group "
         "variance, hence gradient, where the outcome gives none.", ha="center",

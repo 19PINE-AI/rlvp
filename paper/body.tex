@@ -117,7 +117,7 @@ Together these rules describe a narrow but reliable regime. The penalty is verif
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_potential_illustration.pdf}
-\caption{\textbf{The aligned potential in action, on a real \textsc{miniF2F} theorem.} On \texttt{mathd\_algebra\_109}, the Lean kernel verifies each tactic and the proof's remaining goals fall $3\!\to\!2\!\to\!1\!\to\!0$. The outcome reward is \emph{sparse}: it pays a single $+1$ only when the proof closes ($\blacksquare$). The aligned potential is \emph{dense}: every kernel-verified drop in goals pays a $+\beta$ discharge (and an errored tactic in another rollout pays $-\lambda$). On the all-fail groups early in training---where no rollout closes the proof---rollouts that get \emph{further} score higher, so the potential supplies the within-group variance, hence the gradient, that the outcome cannot.}
+\caption{\textbf{The aligned potential in action, on a real \textsc{miniF2F} theorem.} On \texttt{mathd\_algebra\_109}, the Lean kernel verifies each tactic and the proof's remaining obligations fall $3\!\to\!2\!\to\!1\!\to\!0$. The outcome reward is \emph{sparse}: it pays a single $+1$ only when the proof closes ($\blacksquare$). The aligned potential is \emph{dense}: every kernel-verified drop in obligations pays a $+\beta$ discharge (and an errored tactic in another rollout pays $-\lambda$). On the all-fail groups early in training---where no rollout closes the proof---rollouts that get \emph{further} score higher, so the potential supplies the within-group variance, hence the gradient, that the outcome cannot.}
 \label{fig:potillus}
 \end{figure}
 
