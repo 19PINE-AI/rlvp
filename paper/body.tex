@@ -52,7 +52,7 @@ On an all-fail (or all-success) group the first term is zero, so \emph{all} usab
 \end{figure}
 
 
-\section{Penalizing the Path: Robust Harm Reduction with Verifiable Penalties}
+\section{Penalizing the Path: Verifiable Constraints for Deployable Agents}
 \label{sec:path}
 
 \paragraph{Two channels.} We keep the outcome reward and add a second, per-action channel (Figure~\ref{fig:twochannel}). At each step, a deterministic rule engine---a pure predicate over the state before the step and the action taken---checks the action. A \emph{violation} (a destructive command, a call issued before its required precondition) attaches a penalty $-\lambda$ to that action's tokens; a \emph{discharge} of a pending obligation (performing the precondition) attaches a credit $+\beta$. The two channels are normalized separately, so the sparse path signal is not diluted or cancelled by the outcome channel, then combined. ``Penalize the path'' is therefore literal: the gradient lowers the probability of the specific offending action, in the specific context where it occurred, while the outcome channel scales whole trajectories by success. We call such a signal a \emph{verifiable penalty}: a deterministic predicate over the pre-action state and the action, checkable the moment it fires and independent of the eventual outcome. Crucially, the rules we penalize are \emph{outcome-neutral}---following or breaking them does not change whether the task is solved---so this is signal the outcome reward can never provide. The full recipe pairs the penalty with its discharge, seeds a handful of scripted-compliant demonstrations so the compliant action is reachable, and anneals the shaping off once compliance saturates; \S\ref{sec:design} shows each of these earns its place.
