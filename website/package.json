@@ -1,0 +1,20 @@
+{
+  "name": "rlvp-website",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Illustrative website for the paper RLVP: Penalize the Path, Reward the Outcome",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0"
+  }
+}
