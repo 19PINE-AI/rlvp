@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import data from '../data/paperData.json'
 
 const M = data.metrics
@@ -169,30 +169,50 @@ function Lean() {
   )
 }
 
-const TABS = [
-  ['constraints', 'Deployable constraints', Constraints],
-  ['harm', 'TerminalBench harm', Harm],
-  ['lean', 'Sample efficiency (Lean)', Lean],
+const SUBSECTIONS = [
+  ['results-constraints', 'Deployable constraints',
+    'Sysadmin + customer-service tasks — the penalty drives violation-free episodes to ~100% at no cost to task success.',
+    Constraints],
+  ['results-harm', 'TerminalBench harm',
+    'A real shell benchmark — the harm penalty cuts destructive actions roughly sixfold at equal task success.',
+    Harm],
+  ['results-lean', 'Sample efficiency (Lean)',
+    'miniF2F theorem proving — the aligned potential reaches mastery faster and never diverges.',
+    Lean],
 ]
 
+function SubHead({ i, title, blurb }) {
+  return (
+    <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', marginBottom: 16 }}>
+      <span style={{
+        flex: 'none', width: 34, height: 34, borderRadius: 9, background: 'var(--ink)', color: '#fff',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15,
+      }}>{i}</span>
+      <div>
+        <h3 style={{ margin: 0, fontSize: 24 }}>{title}</h3>
+        <p style={{ margin: '4px 0 0', color: 'var(--ink-soft)' }}>{blurb}</p>
+      </div>
+    </div>
+  )
+}
+
 export default function Results() {
-  const [tab, setTab] = useState('constraints')
-  const Active = TABS.find(t => t[0] === tab)[2]
   return (
     <section className="section" id="results" style={{ background: 'var(--bg-soft)' }}>
       <div className="wrap">
         <div className="eyebrow">Experiments</div>
         <h2>Main results — baseline vs. ours</h2>
         <p className="section-lead">
-          Every number below is from the paper's real result dumps. Switch experiments to see the
-          setting and how outcome-only training compares to the two-channel recipe.
+          Three experiments, all shown below. Every number is from the paper's real result dumps —
+          each subsection gives the evaluation setting and how outcome-only training compares to the
+          two-channel recipe.
         </p>
-        <div className="tabs" style={{ marginTop: 24 }}>
-          {TABS.map(([id, label]) => (
-            <button key={id} className={`tab ${tab === id ? 'active' : ''}`} onClick={() => setTab(id)}>{label}</button>
-          ))}
-        </div>
-        <Active />
+        {SUBSECTIONS.map(([id, title, blurb, Body], idx) => (
+          <div key={id} id={id} style={{ marginTop: idx === 0 ? 40 : 56, scrollMarginTop: 72 }}>
+            <SubHead i={idx + 1} title={title} blurb={blurb} />
+            <Body />
+          </div>
+        ))}
       </div>
     </section>
   )
