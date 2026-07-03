@@ -75,7 +75,7 @@ def fig_two_channel():
 
 # ---------------------------------------------------------------- Fig 2
 def fig_variance_vacuum():
-    fig, ax = plt.subplots(figsize=(8.4, 4.5))
+    fig, ax = plt.subplots(figsize=(7.4, 4.5))
     p = np.linspace(0, 1, 400)
     out = 4 * p * (1 - p)                       # within-group variance of the binary outcome (norm to 1)
     pen = 0.72 + 0.06 * np.sin(6 * p)           # penalty variance: high & roughly flat everywhere
@@ -83,26 +83,30 @@ def fig_variance_vacuum():
 
     ax.axvspan(0, 0.14, color=RED, alpha=0.10)
     ax.axvspan(0.86, 1.0, color=RED, alpha=0.10)
-    ax.plot(p, out, color=DARK, lw=2.6, label="outcome (binary)")
-    ax.plot(p, pen, color=BLUE, lw=2.6, label="verifiable penalty")
-    ax.plot(p, pot, color=PURPLE, lw=2.4, ls="--", label="dense progress potential")
+    ax.plot(p, out, color=DARK, lw=3.0, label="outcome")
+    ax.plot(p, pen, color=BLUE, lw=3.0, label="verifiable penalty")
+    ax.plot(p, pot, color=PURPLE, lw=2.8, ls="--", label="progress potential")
 
-    ax.text(0.07, 0.9, "all-fail\ngroups\n(early)", ha="center", va="top", fontsize=8.5,
+    ax.text(0.07, 0.94, "all-fail\ngroups\n(early)", ha="center", va="top", fontsize=12,
             color=RED, fontweight="bold")
-    ax.text(0.93, 0.9, "all-success\ngroups\n(late)", ha="center", va="top", fontsize=8.5,
+    ax.text(0.93, 0.94, "all-success\ngroups\n(late)", ha="center", va="top", fontsize=12,
             color=RED, fontweight="bold")
-    ax.annotate("outcome blind\n(zero variance)", xy=(0.02, 0.04), xytext=(0.22, 0.30),
-                fontsize=8.7, color=DARK,
-                arrowprops=dict(arrowstyle="->", color=DARK, lw=1.2))
-    ax.text(0.5, 0.80, "penalty supplies variance\nin both vacuums", ha="center",
-            fontsize=9, color=BLUE, fontweight="bold")
-    ax.text(0.5, 0.16, "potential needs reachable\npartial success", ha="center",
-            fontsize=9, color=PURPLE, style="italic")
+    ax.annotate("outcome blind\n(zero variance)", xy=(0.02, 0.04), xytext=(0.25, 0.34),
+                fontsize=12, color=DARK,
+                arrowprops=dict(arrowstyle="->", color=DARK, lw=1.4))
+    ax.text(0.5, 0.79, "penalty supplies variance\nin both vacuums", ha="center",
+            fontsize=12.5, color=BLUE, fontweight="bold")
+    ax.text(0.5, 0.15, "potential needs reachable\npartial success", ha="center",
+            fontsize=12.5, color=PURPLE, style="italic")
 
-    ax.set_xlabel("group success rate"); ax.set_ylabel("within-group variance  (usable gradient)")
-    ax.set_title("Outcome-only RL is blind at both ends; the penalty is not", fontsize=12)
+    ax.set_xlabel("group success rate", fontsize=13.5)
+    ax.set_ylabel("within-group variance\n(usable gradient)", fontsize=13.5)
+    ax.set_title("Outcome-only RL is blind at both ends;\nthe penalty is not", fontsize=15,
+                 fontweight="bold")
+    ax.tick_params(labelsize=12)
     ax.set_xlim(0, 1); ax.set_ylim(0, 1.02); ax.set_yticks([0, 0.5, 1.0])
-    ax.legend(loc="upper center", frameon=False, ncol=3, fontsize=8.8, bbox_to_anchor=(0.5, -0.16))
+    ax.legend(loc="upper center", frameon=False, ncol=3, fontsize=11.5,
+              bbox_to_anchor=(0.5, -0.2), handlelength=1.3, columnspacing=1.1)
     fig.savefig(os.path.join(HERE, "fig_variance_vacuum.pdf"))
     plt.close(fig)
 
@@ -348,7 +352,8 @@ def fig_headline():
 
 
 if __name__ == "__main__":
-    fig_headline()
+    # fig_headline is now produced by gen_headline_dual.py (the enlarged dual panel);
+    # do not regenerate the stale single-row version here.
     fig_two_channel(); print("fig_two_channel OK")
     fig_variance_vacuum(); print("fig_variance_vacuum OK")
     fig_penalty_design(); print("fig_penalty_design OK")

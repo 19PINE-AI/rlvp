@@ -87,7 +87,7 @@ Website: \url{https://01.me/research/rlvp}
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_headline.pdf}
-\caption{\textbf{Two verifiable path signals for agents that learn from costly, real-world rollouts.} \emph{(a) Penalize the path.} On diverse held-out tasks, rewarding the outcome while penalizing the path drives violation-free episodes from near zero to $\approx$100\%---a deployability constraint the outcome reward is blind to, so outcome-only GRPO never reaches it at any budget---at no cost to task success (\S\ref{sec:path}; on TerminalBench the same mechanism commits $\approx$6$\times$ fewer harmful actions at \emph{equal} success). \emph{(b) Reward progress where reachable.} Where the environment can verify a step of progress, a dense potential reaches competence in fewer costly rollouts than outcome-only training (\S\ref{sec:potentials}). Mean over seeds; bands $\pm$1 s.d.}
+\caption{\textbf{Two verifiable path signals for agents that learn from costly, real-world rollouts.} \emph{(a) Penalize the path:} rewarding the outcome while penalizing the path drives violation-free episodes from near zero to $\approx$100\%---a deployability constraint outcome-only GRPO is blind to and never reaches---at no cost to task success (\S\ref{sec:path}). \emph{(b) Reward progress where reachable:} a dense potential reaches competence in fewer costly rollouts than outcome-only training (\S\ref{sec:potentials}). Mean over seeds; bands $\pm$1 s.d.}
 \label{fig:headline}
 \end{figure}
 

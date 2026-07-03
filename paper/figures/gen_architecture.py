@@ -37,10 +37,10 @@ VIOL, DISC = 1, 2
 
 
 def draw_panel(ax, rlvp):
-    ax.set_xlim(0, 11); ax.set_ylim(0, 6.8); ax.axis("off")
+    ax.set_xlim(0, 11); ax.set_ylim(0, 7.05); ax.axis("off")
     title = ("RLVP: reward the outcome, penalize the path" if rlvp
              else "RLVR: reward the outcome only")
-    ax.text(5.5, 6.5, title, ha="center", fontsize=14.5, fontweight="bold",
+    ax.text(5.5, 6.85, title, ha="center", fontsize=14, fontweight="bold",
             color=(DARK if rlvp else GRAY))
 
     for i, (x, t) in enumerate(zip(XS, ACTS)):
@@ -59,8 +59,8 @@ def draw_panel(ax, rlvp):
     arrow(ax, XS[-1]+1.05, 4.55, 9.9-0.9, 4.55, color=GRAY, lw=1.5)
 
     # outcome channel (both)
-    box(ax, 9.9, 6.1, 2.2, 0.82, "outcome reward", "white", GREEN, fs=11.5, bold=True, tc=GREEN)
-    arrow(ax, 9.9, 5.68, 9.9, 5.15, color=GREEN, lw=2.0)
+    box(ax, 9.9, 5.9, 1.9, 0.92, "outcome\nreward", "white", GREEN, fs=11, bold=True, tc=GREEN)
+    arrow(ax, 9.9, 5.42, 9.9, 5.15, color=GREEN, lw=2.0)
 
     if not rlvp:
         for i in (VIOL, DISC):
@@ -73,10 +73,10 @@ def draw_panel(ax, rlvp):
         arrow(ax, XS[VIOL], 3.95, XS[VIOL], 3.0, color=RED, lw=2.0)
         box(ax, XS[DISC], 2.45, 1.9, 1.05, "$+\\beta$\nprecond. met", LGREEN, GREEN, fs=12.5, bold=True, tc=GREEN)
         arrow(ax, XS[DISC], 3.95, XS[DISC], 3.0, color=GREEN, lw=2.0)
-        box(ax, 5.5, 1.05, 6.2, 0.84, "verifiable rule engine  (per-action, deterministic)",
-            LGRAY, DARK, fs=12, bold=True, tc=DARK)
-        arrow(ax, XS[VIOL], 1.92, 4.3, 1.48, color=DARK, lw=1.3)
-        arrow(ax, XS[DISC], 1.92, 6.7, 1.48, color=DARK, lw=1.3)
+        box(ax, 5.5, 1.0, 4.7, 1.1, "verifiable rule engine\n(per-action, deterministic)",
+            LGRAY, DARK, fs=11.5, bold=True, tc=DARK)
+        arrow(ax, XS[VIOL], 1.92, 4.2, 1.5, color=DARK, lw=1.3)
+        arrow(ax, XS[DISC], 1.92, 6.8, 1.5, color=DARK, lw=1.3)
 
 
 fig, axes = plt.subplots(1, 2, figsize=(13, 4.3))
