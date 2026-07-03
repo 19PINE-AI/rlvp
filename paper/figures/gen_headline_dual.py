@@ -13,8 +13,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 plt.rcParams.update({
-    "font.size": 10, "axes.titlesize": 12, "axes.labelsize": 10.5,
-    "xtick.labelsize": 9.5, "ytick.labelsize": 9.5, "legend.fontsize": 9,
+    "font.size": 12, "axes.titlesize": 15, "axes.labelsize": 13,
+    "xtick.labelsize": 11.5, "ytick.labelsize": 11.5, "legend.fontsize": 11,
     "figure.dpi": 300, "savefig.dpi": 300, "savefig.bbox": "tight",
     "savefig.pad_inches": 0.06, "font.family": "sans-serif", "axes.linewidth": 0.9,
 })
@@ -61,7 +61,7 @@ def lean_succ(arm):
     return np.arange(1, n + 1), mat.mean(0), mat.std(0)
 
 
-fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 3.0))
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(12.5, 4.0))
 
 # ---- (a) Penalize the path: violation-free episodes ----
 eo, co, ceo = rvp_clean("outcome")
@@ -75,9 +75,9 @@ axL.set_ylim(-0.04, 1.08); axL.set_xlim(left=0)
 axL.set_xlabel("episodes generated"); axL.set_ylabel("violation-free rate")
 axL.set_title("(a) Penalize the path", fontweight="bold")
 axL.annotate("the deployable axis\noutcome-only never reaches", xy=(eo[-1], co[-1]),
-             xytext=(eo[len(eo)//2], 0.30), fontsize=8.4, color=GRAY, ha="center",
+             xytext=(eo[len(eo)//2], 0.30), fontsize=10.5, color=GRAY, ha="center",
              arrowprops=dict(arrowstyle="->", color=GRAY, lw=1.0))
-axL.legend(frameon=False, loc="center left", bbox_to_anchor=(0.0, 0.62), fontsize=8.6)
+axL.legend(frameon=False, loc="center left", bbox_to_anchor=(0.0, 0.62), fontsize=11)
 axL.spines[["top", "right"]].set_visible(False)
 
 # ---- (b) Verifiable progress: fewer rollouts to competence ----
@@ -93,12 +93,12 @@ axR.set_xlabel("training iterations (each = costly rollouts)")
 axR.set_ylabel("task success")
 axR.set_title("(b) Reward progress where reachable", fontweight="bold")
 axR.annotate("competence in\nfewer rollouts", xy=(4.4, 0.9), xytext=(9, 0.42),
-             fontsize=8.4, color=DARK, arrowprops=dict(arrowstyle="->", color=DARK, lw=1.0))
-axR.legend(frameon=False, loc="lower right", fontsize=8.6)
+             fontsize=10.5, color=DARK, arrowprops=dict(arrowstyle="->", color=DARK, lw=1.0))
+axR.legend(frameon=False, loc="lower right", fontsize=11)
 axR.spines[["top", "right"]].set_visible(False)
 
 fig.suptitle("Two verifiable path signals for agents that learn from costly, real-world rollouts",
-             fontsize=11.5, fontweight="bold", y=1.03)
+             fontsize=14, fontweight="bold", y=1.03)
 fig.tight_layout(rect=(0, 0, 1, 0.96))
 fig.savefig(os.path.join(HERE, "fig_headline.pdf"))
 print("wrote fig_headline.pdf (dual)")
