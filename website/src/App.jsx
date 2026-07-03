@@ -37,10 +37,10 @@ function Hero() {
           <h1>Penalize the Path,<br />Reward the Outcome</h1>
           <div className="authors">{data.meta.authors.join('  ·  ')}</div>
           <p className="thesis">
-            An AI agent that places phone calls or resolves support tickets can't just get the final
-            result right — it has to behave correctly at <em>every step</em>. RLVP grades the{' '}
-            <strong>path</strong> the agent takes, not only the outcome, so it learns faster and stays
-            safe to deploy.
+            An AI agent that fixes code, places phone calls, or resolves support tickets can't just
+            get the final result right — it has to behave correctly at <em>every step</em>. RLVP
+            grades the <strong>path</strong> the agent takes, not only the outcome, so it learns
+            faster and stays safe to deploy.
           </p>
           <div className="pill-row">
             <span className="pill green">Grade every step, not just the result</span>

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
 
-// A looping "graded call" scene: an agent takes steps, and each step gets a plain-language
-// verdict as it happens. Shows the core idea — grade the path, not just the result — with no jargon.
+// A looping "graded coding session" scene: an agent fixes a bug, and each step gets a
+// plain-language verdict as it happens. Shows the core idea — grade the path, not just the
+// result — with no jargon, in a world the site's (technical) audience knows instantly.
 const STEPS = [
-  { ico: '📞', lbl: 'Call the customer', verdict: null },
-  { ico: '📞', lbl: 'Call again — still no answer', verdict: { ok: false, text: 'not allowed · called too soon' } },
-  { ico: '🔒', lbl: 'Verify identity first', verdict: { ok: true, text: 'good move · did the required check' } },
-  { ico: '🎉', lbl: 'Resolve the billing dispute', verdict: { ok: true, text: 'result · task solved' } },
+  { ico: '📄', lbl: 'Open the failing test + source', verdict: null },
+  { ico: '⚠️', lbl: 'rm -rf build/', verdict: { ok: false, text: 'not allowed · destructive command' } },
+  { ico: '▶️', lbl: 'Run the tests before submitting', verdict: { ok: true, text: 'good move · verified the change' } },
+  { ico: '✅', lbl: 'Bug fixed — all tests pass', verdict: { ok: true, text: 'result · task solved' } },
 ]
 
 const prefersReduced = () =>
@@ -27,7 +28,7 @@ export default function HeroScene() {
   return (
     <div className="hs-card" aria-hidden="true">
       <div className="hs-head">
-        <span className="badge2"><span className="dot-live" />live agent</span>
+        <span className="badge2"><span className="dot-live" />coding agent</span>
         <span>Grade the path, not just the result</span>
       </div>
 
