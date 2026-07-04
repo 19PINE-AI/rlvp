@@ -31,13 +31,13 @@ def arrow(ax, x1, y1, x2, y2, color=DARK, lw=1.8, style="-|>", ms=15, ls="-"):
 
 
 # shared 3-action phone-agent episode
-XS = [1.7, 4.5, 7.3]
+XS = [1.9, 4.6, 7.3]
 ACTS = ["call user", "call again\n(no answer)", "authenticate\n(give DOB)"]
 VIOL, DISC = 1, 2
 
 
 def draw_panel(ax, rlvp):
-    ax.set_xlim(0, 11); ax.set_ylim(0, 7.05); ax.axis("off")
+    ax.set_xlim(-0.55, 11); ax.set_ylim(0, 7.05); ax.axis("off")
     title = ("RLVP: reward the outcome, penalize the path" if rlvp
              else "RLVR: reward the outcome only")
     ax.text(5.5, 6.85, title, ha="center", fontsize=14, fontweight="bold",
@@ -50,13 +50,13 @@ def draw_panel(ax, rlvp):
             fc, ec = LGREEN, GREEN
         else:
             fc, ec = LBLUE, BLUE
-        box(ax, x, 4.55, 2.1, 1.15, t, fc, ec, fs=11)
-    ax.text(0.4, 4.55, "start", ha="center", va="center", fontsize=11, color=GRAY, style="italic")
-    arrow(ax, 0.85, 4.55, XS[0]-1.05, 4.55, color=GRAY, lw=1.5)
+        box(ax, x, 4.55, 2.2, 1.15, t, fc, ec, fs=10.5)
+    ax.text(0.0, 4.55, "start", ha="center", va="center", fontsize=10, color=GRAY, style="italic")
+    arrow(ax, 0.36, 4.55, XS[0]-1.1, 4.55, color=GRAY, lw=1.5)
     for i in range(len(XS)-1):
-        arrow(ax, XS[i]+1.05, 4.55, XS[i+1]-1.05, 4.55, color=GRAY, lw=1.5)
+        arrow(ax, XS[i]+1.1, 4.55, XS[i+1]-1.1, 4.55, color=GRAY, lw=1.5)
     box(ax, 9.9, 4.55, 2.15, 1.15, "dispute\nresolved ✓", LGREEN, GREEN, fs=10.5, bold=True)
-    arrow(ax, XS[-1]+1.05, 4.55, 9.9-0.9, 4.55, color=GRAY, lw=1.5)
+    arrow(ax, XS[-1]+1.1, 4.55, 9.9-1.075, 4.55, color=GRAY, lw=1.5)
 
     # outcome channel (both)
     box(ax, 9.9, 5.9, 1.9, 0.92, "outcome\nreward", "white", GREEN, fs=11, bold=True, tc=GREEN)
@@ -69,14 +69,14 @@ def draw_panel(ax, rlvp):
         ax.text(4.5, 1.9, "the path is invisible to the reward:\nover-calling and acting without"
                 " authentication\nare never penalized", ha="center", fontsize=12, color=GRAY, style="italic")
     else:
-        box(ax, XS[VIOL], 2.45, 2.05, 1.05, "$-\\lambda$\nover-call", LRED, RED, fs=11, bold=True, tc=RED)
+        box(ax, XS[VIOL], 2.45, 2.05, 1.05, "$-\\lambda$\nover-call", LRED, RED, fs=10.5, bold=True, tc=RED)
         arrow(ax, XS[VIOL], 3.95, XS[VIOL], 3.0, color=RED, lw=2.0)
-        box(ax, XS[DISC], 2.45, 2.25, 1.05, "$+\\beta$\nprecond. met", LGREEN, GREEN, fs=11, bold=True, tc=GREEN)
+        box(ax, XS[DISC], 2.45, 2.55, 1.05, "$+\\beta$\nprecond. met", LGREEN, GREEN, fs=10.5, bold=True, tc=GREEN)
         arrow(ax, XS[DISC], 3.95, XS[DISC], 3.0, color=GREEN, lw=2.0)
-        box(ax, 5.5, 1.0, 4.7, 1.1, "verifiable rule engine\n(per-action, deterministic)",
-            LGRAY, DARK, fs=11.5, bold=True, tc=DARK)
-        arrow(ax, XS[VIOL], 1.92, 4.2, 1.5, color=DARK, lw=1.3)
-        arrow(ax, XS[DISC], 1.92, 6.8, 1.5, color=DARK, lw=1.3)
+        box(ax, 5.95, 1.0, 5.5, 1.1, "verifiable rule engine\n(per-action, deterministic)",
+            LGRAY, DARK, fs=11, bold=True, tc=DARK)
+        arrow(ax, XS[VIOL], 1.92, 4.9, 1.55, color=DARK, lw=1.3)
+        arrow(ax, XS[DISC], 1.92, 7.0, 1.55, color=DARK, lw=1.3)
 
 
 fig, axes = plt.subplots(1, 2, figsize=(13, 4.3))

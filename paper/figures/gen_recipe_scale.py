@@ -64,13 +64,15 @@ draw_arm(ax, runs("run_lean_potential_s*"), BLUE, "aligned potential (Muon)")
 draw_arm(ax, runs("run_lean_outcome_s*"), RED, "outcome-only (Muon)")
 draw_arm(ax, runs("run_lean_p0_30b_outcomeAdamw_s*"), ORANGE,
          "outcome-only (AdamW)", ls="--")
-ax.set_title("(b) Qwen3-30B-A3B (aligned/Muon 5 seeds; AdamW 2 of 5 done)")
+ax.set_title("(b) Qwen3-30B-A3B (5 seeds per arm)")
 
 for ax in axes:
     ax.axhline(0.9, color="#9CA3AF", lw=0.9, ls=":")
     ax.set_xlabel("training iteration")
     ax.set_ylim(-0.03, 1.05)
-    ax.legend(loc="lower right", framealpha=0.9)
+    # legend below the axes so it never overlaps the curves
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22),
+              ncol=2, frameon=False, columnspacing=1.2, handlelength=1.8)
     ax.spines[["top", "right"]].set_visible(False)
 axes[0].set_ylabel("training success")
 axes[0].text(29.5, 0.92, "0.9 threshold", ha="right", va="bottom",
