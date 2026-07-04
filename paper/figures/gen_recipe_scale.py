@@ -52,7 +52,7 @@ def draw_arm(ax, arm, color, label, ls="-"):
     ax.plot(range(1, full + 1), mean, color=color, lw=2.6, ls=ls, label=label + suffix)
 
 
-fig, axes = plt.subplots(1, 2, figsize=(12.8, 3.7), sharey=True)
+fig, axes = plt.subplots(1, 2, figsize=(12.8, 4.8), sharey=True)
 
 ax = axes[0]
 draw_arm(ax, runs("run_lean_p0_4b_aligned_s*"), BLUE, "aligned potential (Muon)")
@@ -72,7 +72,7 @@ for ax in axes:
     ax.set_ylim(-0.03, 1.05)
     # legend below the axes so it never overlaps the curves; single column
     # keeps each legend well inside its own panel's width
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.24),
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.19),
               ncol=1, frameon=False, handlelength=1.8)
     ax.spines[["top", "right"]].set_visible(False)
 axes[0].set_ylabel("training success")
