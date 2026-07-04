@@ -13,9 +13,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 plt.rcParams.update({
-    "font.size": 10, "axes.titlesize": 12, "axes.labelsize": 10.5,
-    "xtick.labelsize": 9.5, "ytick.labelsize": 9.5,
-    "legend.fontsize": 9, "figure.dpi": 300, "savefig.dpi": 300,
+    "font.size": 12, "axes.titlesize": 14.5, "axes.labelsize": 13,
+    "xtick.labelsize": 11.5, "ytick.labelsize": 11.5,
+    "legend.fontsize": 11, "figure.dpi": 300, "savefig.dpi": 300,
     "savefig.bbox": "tight", "savefig.pad_inches": 0.06,
     "font.family": "sans-serif", "axes.linewidth": 0.9,
 })
@@ -52,7 +52,7 @@ def draw_arm(ax, arm, color, label, ls="-"):
     ax.plot(range(1, full + 1), mean, color=color, lw=2.6, ls=ls, label=label + suffix)
 
 
-fig, axes = plt.subplots(1, 2, figsize=(10.4, 3.5), sharey=True)
+fig, axes = plt.subplots(1, 2, figsize=(12.8, 3.7), sharey=True)
 
 ax = axes[0]
 draw_arm(ax, runs("run_lean_p0_4b_aligned_s*"), BLUE, "aligned potential (Muon)")
@@ -70,13 +70,14 @@ for ax in axes:
     ax.axhline(0.9, color="#9CA3AF", lw=0.9, ls=":")
     ax.set_xlabel("training iteration")
     ax.set_ylim(-0.03, 1.05)
-    # legend below the axes so it never overlaps the curves
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22),
-              ncol=2, frameon=False, columnspacing=1.2, handlelength=1.8)
+    # legend below the axes so it never overlaps the curves; single column
+    # keeps each legend well inside its own panel's width
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.24),
+              ncol=1, frameon=False, handlelength=1.8)
     ax.spines[["top", "right"]].set_visible(False)
 axes[0].set_ylabel("training success")
 axes[0].text(29.5, 0.92, "0.9 threshold", ha="right", va="bottom",
-             fontsize=8.5, color="#6B7280")
+             fontsize=10.5, color="#6B7280")
 
 fig.tight_layout()
 fig.savefig(os.path.join(HERE, "fig_recipe_scale.pdf"))
