@@ -892,7 +892,7 @@
     "rlvp_dead_frac": 0.0
   },
   "ablation": {
-    "clean (penalty+discharge+anneal)": {
+    "clean (penalty+fulfillment+anneal)": {
       "eps50": 320,
       "final": 1.0,
       "dead": 5
@@ -902,7 +902,7 @@
       "final": 0.90625,
       "dead": 2
     },
-    "- discharge": {
+    "- fulfillment": {
       "eps50": 336,
       "final": 0.9375,
       "dead": 11

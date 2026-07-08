@@ -105,9 +105,9 @@ D["paired_dead"] = json.loads((R / "paired_dead.json").read_text())
 
 # --- component ablation (chain4) ---
 D["ablation"] = {}
-abl = {"clean (penalty+discharge+anneal)": "abl_nomix",
+abl = {"clean (penalty+fulfillment+anneal)": "abl_nomix",
        "+ mixing (full)": "flag_rlvp",
-       "- discharge": "abl_nodisch",
+       "- fulfillment": "abl_nodisch",
        "- token channel (scalar-fold)": "abl_scalaronly",
        "- anneal": "abl_noanneal",
        "+ step-cost": "rlvp_sc3"}

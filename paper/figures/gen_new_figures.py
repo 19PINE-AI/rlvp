@@ -93,7 +93,7 @@ def fig_criterion_map():
     def tag(x, y, t, c):
         ax.text(x, y, t, ha="center", va="center", fontsize=9, style="italic", color="black")
     tag(q1[0] + q1[2] / 2, -0.4, r"$\tau^2$ customer service", ORANGE)
-    tag(q2[0] + q2[2] / 2, -0.4, "Lean penalty arms", RED)
+    tag(q2[0] + q2[2] / 2, -0.4, "Lean penalty configurations", RED)
     tag(q3[0] + q3[2] / 2, -0.4, "SWE software repair", RED)
     tag(gx, 5.92, "Lean progress; sysadmin harm", GREEN)
     fig.savefig(os.path.join(os.path.dirname(__file__), "fig_criterion_map.pdf"))

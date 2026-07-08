@@ -64,7 +64,7 @@ draw_arm(ax, runs("run_lean_potential_s*"), BLUE, "aligned potential (Muon)")
 draw_arm(ax, runs("run_lean_outcome_s*"), RED, "outcome-only (Muon)")
 draw_arm(ax, runs("run_lean_p0_30b_outcomeAdamw_s*"), ORANGE,
          "outcome-only (AdamW)", ls="--")
-ax.set_title("(b) Qwen3-30B-A3B (5 seeds per arm)")
+ax.set_title("(b) Qwen3-30B-A3B (5 seeds per configuration)")
 
 for ax in axes:
     ax.axhline(0.9, color="#9CA3AF", lw=0.9, ls=":")
