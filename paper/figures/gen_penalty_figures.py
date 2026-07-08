@@ -61,7 +61,7 @@ def fig_two_channel():
     box(ax, 10.7, 4.55, 1.9, 0.7, "Outcome reward\n(drives the task)", "white", GREEN, fs=9.5, bold=True, tc=GREEN)
     arrow(ax, 10.7, 4.2, 10.7, 3.7, color=GREEN, lw=1.6)
 
-    # path channel (per-action penalties / discharges)
+    # path channel (per-action penalties / fulfillments)
     box(ax, 5.0, 1.55, 1.9, 0.72, r"$-\lambda$  destructive", LRED, RED, fs=9, bold=True, tc=RED)
     arrow(ax, 5.0, 2.72, 5.0, 1.95, color=RED, lw=1.6)
     box(ax, 6.8, 1.55, 1.9, 0.72, r"$+\beta$  tested first", LGREEN, GREEN, fs=9, bold=True, tc=GREEN)
@@ -122,7 +122,7 @@ def fig_penalty_design():
          r"e.g.  $-\lambda$ for 'rm -rf build/',"  "\n"  "not for 'no progress this turn'", 4.25),
         ("2.  Keep the outcome reward as the driver;\n     never optimize a penalty alone",
          r"e.g.  keep the 'ticket resolved' reward;"  "\n"  r"$-\lambda$ over-call alone just stalls", 3.15),
-        ("3.  Pair the penalty with a DISCHARGE\n     (reward the compliant action)",
+        ("3.  Pair the penalty with a FULFILLMENT\n     (reward the compliant action)",
          r"e.g.  $+\beta$ when it authenticates"  "\n"  "before placing the call", 2.05),
         ("4.  Make the compliant path reachable\n     and its target un-gameable",
          "e.g.  seed one 'read the access-"  "\n"  "control file first' demonstration", 0.95),
@@ -255,7 +255,7 @@ def fig_recipe_positive():
 # ---------------------------------------------------------------- Fig 6
 def fig_penalty_ablation():
     """Walk outcome -> penalty_only -> recipe; success + clean per arm."""
-    arms = [("outcome", "Outcome\nonly"), ("penonly", "+ penalty\n(no discharge/seed)"),
+    arms = [("outcome", "Outcome\nonly"), ("penonly", "+ penalty\n(no fulfillment/seed)"),
             ("recipe", "Full recipe")]
     stats = [(lbl, _arm_stats(a)) for a, lbl in arms]
     stats = [(lbl, s) for lbl, s in stats if s]

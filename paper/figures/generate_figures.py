@@ -32,7 +32,7 @@ def fig_mechanism():
     # A concrete all-fail group: 4 rollouts of an edit-a-config agent. Every
     # rollout ends in task failure (outcome 0), but the trajectories differ in
     # HOW they behaved, so a verifiable process potential separates them.
-    #   credit  (+1): a discharged precondition -- read the file before writing it
+    #   credit  (+1): a fulfilled precondition -- read the file before writing it
     #   penalty (-1): an irreversible action    -- rm -rf before the task is done
     # step kind in {'credit','task','penalty'}
     trajs = [
@@ -142,7 +142,7 @@ def fig_mechanism():
     axR.add_patch(FancyBboxPatch((0.95, 2.78), 0.55, 0.34, boxstyle='round,pad=0.02,rounding_size=0.08',
                   linewidth=1.1, edgecolor=GREEN, facecolor=LIGHTGREEN))
     axR.text(1.225, 2.95, '$+1$', ha='center', va='center', fontsize=8.5, fontweight='bold', color=GREEN)
-    axR.text(1.65, 2.95, r'credit: precondition discharged (read before write)',
+    axR.text(1.65, 2.95, r'credit: precondition fulfilled (read before write)',
              ha='left', va='center', fontsize=8.6, color=DARKGRAY)
     axR.add_patch(FancyBboxPatch((0.95, 2.28), 0.55, 0.34, boxstyle='round,pad=0.02,rounding_size=0.08',
                   linewidth=1.1, edgecolor=RED, facecolor=LIGHTRED))

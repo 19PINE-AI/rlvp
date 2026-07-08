@@ -1,7 +1,7 @@
 """fig_potential_illustration: how the aligned potential (verifiable progress) works,
 on a REAL miniF2F theorem used in the paper (mathd_algebra_109). As the proof advances,
 the Lean kernel verifies each tactic and the number of remaining goals falls; each
-verified decrease pays a dense +beta discharge, while the outcome pays a single +1
+verified decrease pays a dense +beta fulfillment, while the outcome pays a single +1
 only when the proof closes. An errored tactic (an alternate rollout) pays -lambda.
 This is the potential mirror of the penalty architecture figure. Large fonts."""
 import os
@@ -55,7 +55,7 @@ for i, (x, s, g) in enumerate(zip(XS, STATES, GOALS)):
     ax.text(x, YS - 1.02, f"obligations remaining: {g}", ha="center", fontsize=10.0,
             color=(GREEN if g == 0 else GRAY), fontweight="bold" if g == 0 else "normal")
 
-# tactic arrows + dense +beta discharge for each verified goal-count drop
+# tactic arrows + dense +beta fulfillment for each verified goal-count drop
 BETA_X = [3.275, 6.725, 9.7]                  # nudge the last +beta box left, clear of outcome
 for i in range(3):
     xm = (XS[i] + XS[i + 1]) / 2

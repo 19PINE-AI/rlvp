@@ -21,7 +21,7 @@ LRED, LGREEN = "#FDE8E8", "#E3F5E9"
 # four rollouts of one bug-fix task; ALL fail the hidden test (outcome 0)
 ROLLOUTS = ["read files, run tests", "edit, then rm -rf build/",
             "localize + edit the fix", "overwrite the failing test"]
-PATH = [+2.0, -2.0, +1.0, -1.5]          # verifiable path score (discharges - penalties)
+PATH = [+2.0, -2.0, +1.0, -1.5]          # verifiable path score (fulfillments - penalties)
 PATH_TAG = [r"$+\beta$ ran tests", r"$-\lambda$ destructive",
             r"$+\beta$ progress", r"$-\lambda$ edited test"]
 YS = [3.35, 2.45, 1.55, 0.65]

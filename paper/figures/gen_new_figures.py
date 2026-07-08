@@ -106,10 +106,10 @@ def fig_criterion_map():
 def fig_ungameability_sweep():
     # arms ordered: penalty-free (survive) then penalty-bearing; label, colour, has-penalty
     arms = [
-        ("validgated", "outcome-gated\ndischarge", BLUE, False),
-        ("aligned",    "aligned\ndischarge",       GREEN, False),
-        ("valid",      "gameable\ndischarge",      "#14B8A6", False),
-        ("structural", "discharge\n+ penalty",     RED, True),
+        ("validgated", "outcome-gated\nfulfillment", BLUE, False),
+        ("aligned",    "aligned\nfulfillment",       GREEN, False),
+        ("valid",      "gameable\nfulfillment",      "#14B8A6", False),
+        ("structural", "fulfillment\n+ penalty",     RED, True),
         ("noerror",    "penalty\nonly",            PURPLE, True),
     ]
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.1),
@@ -141,7 +141,7 @@ def fig_ungameability_sweep():
     axL.grid(axis="y", alpha=0.25)
 
     # (b) the two penalty arms across seeds: structural bimodal vs noerror reliably dead
-    for arm, c, lab in [("structural", RED, "discharge+penalty"),
+    for arm, c, lab in [("structural", RED, "fulfillment+penalty"),
                         ("noerror", PURPLE, "penalty only")]:
         for k, suf in enumerate(["", "_s8", "_s9"]):
             p = os.path.join(RES, f"run_swp_{arm}{suf}", "train_log.jsonl")
