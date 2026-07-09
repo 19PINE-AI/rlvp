@@ -21,6 +21,7 @@ function Nav() {
         <a href="#top" className="brand">RL<span>V</span>P</a>
         <nav className="links">
           {links.map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}
+          <a href="https://arxiv.org/abs/2607.07435" target="_blank" rel="noreferrer">Paper ↗</a>
           <a href="https://github.com/19PINE-AI/rlvp" target="_blank" rel="noreferrer">GitHub ↗</a>
         </nav>
       </div>
@@ -50,6 +51,7 @@ function Hero() {
           <div className="pill-row">
             <a className="btn primary" href="#mechanism">See how it works</a>
             <a className="btn" href="#cases">Explore real evaluation cases</a>
+            <a className="btn" href="https://arxiv.org/abs/2607.07435" target="_blank" rel="noreferrer">Read the paper (arXiv) ↗</a>
           </div>
         </div>
         <HeroScene />
@@ -134,6 +136,8 @@ function App() {
               <p>Penalize the Path, Reward the Outcome.</p>
               <p style={{ fontSize: 14 }}>{data.meta.authors.join(' · ')}</p>
               <p style={{ marginTop: 16 }}>
+                <a href="https://arxiv.org/abs/2607.07435" target="_blank" rel="noreferrer">Paper (arXiv) ↗</a>
+                &nbsp;&nbsp;·&nbsp;&nbsp;
                 <a href="https://github.com/19PINE-AI/rlvp" target="_blank" rel="noreferrer">Code ↗</a>
                 &nbsp;&nbsp;·&nbsp;&nbsp;
                 <a href="https://01.me/research/rlvp" target="_blank" rel="noreferrer">Website ↗</a>
@@ -141,10 +145,11 @@ function App() {
             </div>
             <div>
               <div style={{ fontWeight: 700, color: '#fff', marginBottom: 8 }}>Cite</div>
-              <div className="cite">{`@article{rlvp2026,
-  title  = {RLVP: Penalize the Path, Reward the Outcome},
-  author = {Li, Bojie and Shi, Noah},
-  year   = {2026}
+              <div className="cite">{`@article{li2026rlvp,
+  title   = {RLVP: Penalize the Path, Reward the Outcome},
+  author  = {Li, Bojie and Shi, Noah},
+  journal = {arXiv preprint arXiv:2607.07435},
+  year    = {2026}
 }`}</div>
               <p style={{ fontSize: 12.5, marginTop: 14 }}>
                 All numbers and evaluation transcripts on this page are extracted from the

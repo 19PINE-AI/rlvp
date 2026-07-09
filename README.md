@@ -1,5 +1,7 @@
 # RLVP: Reinforcement Learning from Verifiable Penalties
 
+**Paper:** [Penalize the Path, Reward the Outcome](https://arxiv.org/abs/2607.07435) (arXiv:2607.07435) · **Website:** [01.me/research/rlvp](https://01.me/research/rlvp)
+
 Dense, rule-derived process rewards for agentic RL, attached at the tool-call
 boundary. Premise (verifier asymmetry): for long-horizon agents, intermediate
 actions are hard to verify as *right* but easy to verify as *wrong* — so use
@@ -50,3 +52,15 @@ python3 scripts/eval_checkpoint.py results/run_c3/final c3_norules
 
 Requires: torch >= 2.x + CUDA, transformers; models pulled from HF hub
 (Qwen3-1.7B/4B/8B).
+
+## Citation
+
+```bibtex
+@article{li2026rlvp,
+  title   = {RLVP: Penalize the Path, Reward the Outcome},
+  author  = {Li, Bojie and Shi, Noah},
+  journal = {arXiv preprint arXiv:2607.07435},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2607.07435}
+}
+```
