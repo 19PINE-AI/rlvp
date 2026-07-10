@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software or its results, please cite the paper below."
+title: "RLVP: Penalize the Path, Reward the Outcome"
+authors:
+  - family-names: Li
+    given-names: Bojie
+    affiliation: Pine AI
+  - family-names: Shi
+    given-names: Noah
+    affiliation: University of Washington
+repository-code: "https://github.com/19PINE-AI/rlvp"
+url: "https://arxiv.org/abs/2607.07435"
+license: MIT
+preferred-citation:
+  type: article
+  title: "RLVP: Penalize the Path, Reward the Outcome"
+  authors:
+    - family-names: Li
+      given-names: Bojie
+    - family-names: Shi
+      given-names: Noah
+  year: 2026
+  journal: "arXiv preprint arXiv:2607.07435"
+  url: "https://arxiv.org/abs/2607.07435"

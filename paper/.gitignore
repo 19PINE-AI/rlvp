@@ -3,4 +3,12 @@
 *.blg
 *.log
 *.out
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.bak
+# build outputs at the paper root (figures/*.pdf are tracked and unaffected)
+/paper.pdf
+/build.log
+/*.tar.gz
 figures/__pycache__/

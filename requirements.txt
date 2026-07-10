@@ -1,0 +1,14 @@
+# Core training + rollout stack (RLVP GRPO trainer).
+# Tested with the versions below; nearby versions should work.
+torch>=2.4          # tested on 2.10 (CUDA 12.8)
+transformers>=4.44  # tested on 4.57
+peft>=0.11          # LoRA adapters; tested on 0.19
+vllm>=0.5           # batched generation for rollouts/eval; tested on 0.19
+numpy
+
+# --- Optional, per domain (install only what you need) ---
+# matplotlib        # paper/figures/ generation
+# tau2              # tau2-bench airline customer-service domain (external)
+# The Lean/miniF2F and SWE-smith/SWE-gym domains require their own external
+# toolchains (Lean + Mathlib REPL, Docker task images); see docs/ and the
+# relevant rlvp/*_adapter.py for setup.
